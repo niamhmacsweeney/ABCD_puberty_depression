@@ -10,7 +10,7 @@
 #Follow the QC criteria recommended by ABCD in NDA 2.0.1 Imaging Instrument Release Notes: https://nda.nih.gov/study.html?id=634
 #Refer to the sMRI and dMRI release notes, also found at https://nda.nih.gov/study.html?id=634
 #Data dictionaries (located in same folder as corresponding data) are also useful for understanding variables. 
-#Hagler et al., 2019 Neuroimage paper: https://www.sciencedirect.com/science/article/pii/S1053811919306822
+#The current preprocessing followed the recommendations by Hagler et al., 2019 Neuroimage paper: https://www.sciencedirect.com/science/article/pii/S1053811919306822
 
 #Helpful link for grep syntax: https://biocorecrg.github.io/CRG_RIntroduction/regular-expressions-to-find-more-flexible-patterns.html
 
@@ -73,11 +73,10 @@ colnames(abcd.cortical)=gsub('_cdk_','.APARC.',colnames(abcd.cortical)) #APARC =
 colnames(abcd.cortical)=gsub('thick.','thk.',colnames(abcd.cortical))
 colnames(abcd.cortical)=gsub('area.','sa.',colnames(abcd.cortical))
 
-#NOTE TO SELF: SORT OUT ICV LATER. 
-##Create ICV and remove wholeb and csf 
-#abcd.cortical$ICV_derived = abcd.cortical$vol.ASEG.wholeb+abcd.cortical$vol.ASEG.csf
-#abcd.cortical$ICV_ASEG = abcd.cortical$vol.ASEG.intracranialv
-#abcd.subcort=abcd.subcort[,!grepl('vol.ASEG.intracranialv',colnames(abcd.subcort))]
+
+##Create ICV and remove wholeb and csf
+abcd.cortical$ICV_ASEG = abcd.cortical$vol.ASEG.intracranialv
+abcd.cortical=abcd.cortical[,!grepl('vol.ASEG.intracranialv',colnames(abcd.cortical))]
 
 
 #rearrange col names so that hemisphere (lh or rh or bl (bilateral - have one measure)) is indicated as the start of col name
@@ -112,12 +111,13 @@ abcd.cortical.final %>%
   gather() %>% 
   ggplot(aes(as.numeric(value)))+
   facet_wrap(~ key, scales = "free") +
-  geom_histogram(fill = "deepskyblue4") #Looks fine. 
+  geom_histogram(fill = "deepskyblue4", 
+                 bins = 30) #Looks OK.  
 
 
 #### DTI/White matter Measures ####
 
-#Note to self: check how tracks are being defined/ 
+#Note to self: check how tracks are being defined.  
 
 #Using fractional anisotropy and mean diffusivity 
 
@@ -129,43 +129,56 @@ abcd.dti<- abcd_dti_p101 %>%
   .[,grep('subject|fiberat',colnames(.))]  #include DTI atlas tract adjustment
 
 
-
 #tidyup column names
 colnames(abcd.dti)=gsub('dmri_','',colnames(abcd.dti))
 colnames(abcd.dti)=gsub('fiberat_','',colnames(abcd.dti))
 
-
-colnames(IM.dat)[grep('\\.all&rh$',colnames(IM.dat))]=
+colnames(abcd.dti)[grep('\\.all&rh$',colnames(abcd.dti))]=
   paste0('rhtotal.',gsub('\\.all|rh$','',colnames(IM.dat)))[grep('\\.all|rh$',colnames(IM.dat))]
 
-#rearrange col names as done for cortical measures
+#rearrange col names as done for cortical measures to make reading easier. 
 colnames(abcd.dti)[grep('lh$',colnames(abcd.dti))]=paste0('lh.',gsub('lh$','',colnames(abcd.dti)))[grep('lh$',colnames(abcd.dti))]
 colnames(abcd.dti)[grep('rh$',colnames(abcd.dti))]=paste0('rh.',gsub('rh$','',colnames(abcd.dti)))[grep('rh$',colnames(abcd.dti))]
 colnames(abcd.dti)[grep('\\_all',colnames(abcd.dti))]=paste0('bl.',colnames(abcd.dti))[grep('\\_all',colnames(abcd.dti))]
 colnames(abcd.dti)[grep('^dti',colnames(abcd.dti))]=paste0('bl.',colnames(abcd.dti))[grep('^dti',colnames(abcd.dti))]
 
-#remove measures that don't include corpus callosum
+#remove average FA and MD without corpus callosum
 cols.omit <- abcd.dti %>% .[grep("_allfcc$|_allfib$",colnames(.))] 
-abcd.dti <- abcd.dti[,!colnames(abcd.dti) %in% colnames(cols.omit)]
+abcd.dti <- abcd.dti[,!colnames(abcd.dti) %in% colnames(cols.omit)] #77 variables left.  
 
 abcd.dti.final<- abcd.dti %>% 
-  .[.$src_subject_id %in% dti.ids.pass,]
+  .[.$src_subject_id %in% dti.ids.pass,] #N= 10163
 
 colnames(abcd.dti.final)
 
+dti.dist.incl.outl <- abcd.dti.final %>%
+  select(ends_with("allfibers"))%>% 
+  gather() %>% 
+  ggplot(aes(as.numeric(value)))+
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram(fill = "deepskyblue4",
+                 bins = 30)  
+
+print(dti.dist.incl.outl) #highly skewed -> so remove individuals (N= 87) that exceed ±SD from mean.
+
+abcd.dti.final <- filter(abcd.dti.final,!is.na(bl.dtifa_allfibers)) 
+abcd.dti.final[abs(scale(abcd.dti.final$bl.dtifa_allfibers))>5,grep('dtifa',colnames(abcd.dti.final))]=NA
+abcd.dti.final[abs(scale(abcd.dti.final$bl.dtimd_allfibers))>5,grep('dtimd',colnames(abcd.dti.final))]=NA
+
+#check dist again -> looks okay now. 
 abcd.dti.final %>%
   select(ends_with("allfibers"))%>% 
   gather() %>% 
   ggplot(aes(as.numeric(value)))+
   facet_wrap(~ key, scales = "free") +
-  geom_histogram(fill = "deepskyblue4") #highly skewed -> so remove indiv that exceed +-5sd
+  geom_histogram(fill = "deepskyblue4",
+                 bins = 30) 
 
-abcd.dti.final <- filter(abcd.dti.final,!is.na(bl.dtifa_allfibers))
-abcd.dti.final[abs(scale(abcd.dti.final$bl.dtifa_allfibers))>5,grep('dtifa',colnames(abcd.dti.final))]=NA
-abcd.dti.final[abs(scale(abcd.dti.final$bl.dtimd_allfibers))>5,grep('dtimd',colnames(abcd.dti.final))]=NA
-#check dist again -> looks fine
+#DTI data final N = 10,076
 
 ###NOTE: not including subcortical measures in Puberty RR but processing here for future reference. 
+
+##Subcortical
 
 abcd.smrip201 <- readRDS(paste0(getwd(),"/abcd_smrip201.rds"))
 
@@ -199,6 +212,10 @@ abcd.subcort.final %>%
   geom_histogram(fill = "deepskyblue4") 
 
 colnames(abcd.subcort.final)
+
+#Change working directory and save QC'd data files. 
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
 
 #Save RDS 
 saveRDS(abcd.subcort.final,"ABCD_release201_Subcortical_QCed_AllSubjects.rds")
