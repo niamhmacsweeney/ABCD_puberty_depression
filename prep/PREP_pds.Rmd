@@ -1,0 +1,54 @@
+---
+title: "PREP_puberty_measures_step1"
+author: "Niamh MacSweeney"
+date: "11/21/2020"
+output: html_document
+---
+#### Introduction
+The purpose of this script is to tidy and prep the pubertal measures, which includes the pubertal development scale (PDS) and pubertal hormone data. This document can also be used as a template for manipulating and tidying other variables in the future. 
+
+####SETUP
+Load libraries needed and set working directory. WD needs to be configured manually in a knitr document (i.e., Rmd)
+Used knitr root.dir (as below) to configure this. 
+
+WD= "/Volumes/GenScotDepression/data/abcd/release2.0.1/iii.data/Physical_Health/
+
+Load data fields: "abcd_ppdms01.rds" = pubertal development scale (parent report)
+                  "abcd_hsss01.rds" = pubertal hormones (Salimetrics hormone data
+                  "sph01.rds" = hormone quality control measures
+                 "abcd_ant01.rds" = for height and weight measures. 
+
+
+
+####TIDYING AND SCORING THE PDS
+For purposes of RR, pubertal timing measure will be used. 
+
+#PDS total score is regressed on age for males and females separately.
+#standardised residual obtained is used as the pubertal timing score.
+
+Future analyses could explore other methods of defining pubertal development such as 
+The Shirtcliff et al. (2009) method seems to be most commonly used (e.g., Ladoceur et al. 2019; Vijayakumar et al., 2019). This allows you generate a puberty category measure. 
+
+See CPP_hormones_0206_2020_STEP1_ from Herting and Uban et al., 2021 for other methods used to define pubertal development. 
+
+####TIDYING AND GENERATING MEASURE OF PUBERTAL HORMONES
+
+
+
+#```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Volumes/GenScotDepression/data/abcd/release2.0.1/iii.data/Physical_Health")
+getwd()
+
+```{r setup, include=FALSE, echo=FALSE}
+require("knitr")
+opts_knit$set(root.dir = "~/Volumes/GenScotDepression/data/abcd/release2.0.1/iii.data/Physical_Health/")
+getwd()
+
+library(tidyr)
+library(dplyr)
+
+```
+
+
+
