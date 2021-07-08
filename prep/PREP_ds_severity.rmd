@@ -5,6 +5,7 @@ date:  "`r Sys.Date()`"
 output: github_document
 ---
 
+Note: This script was used by Niamh to create lifetime MDD and DS severity measures for use in models. 
 
 * * *
 ### Contact and credit
@@ -355,14 +356,41 @@ In targetdat.clean (all columns below are life-time measures):
  Inspect new column outputs. Check to see levels within DS severity for youth and parent.
  They are coded as follows: 0=none, 1=mild, 2=moderate 3=severe. 
  
- To do - export clean variables for use in models. 
+ Export clean variables for use in models, as outlined in Outputs.  
 ```{r}
+
+sum_dep_measures <- targetdat.clean %>% 
+  select (KSADS.MDD.y, KSADS.MDD.p, KSADS.Dep_symptoms_sum_ever.y, KSADS.Dep_symptoms_sum_ever.p, KSADS.Depressive_symptoms_ever.y, KSADS.Depressive_symptoms_ever.p)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+
+saveRDS(sum_dep_measures,"ABCD_release_201_sum_dep_measures.rds")
+
+
+```
+ 
+Get breakdown of MDD and DS for caregiver and child report. 
+Note missing data for DS (~30%) and MDD (~14%)
+```{r}
+
+targetdat.clean %>% 
+  dplyr::count(KSADS.MDD.y)
+
+targetdat.clean %>% 
+  dplyr::count(KSADS.MDD.p)
+
 targetdat.clean %>% 
   dplyr::count(KSADS.Depressive_symptoms_ever.y)
 
 targetdat.clean %>% 
   dplyr::count(KSADS.Depressive_symptoms_ever.p)
 
+
+
 ```
  
+
+
+
+
  

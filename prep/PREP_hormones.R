@@ -150,6 +150,14 @@ ph_df$filtered_dhea <- apply(ph_df[, c("filtered_dhea_rep1", "filtered_dhea_rep2
 sum(is.na(ph_df$filtered_dhea)) #NAs= 6619. Complete cases = 5131 (Remember to use total N=11750 to calc complete cases) 
 #Same as Herting & Uban QC. 
 
+#check distribution - data is skewed, as expected, should I log-transform?
+
+ggplot(data=ph_df, aes(x= filtered_dhea)) +
+  geom_histogram(fill = "deepskyblue4",
+                 bins =30) +
+  ggtitle("Distribution of Filtered DHEA")
+
+
 #To Do: breakdown of QC steps to get to final DHEA value. 
 
 ####TESTOSTERONE 
@@ -179,6 +187,13 @@ ph_df$filtered_testosterone <- apply(ph_df[, c("filtered_testosterone_rep1", "fi
 
 sum(is.na(ph_df$filtered_testosterone)) #NAs = 6747 Complete cases= 5003 (same as H&U 2021)
 
+#Check distribution - data is skewed, as expected. Should I log-transform?
+
+ggplot(data=ph_df, aes(x= filtered_testosterone)) +
+  geom_histogram(fill = "deepskyblue4",
+                 bins =30) +
+  ggtitle("Distribution of Filtered Testosterone")
+
 
 ####ESTRADIOL
 
@@ -206,6 +221,15 @@ ph_df$filtered_estradiol_rep2[rownums[which(rownums %in% rownums_rep2)]] <- NA #
 ph_df$filtered_estradiol <- apply(ph_df[, c("filtered_estradiol_rep1", "filtered_estradiol_rep2")], 1, function(x) mean(x, na.rm=T)) 
 
 sum(is.na(ph_df$filtered_estradiol)) #NAs = 9562 Complete cases= 2188 (same as H&U 2021) 
+
+#Check distribution - skewed as expected. 
+
+ph_df %>%
+  filter(sex_of_subject == "F") %>% 
+  ggplot(aes(x= filtered_estradiol)) +
+  geom_histogram(fill = "deepskyblue4",
+                 bins =30) +
+  ggtitle("Distribution of Filtered Estradiol")
 
 #### EXPORT CLEANED DATA
 #We now have single value for each hormone plus, hormone sex and sex at birth. 

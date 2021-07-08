@@ -209,7 +209,8 @@ abcd.subcort.final %>%
   gather() %>% 
   ggplot(aes(as.numeric(value)))+
   facet_wrap(~ key, scales = "free") +
-  geom_histogram(fill = "deepskyblue4") 
+  geom_histogram(fill = "deepskyblue4"
+                 bins =30) 
 
 colnames(abcd.subcort.final)
 
