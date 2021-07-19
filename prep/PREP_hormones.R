@@ -194,6 +194,23 @@ ph_df <- ph_df %>%
   
 colnames(ph_df) #check new col exists. 
 
+#Check for outliers after transformation
+
+outl_dhea <- ph_df %>% 
+  filter(mean(dhea_log) + 3*(sd(dhea_log)) & mean(dhea_log) - 3*(sd(dhea_log)))
+        
+#check outlier removal
+outl_dhea_upper <- (mean(ph_df$dhea_log) - 3*(sd(ph_df$dhea_log)))
+                             
+pds_tot_m_lo_limit <- (mean(pds_timing$pds_total_males_p,na.rm=T) - 3*(sd(pds_timing$pds_total_males_p,na.rm=T)))
+
+
+
+
+
+
+
+
 #To Do: breakdown of QC steps to get to final DHEA value. 
 
 ####TESTOSTERONE 
@@ -268,6 +285,15 @@ summary(log10(ph_df$filtered_testosterone)) #note: if min value=0, should add +1
 ph_df <- ph_df %>%
   mutate(testosterone_log = log10(filtered_testosterone))
 
+#Check for outliers after log trans
+
+outl_test <- ph_df %>% 
+  filter(mean(testosterone_log) + 3*(sd(testosterone_log)) | mean(testosterone_log) - 3*(sd(testosterone_log)))
+
+#double check that outlier code works (use + or - 3sd to check)
+outl_test_upper <- (mean(ph_df$testosterone_log) + 3*(sd(ph_df$testosterone_log)))
+
+
 ####ESTRADIOL
 
 #Generate new columns for filtered data
@@ -300,7 +326,7 @@ sum(is.na(ph_df$filtered_estradiol)) #NAs = 9562 Complete cases= 2188 (same as H
 estradiol_hist <- ph_df %>%
   filter(sex_of_subject == "F") %>% 
   ggplot(aes(x= filtered_estradiol)) +
-  geom_histogram(fill = "deepskyblue4",
+  geom_histogram(color="black", fill = "deepskyblue4",
                  bins =30) +
   ggtitle("Distribution of Filtered Estradiol")
 
@@ -337,6 +363,13 @@ summary(log10(ph_df$filtered_estradiol)) #note: if min value=0, should add +1 to
 ph_df <- ph_df %>%
   mutate(estradiol_log = log10(filtered_estradiol))
 
+#Check for outliers after log trans
+
+outl_estr <- ph_df %>% 
+  filter(mean(estradiol_log) + 3*(sd(estradiol_log)) | mean(estradiol_log) - 3*(sd(estradiol_log)))
+
+#double check that outlier code works (use + or - 3sd to check)
+outl_estr_upper <- (mean(ph_df$estradiol_log) + 3*(sd(ph_df$estradiol_log)))
 
 ###### DERIVE TIMING RESIDUALS FOR EACH HORMONE MEASURE 
 
