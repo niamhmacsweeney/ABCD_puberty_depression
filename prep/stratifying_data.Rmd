@@ -1,0 +1,78 @@
+---
+title: "Stratified Sampling Hackathon"
+author: "Niamh MacSweeney"
+date: "7/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load libraries 
+```{r}
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(ggstatsplot)
+library(GGally)
+library(outliers)
+library(jtools) #great package for summarising regression results
+library(readr)
+library(gridExtra)
+library(sandwich)
+library(caret) #for stratifying models
+library(splitstackshape)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
+getwd()
+
+```
+
+Load data
+```{r}
+
+hormones_clean <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/abcd3.0_hormones_clean.rds")
+
+covs_df <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/DEAP_data/BMI_demographic_vars.rds")
+
+#reduce to baseline
+covs_df<- subset(covs_df,event_name=="baseline_year_1_arm_1")
+colnames(covs_df)
+
+#merge two dfs
+
+df <- merge(hormones_clean, covs_df, by="src_subject_id")
+
+```
+
+Try out splitting dataset using caret
+```{r}
+
+setseed(2507)
+
+test <- df$
+
+```
+
+Try out using stratified function
+```{r}
+
+subsample <- stratified(df, "sex", .1) #get 10% of sample stratified on sex
+nrow(subsample %>% filter(sex=="F"))/nrow(subsample) #check frequency in subsample
+nrow(df %>% filter(sex=="F"))/nrow(df) #check freq in whole sample. 
+
+#think about variables that are highly correlated to select variables to split by. 
+
+subsample2 <- stratified(df, c("sex", "abcd_site", size = .15) #get 15% of sample for two variables. 
+                         #check frequency as above. 
+
+
+
+
+#replace = FALSE,
+  keep.rownames = FALSE, bothSets = FALSE)
+```
+
