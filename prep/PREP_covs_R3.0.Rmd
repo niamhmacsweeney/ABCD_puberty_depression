@@ -1,0 +1,81 @@
+---
+title: "PREP_covs_R3.0"
+author: "Niamh MacSweeney"
+date: "8/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+The purpose of this script is to tidy and quality control the covariates for our analysis.
+#BMI, age, race/ethnicity, family income, motion, site, hemisphere (for bilateral brain measures)
+
+This data frame was downloaded via the DEAP portal which works off the most recent ABCD data release (3.0). 
+
+## Setup
+
+Load libraries, set working directory.
+
+```{r, setup}
+
+library(psych)
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(ggstatsplot)
+library(readr)
+library(gridExtra)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
+getwd()
+
+```
+
+##Load data and tidy variables 
+
+Note: Renaming variables to make the names more intuitive. 
+
+Need to insert table here of all the covariates used.... 
+
+```{r, covariate table}
+
+```
+
+```{r, load and tidy data}
+
+covs <-rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/DEAP_data_downloads/covs_puberty_RR.rds") 
+
+#rename variables so consistent across scripts and more intuitive
+covs <- covs %>% 
+  rename(eventname = event_name, sex = sex_at_birth, bmi = anthro_bmi_calc)
+colnames(covs)
+
+
+#Reduce to baseline data only
+covs <- covs %>% 
+  filter(eventname=="baseline_year_1_arm_1") #N=11,878
+
+#change age to years instead of months 
+covs <- covs %>%
+  mutate(
+    age_years = age/12 
+  )
+colnames(covs) #check new variable exists
+
+```
+
+Note: to do after annual leave
+
+1. QC covariates and make sure they are okay for models. 
+2. Check Amelia's scripts for how she handled her covariates.
+
+
+
+
+
+

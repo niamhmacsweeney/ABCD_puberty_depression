@@ -1,0 +1,404 @@
+---
+title: "PREP_imaging_R3.0"
+author: "Niamh MacSweeney" Credit to Gladi Thng and Xueyi Shen for template scripts.
+date: "8/3/2021"
+output: html_document
+---
+#### Introduction
+The purpose of this script is to quality control and process the ABCD imaging data (cortical, diffusion/white matter, subcortical)
+
+#Helpful Documents:
+
+Follow the QC criteria recommended by ABCD in NDA 2.0.1 and 3.0.1 Imaging Instrument Release Notes: https://nda.nih.gov/study.html?id=634
+Refer to the sMRI and dMRI release notes, also found at https://nda.nih.gov/study.html?id=634
+Data dictionaries (located in same folder as corresponding data) are also useful for understanding variables. 
+
+The current preprocessing followed the recommendations by Hagler et al., 2019 Neuroimage paper: https://www.sciencedirect.com/science/article/pii/S1053811919306822
+
+Helpful link for grep syntax: https://biocorecrg.github.io/CRG_RIntroduction/regular-expressions-to-find-more-flexible-patterns.html
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#SETUP
+Load libraries needed and set working directory.
+
+```{r, setup}
+
+library(tidyverse)
+library(dplyr)
+library(broom)
+library(ggplot2)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
+
+
+
+```
+
+
+#STEP 1: LOAD DATA FOR QUALITY CONTROL AND SELECT VALID IDS
+
+Need satisfactory T1 raw images, Freesurfer (FS) and DTI QC, reduce to baseline data only.
+```{r, load data and tidy}
+
+qc.t1 <-rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/MRI_QC/mriqcrp102.rds") #t1 image QC file 
+qc.fs <-rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/MRI_QC/freesqc01.rds") #freesurfer QC file
+
+qc.criteria <- full_join(qc.t1,qc.fs) #merge two dataframes
+
+#reduce to baseline data only, N=11,815
+qc.criteria <- qc.criteria %>% 
+  filter(eventname == "baseline_year_1_arm_1")
+
+```
+
+
+Select IDs that passed QC for T1 FS and DTI
+
+field name: iqc_t1_ok_ser = T1: Number of series that are complete and passed QC. Valid IDs: iqc_t1_ok_ser > 0
+field name: fsqc_qc = FS QC score. Valid IDs: fsqc_qc = 1
+field name: iqc_dmri_ok_ser = DTI: Number of series that are complete and passed QC. Valid IDs: iqc_dmri_ok_ser > 0
+
+```{r, valid IDs}
+
+t1.ids.pass <- qc.criteria %>% 
+  select(src_subject_id,iqc_t1_ok_ser,fsqc_qc) %>%  
+  filter(iqc_t1_ok_ser >0) %>% # t1 raw scans that passed QC
+  filter(fsqc_qc==1) # passed freesurfer QC
+t1.ids.pass <- t1.ids.pass$src_subject_id # make new column for valid t1 IDs --- N = 11,236
+
+dti.ids.pass <- qc.criteria %>% 
+  select(src_subject_id,iqc_dmri_ok_ser,iqc_t1_ok_ser,fsqc_qc) %>% 
+  filter(iqc_dmri_ok_ser>0) %>% #DTI scans that passed QC
+  filter(iqc_t1_ok_ser>0) %>% 
+  filter(fsqc_qc==1) 
+dti.ids.pass <- dti.ids.pass$src_subject_id #make new column for valid DTI IDs ---- N = 10,701
+
+```
+
+#STEP 2: PROCESS IMAGING DATA
+
+#### Cortical Measures #####
+
+#Using cortical volume, surface area, thickness and sulcal depth. 
+
+```{r, load cortical measures data}
+
+abcd.smrip101 <- rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/abcd_smrip101.rds")
+
+abcd.cortical<- abcd.smrip101 %>%  #make df name more intuitive
+  filter(eventname == "baseline_year_1_arm_1") %>% #baseline only --- N= 11736
+  .[,grep("subject|thick_cdk|sulc_cdk|area_cdk|vol_cdk", colnames(.))] #extract variables of interest using grep
+```
+
+Rename columns to make more intuitive
+```{r, rename columns}
+colnames(abcd.cortical)=gsub('smri_','',colnames(abcd.cortical))
+colnames(abcd.cortical)=gsub('_cdk_','.APARC.',colnames(abcd.cortical)) #APARC = cortical parcellation in FS syntax
+colnames(abcd.cortical)=gsub('thick.','thk.',colnames(abcd.cortical))
+colnames(abcd.cortical)=gsub('area.','sa.',colnames(abcd.cortical))
+```
+
+#Create ICV and remove wholeb and csf
+```{r}
+
+abcd.cortical$ICV_ASEG = abcd.cortical$vol.ASEG.intracranialv
+abcd.cortical=abcd.cortical[,!grepl('vol.ASEG.intracranialv',colnames(abcd.cortical))]
+
+```
+
+Rearrange col names so that hemisphere (lh or rh or bl (bilateral - have one measure)) is indicated as the start of col name
+```{r, further renaming}
+
+colnames(abcd.cortical)[grep('lh$',colnames(abcd.cortical))]=paste0('lh.',gsub('lh$','',colnames(abcd.cortical)))[grep('lh$',colnames(abcd.cortical))]
+colnames(abcd.cortical)[grep('rh$',colnames(abcd.cortical))]=paste0('rh.',gsub('rh$','',colnames(abcd.cortical)))[grep('rh$',colnames(abcd.cortical))]
+colnames(abcd.cortical)[grep('^vol.|^sa.|^sulc.|^thk.',colnames(abcd.cortical))]=paste0('bl.',colnames(abcd.cortical))[grep('^vol.|^sa.|^sulc.|^thk.',colnames(abcd.cortical))]
+```
+
+We are only interested in overall total values for this analysis so remove totals for lh and rh
+
+```{r}
+cols.omit <- abcd.cortical %>% .[grep(c("^rh.+\\.total$|^lh.+\\.total$|^rh.+\\.mean$|^lh.+\\.mean$"),colnames(.))] 
+abcd.cortical <- abcd.cortical[,!colnames(abcd.cortical) %in% colnames(cols.omit)]
+```
+
+Select IDs that passed QC check ----  N=11232
+```{r, select QC'd IDs}
+
+abcd.cortical.final <- abcd.cortical %>% 
+  .[.$src_subject_id %in% t1.ids.pass,] 
+
+colnames(abcd.cortical.final)
+
+```
+
+Check distribution for global (total) vol and sa. Looks normally distributed so all good!
+
+```{r, check distribution vol and sa}
+
+abcd.cortical.final %>%
+  select(contains(".total")) %>% 
+  gather() %>% 
+  ggplot(aes(as.numeric(value)))+
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram(fill = "deepskyblue4") #Looks fine. 
+
+```
+
+Check distribution for global (mean) sulc and thk. Looks okay too!
+
+```{r, check distribution sulc and thk}
+
+abcd.cortical.final %>%
+  select(contains(".mean")) %>% 
+  gather() %>% 
+  ggplot(aes(as.numeric(value)))+
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram(fill = "deepskyblue4", 
+                 bins = 30) 
+
+```
+
+#### DTI/White matter Measures ####
+
+Note to self: check how tracks are being defined.  
+
+Using fractional anisotropy and mean diffusivity. 
+
+```{r, load DTI measures}
+
+abcd.dti <- rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/abcd_dti_p101.rds")
+
+abcd.dti <- abcd.dti %>% 
+  filter(eventname == "baseline_year_1_arm_1") %>% #reduce to baseline --- N = 11,736
+  .[,grep("subject|_dtifa_|_dtimd_", colnames(.))] %>% #select FA and MD cols
+  .[,grep('subject|fiberat',colnames(.))] #include DTI atlas tract adjustment
+
+```
+
+Tidy up column names
+```{r, rename columns}
+
+colnames(abcd.dti)=gsub('dmri_','',colnames(abcd.dti))
+colnames(abcd.dti)=gsub('fiberat_','',colnames(abcd.dti))
+
+colnames(abcd.dti)[grep('\\.all&rh$',colnames(abcd.dti))]=
+  paste0('rhtotal.',gsub('\\.all|rh$','',colnames(abcd.dti)))[grep('\\.all|rh$',colnames(abcd.dti))]
+
+#rearrange col names as done for cortical measures to make reading easier. 
+colnames(abcd.dti)[grep('lh$',colnames(abcd.dti))]=paste0('lh.',gsub('lh$','',colnames(abcd.dti)))[grep('lh$',colnames(abcd.dti))]
+colnames(abcd.dti)[grep('rh$',colnames(abcd.dti))]=paste0('rh.',gsub('rh$','',colnames(abcd.dti)))[grep('rh$',colnames(abcd.dti))]
+colnames(abcd.dti)[grep('\\_all',colnames(abcd.dti))]=paste0('bl.',colnames(abcd.dti))[grep('\\_all',colnames(abcd.dti))]
+colnames(abcd.dti)[grep('^dti',colnames(abcd.dti))]=paste0('bl.',colnames(abcd.dti))[grep('^dti',colnames(abcd.dti))]
+
+
+```
+
+Remove average FA and MD without corpus callosum
+```{r, select variables of interest}
+
+#remove average FA and MD without corpus callosum
+cols.omit <- abcd.dti %>% .[grep("_allfcc$|_allfib$",colnames(.))] 
+abcd.dti <- abcd.dti[,!colnames(abcd.dti) %in% colnames(cols.omit)] #77 variables left. 
+
+```
+
+Select IDs that pass QC. Total N = 10,699
+```{r, select valid IDs}
+
+abcd.dti.final<- abcd.dti %>% 
+  .[.$src_subject_id %in% dti.ids.pass,] #N= 10,699
+
+colnames(abcd.dti.final) #get column names
+```
+
+Check distribution of FA and MD
+
+The MD values do appear to be skewed. However, instead of removing outliers, we will conduct analysis with and without the outliers removed as sensitivity analysis. With a sample size this large, it is difficult to know whether there are false or spurious values.
+
+Removing outliers of ±5 SD does not change the distribution of FA but does significantly change the distribution of MD. 
+
+```{r, check distribution}
+
+dti.dist.incl.outl <- abcd.dti.final %>%
+  select(ends_with("allfibers"))%>% 
+  gather() %>% 
+  ggplot(aes(as.numeric(value)))+
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram(fill = "deepskyblue4",
+                 bins = 30) 
+dti.dist.incl.outl
+
+
+```
+
+Outlier treatment
+
+Note here, using bl.dti.fa(or md)_allfibers variables when removing outliers. 
+
+```{r, define outliers}
+
+#Define upper and lower limits (±5 SD)
+outl_fa_upper <- (mean(abcd.dti.final$bl.dtifa_allfibers, na.rm=T) +5*(sd(abcd.dti.final$bl.dtifa_allfibers, na.rm=T))) #=0.611
+outl_fa_lower <- (mean(abcd.dti.final$bl.dtifa_allfibers, na.rm=T) -5*(sd(abcd.dti.final$bl.dtifa_allfibers, na.rm=T))) #=0.391
+outl_md_upper <- (mean(abcd.dti.final$bl.dtimd_allfibers, na.rm=T) +5*(sd(abcd.dti.final$bl.dtimd_allfibers, na.rm=T))) #=0.916
+outl_md_lower <- (mean(abcd.dti.final$bl.dtimd_allfibers, na.rm=T) -5*(sd(abcd.dti.final$bl.dtimd_allfibers, na.rm=T))) #=0.681
+
+```
+```{r, plot FA outliers}
+hist(abcd.dti.final$bl.dtifa_allfibers, main="", xlab="FA ALL FIBERS")
+abline(v=outl_fa_upper,col="red")
+abline(v=outl_fa_lower,col="red")
+
+```
+```{r, plot MD outliers}
+hist(abcd.dti.final$bl.dtimd_allfibers, main="", xlab="MD ALL FIBERS")
+abline(v=outl_md_upper,col="red")
+abline(v=outl_md_lower,col="red")
+
+```
+```{r, identify number of FA and MD outliers} 
+
+fa_outl <- abcd.dti.final %>% 
+  filter(bl.dtifa_allfibers > outl_fa_upper |
+           bl.dtifa_allfibers < outl_fa_lower) #14 outliers present
+
+md_outl <- abcd.dti.final %>% 
+  filter(bl.dtimd_allfibers > outl_md_upper |  #6 outliers present 
+           bl.dtimd_allfibers < outl_md_lower)
+
+```
+
+Create new FA and MD variables with outliers removed for later sensitivity analysis. N =10,699 before outlier removal. 
+
+I can't get this to work at the moment. I want to do a sensitivity analysis with and without outliers for the DTI measures but I'm finding it difficult to remove the outlier IDs and then save as a new variable because the "all fibers" variable is a kind of grouping measure for many FA and MD measures. 
+```{r, outlier removal}
+
+#new FA variable excl. outliers
+abcd.dti.final <- abcd.dti.final %>% 
+  mutate(bl.dtifa_allfibers_excl_outl = bl.dtifa_allfibers) 
+
+#new MD variable excl. outliers
+abcd.dti.final <- abcd.dti.final %>% 
+  mutate(bl.dtimd_allfibers_excl_outl = bl.dtimd_allfibers) 
+
+
+#Change outlier values to NA
+
+#FA
+abcd.dti.final$bl.dtifa_allfibers_excl_outl[abcd.dti.final$bl.dtifa_allfibers_excl_outl > outl_fa_upper |abcd.dti.final$bl.dtifa_allfibers_excl_outl < outl_fa_lower] <- NA
+#MD
+abcd.dti.final$bl.dtimd_allfibers_excl_outl[abcd.dti.final$bl.dtimd_allfibers_excl_outl > outl_md_upper |abcd.dti.final$bl.dtimd_allfibers_excl_outl < outl_md_lower] <- NA
+
+```
+```{r, check it worked} 
+
+fa_outl_check <- abcd.dti.final %>% 
+  filter(bl.dtifa_allfibers > outl_fa_upper |
+           bl.dtifa_allfibers < outl_fa_lower) #14 outliers present
+
+md_outl_check <- abcd.dti.final %>% 
+  filter(bl.dtimd_allfibers > outl_md_upper |  #6 outliers present 
+           bl.dtimd_allfibers < outl_md_lower)
+
+#THE ABOVE DOES NOT WORK AT THE MOMENT FOR THE REASONS OUTLINED ABOVE. FOR THE MOMENT, I WIL TRY AND PROCEED WITH THE REST OF QC AND ASK PEOPLE FOR THEIR HELP. 
+
+```
+
+
+Below, I've created a dataframe with the outlier excluded. I think I will have to export this as a separate RDS file and then run the sensitivity analysis separately.... 
+
+```{r, identify outliers and create additional variables for sensitivity analysis} 
+
+
+abcd.dti.final.excl.outl <- abcd.dti.final <- filter(abcd.dti.final,!is.na(bl.dtifa_allfibers))
+
+abcd.dti.final.excl.outl[abs(scale(abcd.dti.final.excl.outl$bl.dtifa_allfibers))>5,
+                         grep('dtifa',colnames(abcd.dti.final.excl.outl))]=NA
+
+abcd.dti.final.excl.outl[abs(scale(abcd.dti.final.excl.outl$bl.dtimd_allfibers))>5,
+                         grep('dtimd',colnames(abcd.dti.final.excl.outl))]=NA
+
+
+```
+
+Note, #DTI data final N = 10,643 (excluding outliers)
+
+Subcortical measures (before QC, N =11,736)
+
+These are not included in the Puberty RR but I am processing them here for future reference
+```{r, load in subcortical measures}
+
+abcd.subcort <- rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/abcd_smrip201.rds")
+
+abcd.subcort <- abcd.subcort %>% 
+filter(eventname == "baseline_year_1_arm_1") %>% #reduce to baseline --- N = 11,736
+.[,grep("subject|smri_vol_scs_", colnames(.))] %>%   #select smri vol data
+.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|cranial|subcortical",colnames(.))] #select columns overlap with ENIGMA 
+
+```
+```{r, tidy column names}
+
+colnames(abcd.subcort)=gsub('smri_','',colnames(abcd.subcort))
+colnames(abcd.subcort)=gsub('_scs_','.ASEG.',colnames(abcd.subcort))
+
+```
+
+Create ICV and remove wholeb, csf
+Note: abcd.subcort$ICV_derived = abcd.subcort$vol.ASEG.wholeb+abcd.subcort$vol.ASEG.csf
+```{r, create ICV and remove wholeb, csf}
+abcd.subcort$ICV_ASEG =abcd.subcort$vol.ASEG.intracranialv
+abcd.subcort=abcd.subcort[,!grepl('vol.ASEG.intracranialv',colnames(abcd.subcort))]
+```
+
+
+```{r, further tidy of column names}
+
+colnames(abcd.subcort)[grep('l$|lh$',colnames(abcd.subcort))]=paste0('lh.',gsub('l$|lh$','',colnames(abcd.subcort)))[grep('l$|lh$',colnames(abcd.subcort))]
+colnames(abcd.subcort)[grep('r$|rh$',colnames(abcd.subcort))]=paste0('rh.',gsub('r$|rh$','',colnames(abcd.subcort)))[grep('r$|rh$',colnames(abcd.subcort))]
+colnames(abcd.subcort)[grep('^vol.',colnames(abcd.subcort))]=paste0('bl.',colnames(abcd.subcort))[grep('^vol.',colnames(abcd.subcort))]
+
+```
+
+Select IDs that passed QC, N=11,232
+```{r, select valid IDs}
+
+abcd.subcort.final<- abcd.subcort %>% 
+  .[.$src_subject_id %in% t1.ids.pass,]   #N= 11232
+```
+
+Check distribution of subcortical measures
+
+```{r, check distribution}
+
+abcd.subcort.final %>%
+  select(!starts_with("src"))%>% 
+  gather() %>% 
+  ggplot(aes(as.numeric(value)))+
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram(fill = "deepskyblue4",
+                 bins =30) #all look okay
+
+```
+
+Let's look at the final variables for subcortical measures (17 in total) after QC
+```{r, subcortical column names}
+
+colnames(abcd.subcort.final)
+```
+ EXPORT CLEANED DATA
+
+Change working directory and save clean file there. 
+Note: clean files should be saved in data folder in ABCD_puberty_RR project folder.
+```{r, export cleaned data}
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+saveRDS(abcd.cortical.final,"cortical_cleaned_R3.0.rds")
+saveRDS(abcd.dti.final,"dti_cleaned_R3.0.rds")
+saveRDS(abcd.subcort.final,"subcort_cleaned_R3.0.rds")
+
+```
+
+####------------ END OF MAIN SCRIPT -----------------####

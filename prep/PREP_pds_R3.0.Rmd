@@ -1,0 +1,413 @@
+---
+title: "PREP_pds.Rmd"
+author: "Niamh MacSweeney"
+date: 19/07/2021
+output: html_document
+---
+#### Introduction
+
+The purpose of this script is to:
+tidy and score the pubertal development scale (PDS) data (caregiver report) from ABCD Release 3.0
+to prepare a final, clean, sample for use in models. 
+
+ SETUP
+Load libraries needed and set working directory
+
+```{r, libraries}
+
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(ggstatsplot)
+library(GGally)
+library(stringr)
+library(outliers)
+library(jtools) 
+library(readr)
+library(gridExtra)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
+getwd()
+
+```
+
+LOAD DATA, REDUCE VARIABLES, CREATE DATAFRAME
+```{r, load data and tidy}
+
+pds <-rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/abcd_ppdms01.rds")
+
+head(pds, n=10) #first few observations
+str(pds)  #types of variables
+names(pds) #List variables in dataframe
+
+#reduce to baseline data only, N=11,878
+pds <- pds %>% 
+  filter(eventname == "baseline_year_1_arm_1")
+
+```
+
+CLEAN DATA
+STEP 1: Column formatting, missing values, male/female item mismatches 
+
+Note: unlike release 2.0.1. - pubertal_sex_p has been changed to NA for all participants. This fix is further explained in the release notes (Changes and Known Issues -> Physical Health)
+
+```{r, column formatting}
+#Convert age in months to years, save new variable
+pds <- pds %>%
+  mutate(
+    age_years = interview_age/12 
+  )
+colnames(pds) #check new variable exists
+
+pds %>% 
+  dplyr::count(sex) # no NAs detected
+
+#Check that males have answered male items, females answered female items -- no mismatches
+#Note: pds_m5 and pds_m4 mean should equal 0 for females, and pds_f4 and pds_f5b mean should equal 0 for males. 
+
+describeBy(pds, group=pds$sex) 
+
+#Final sample for PDS caregiver report: MALES = 6196, FEMALES = 5682, TOTAL N = 11878
+xtabs(~pds$sex)
+
+```
+
+STEP 3: Prepare data for scoring - remove "I don't know = "999" values
+
+
+```{r, remove missing values}
+
+#Inspect variables for "999" values
+
+table(pds$pds_1_p,pds$sex)
+table(pds$pds_2_p,pds$sex)
+table(pds$pds_3_p,pds$sex)
+table(pds$pds_m5_p,pds$sex)
+table(pds$pds_m4_p,pds$sex)
+table(pds$pds_f4_p,pds$sex)
+table(pds$pds_f5b_p,pds$sex)
+
+#PDS Recode: Change "999 = I don't know" to NA for these variables only as it is not numerically meaningful. 
+pds$pds_1_p[pds$pds_1_p== 999] <- NA
+pds$pds_2_p[pds$pds_2_p== 999] <- NA
+pds$pds_3_p[pds$pds_3_p== 999] <- NA
+pds$pds_m5_p[pds$pds_m5_p== 999] <- NA
+pds$pds_m4_p[pds$pds_m4_p== 999] <- NA
+pds$pds_f4_p[pds$pds_f4_p== 999] <- NA
+pds$pds_f5b_p[pds$pds_f5b_p== 999] <- NA
+
+#Recheck tables to see 999 has been changed to NA - looks good!
+table(pds$pds_1_p,pds$sex)
+table(pds$pds_2_p,pds$sex)
+table(pds$pds_3_p,pds$sex)
+table(pds$pds_m5_p,pds$sex)
+table(pds$pds_m4_p,pds$sex)
+table(pds$pds_f4_p,pds$sex)
+table(pds$pds_f5b_p,pds$sex)
+
+```
+
+#STEP 4: Examine correlation of raw data for PDS caregiver report
+```{r, examine data}
+
+#STEP 1: Examine correlation of raw data for PDS caregiver report
+#Split df by sex and examine valid PDS variables for each.
+pds_m <- filter(pds, sex== "M")
+pds_f <- filter(pds, sex== "F")
+
+#Group male PDS correlations with age
+pds_m_tmp=c("pds_1_p", "pds_2_p", "pds_3_p", "pds_m5_p", "pds_m4_p", "age_years")
+pds_age_m =ggpairs(pds_m, pds_m_tmp, title = "Within PDS Males")
+pds_age_m
+
+#Group female PDS correlations with age
+pds_f_tmp=c("pds_1_p", "pds_2_p", "pds_3_p", "pds_f4_p", "pds_f5b_p", "age_years")
+pds_age_f =ggpairs(pds_f, pds_f_tmp, title = "Within PDS Females")
+pds_age_f
+
+
+```
+
+STEP 5: GENERATE PDS TOTAL SCORE (5 OUT OF 5 VARIABLES NEEDED)
+
+First, select valid IDs
+
+```{r, select valid IDs for PDS total}
+
+#Sum PDS scores across rows for males. Then change female values for this field to NA
+pds$pds_tot_m <-rowSums(pds[,c("pds_1_p", "pds_2_p", "pds_3_p", "pds_m5_p", "pds_m4_p")], na.rm=T)
+pds$pds_tot_m[pds$pds_tot_m==0] <-NA
+pds$pds_tot_m[pds$sex== "F"] <- NA
+
+#Sum PDS scores across rows for females. Then change male values for this field to NA
+pds$pds_tot_f <-rowSums(pds[,c("pds_1_p", "pds_2_p", "pds_3_p", "pds_f4_p", "pds_f5b_p")], na.rm=T)
+pds$pds_tot_f[pds$pds_tot_f==0] <-NA
+pds$pds_tot_f[pds$sex=="M"] <- NA
+
+#Count number of Qs per subject in males that are not NA/DK
+pds$pds_m_Qcount <- 
+rowSums(!is.na(pds[,c("pds_1_p", "pds_2_p", "pds_3_p","pds_m5_p", "pds_m4_p")]))
+
+#Change female values to NA for this Qcount_m col.
+pds$pds_m_Qcount[pds$sex=="F"] <- NA 
+
+#Count number of Qs per subject in females that are not NA/DK
+pds$pds_f_Qcount <- 
+rowSums(!is.na(pds[,c("pds_1_p", "pds_2_p", "pds_3_p", "pds_f4_p", "pds_f5b_p")]))
+
+#Change male values to NA for this Qcount_f col.
+pds$pds_f_Qcount[pds$sex=="M"] <- NA 
+
+#This will give total number of NAs in males per pds column
+apply(subset(pds, sex=="M")[,c("pds_1_p", "pds_2_p", "pds_3_p","pds_m5_p", "pds_m4_p")],
+      2, function(x) sum(is.na(x)))
+#And total number of NAs in females per pds column
+apply(subset(pds, sex=="F")[,c("pds_1_p", "pds_2_p", "pds_3_p", "pds_f4_p", "pds_f5b_p")], 
+      2, function(x) sum(is.na(x)))
+
+#If any NAs for males. Then code to invalid.
+pds$pds_m_pt_valid <- NA
+pds$pds_m_pt_valid <- ifelse(pds$sex=="M"
+      & pds$pds_m_Qcount==5,1,0)  #5 denotes the number of PDS variables needed, 1=valid, 0= invalid.
+
+#If any NAs for females. Then code to invalid.
+pds$pds_f_pt_valid <- NA
+pds$pds_f_pt_valid <- ifelse(pds$sex=="F" 
+      & pds$pds_f_Qcount==5,1,0)  #5 denotes the number of PDS variables needed, 1=valid, 0= invalid. 
+
+
+#Count number of valid participants for males (N= 5723) and females (N=5250)
+pds %>% dplyr::count(pds_m_pt_valid)
+pds%>% dplyr::count(pds_f_pt_valid)
+
+
+
+```
+
+Total males valid = 5723
+Total females valid = 5250
+
+Second, generate PDS total score for valid IDs
+
+```{r, generate PDS total}
+
+#Calculate PDS total for males for only those with valid data (see definition of valid above)
+pds$pds_tot_m <- pds$pds_tot_m
+pds$pds_tot_m[pds$pds_m_pt_valid==0] <- NA
+
+#Calculate PDS total for females for only those with valid data (see definition of valid above)
+pds$pds_tot_f <- pds$pds_tot_f
+pds$pds_tot_f[pds$pds_f_pt_valid==0] <- NA
+
+
+#Create column for PDS total for males and females together
+pds <- pds %>% 
+  mutate(pds_tot_all = if_else(is.na(pds_tot_m), pds_tot_f, pds_tot_m))
+
+
+#Generate new dataframe with complete cases for pubertal timing --- N=10,973
+#This will allow us to save the linear model outputs as a new column. 
+
+pds_timing <- pds %>% select(src_subject_id, eventname, sex, age_years,
+                                pds_m_pt_valid , pds_f_pt_valid, 
+                                pds_tot_m, pds_tot_f, pds_tot_all)
+
+#Remove participants with invalid data for generating pubertal timing score. 
+pds_timing <- pds_timing[-c(which(pds_timing$sex == "M" & pds_timing$pds_m_pt_valid == 0), 
+                    which(pds_timing$sex == "F" & pds_timing$pds_f_pt_valid == 0)),]
+
+
+
+```
+
+Total number of valid participant for PDS total = 10,973 (This matches above total calculations for M and F separately)
+
+Step 6: Inspect data and check for outliers
+
+Let's look at the distribution first
+```{r, inspect data}
+#distribution
+
+raw_plot <- pds_timing %>%
+  ggplot(aes(x = pds_tot_all)) +
+  geom_histogram(color="black",fill="deepskyblue4") +
+  facet_wrap(~ sex, scales="free")
+raw_plot
+```
+
+
+Now let's examine outliers (±5 SD from mean)
+Note: We are defining outliers as ±5SD from mean as with a sample this large (N= ~10,000), 
+we should expect some responses greater than 3SD (commonly used outlier cutoff) if the data are really normally distributed. 
+
+As sensitivity analysis, we will run models with and without ouliers removed for PDS.
+This will be for males only as no outlier detected for females. 
+```{r, outliers}
+
+#Males
+outl_pds_m_upper <- (mean(pds_timing$pds_tot_m, na.rm=T) + 5*(sd(pds_timing$pds_tot_m, na.rm=T))) # = 16.45
+outl_pds_m_lower <- (mean(pds_timing$pds_tot_m, na.rm=T) - 5*(sd(pds_timing$pds_tot_m, na.rm=T))) # = -2.05
+
+#Plot outliers. Focus on +5SD from mean as negative values that are -5SD aren't valid here. 
+hist(pds_timing$pds_tot_m, main="", xlab="PDS TOTAL_MALES")
+abline(v=outl_pds_m_upper,col="red")
+abline(v=outl_pds_m_lower,col="red")
+
+outl_pds_m <- pds_timing %>% 
+  filter(pds_tot_m > outl_pds_m_upper) #There are 10 outlier values
+
+#create new variable with outliers removed for later sensitivity analysis
+#duplicate pds_tot_m and name is pds_tot_m_no_outl
+pds_timing <- pds_timing %>% 
+  mutate(pds_tot_m_no_outl = pds_tot_m) 
+
+#Change outlier values for pds_tot_m_no_outl to NA
+#tried to do with dplyr syntax below and couldn't get working
+pds_timing$pds_tot_m_no_outl[pds_timing$pds_tot_m_no_out > outl_pds_m_upper] <- NA
+
+#dplyr syntax
+#pds_timing <- pds_timing %>% 
+  #mutate(pds_tot_m_no_outl = na_if(pds_tot_m_no_outl, pds_total_males_p > outl_pds_m_upper))
+
+#check it worked - it did! 
+outl_pds_m_check <- pds_timing %>% 
+  filter(pds_tot_m_no_outl > outl_pds_m_upper)
+
+#Females
+outl_pds_f_upper <- (mean(pds_timing$pds_tot_f, na.rm=T) + 5*(sd(pds_timing$pds_tot_f, na.rm=T))) # = 21.88
+outl_pds_f_lower <- (mean(pds_timing$pds_tot_f, na.rm=T) - 5*(sd(pds_timing$pds_tot_f, na.rm=T))) # = -4.13
+
+#Plot outliers. Focus on +5SD from mean as negative values that are -5SD aren't valid here. 
+hist(pds_timing$pds_tot_f, main="", xlab="PDS TOTAL_FEMALES")
+abline(v=outl_pds_f_upper,col="red")
+abline(v=outl_pds_f_lower,col="red")
+
+#There are no outlier values for females at threshold of 5SD. 
+
+#another method using dplyr
+#pds_out_m_tmp <- pds_timing %>% 
+#select(pds_total_males_p) %>% 
+#filter(mean(pds_total_males_p) + 5*(sd(pds_total_males_p)) | mean(pds_total_males_p) - 5*(sd(pds_total_males_p))) %>% 
+# summarise_each(funs(mean(., na.rm = TRUE)))
+
+```
+
+STEP 7: GENERATE PUBERTAL TIMING SCORE
+
+PDS total score is regressed on age for males and females separately.
+The standardised residual obtained is used as the pubertal timing score.
+
+Male PT 
+```{r, generate male pubertal timing score}
+#### Male pubertal timing linear model ####
+#model summary
+pt_m_lm <- lm(pds_tot_m~age_years, na.action=na.exclude, data = pds_timing) # create linear model, and specify na.exclude so that df size stays the same.
+summ(pt_m_lm,
+     robust = TRUE, #robust standard error = HC3 as per sandwich package
+     scale = TRUE,  #scaled beta used
+     confint = TRUE, digits = 3) #get confidence intervals. 95% CI by default 
+
+#obtain standardised residual = measure of pubertal timing. Save as new variable. 
+#Note: the resid function in lm allows us to have the desired NA values for female rows. 
+
+pds_timing$pt_m <- resid(pt_m_lm)
+summary(pds_timing$pt_m)
+
+```
+
+For sensitivity analysis with outliers removed
+```{r, male pt, outliers removed}
+
+pt_m_lm_no_outl <- lm(pds_tot_m_no_outl~age_years, na.action=na.exclude, data = pds_timing) # create linear model, and specify na.exclude so that df size stays the same.
+summ(pt_m_lm,
+     robust = TRUE, #robust standard error = HC3 as per sandwich package
+     scale = TRUE,  #scaled beta used
+     confint = TRUE, digits = 3) #get confidence intervals. 95% CI by default 
+
+#obtain standardised residual = measure of pubertal timing. Save as new variable. 
+#Note: the resid function in lm allows us to have the desired NA values for female rows. 
+
+pds_timing$pt_m_no_outl <- resid(pt_m_lm)
+summary(pds_timing$pt_m_no_outl)
+
+```
+
+FEMALE PT
+```{r, generate female pubertal timing score}
+#### Female pubertal timing linear model ####
+#model summary
+pt_f_lm <- lm(pds_tot_f~age_years, na.action=na.exclude, data = pds_timing) # create linear model
+
+summ(pt_f_lm,
+     robust = TRUE, #robust standard error = HC3 as per sandwich package
+     scale = TRUE,  #scaled beta used
+     confint = TRUE, digits = 3) #get confidence intervals. 95% CI by default )
+
+#obtain standardised residual = measure of pubertal timing. Save as new variable. 
+pds_timing$pt_f <- resid(pt_f_lm)
+summary(pds_timing$pt_f)
+
+```
+
+Create a single pubertal timing measure combining males (with outliers) and females 
+Use ifelse to specify that NAs values should be replaced by non-NA value from other column.
+```{r, pt score for all participants}
+
+
+pds_timing <- pds_timing %>% 
+  mutate(pt_all = if_else(is.na(pt_m), pt_f, pt_m))
+```
+
+STEP 8: INSPECT RESIDUAL PLOTS 
+
+Examine plots to check to validity of the assumptions (i.e., residuals vs. leverage; residuals vs. fitted; Normal Q-Q; scale-location)
+
+This allows us to assess the quality of the regression
+see https://data.library.virginia.edu/diagnostic-plots/ for guidance on plot interpretation. 
+
+
+What to do with skewed male data? 
+
+How to deal with violations to the assumption of normality? Have enough data and invoke the central limit theorem. This is the simplest. If you have sufficient data and you expect that the variance of your errors (you can use residuals as a proxy) is finite, then you invoke the central limit theorem and do nothing. Your \hat{\beta} will be approximately normally distributed, which is all you need to construct confidence intervals and do hypothesis tests.
+
+```{r, residual plot analysis}
+#Check male plots - male values look to be skewed.... 
+
+plot(pt_m_lm)
+
+plot(pt_m_lm_no_outl)
+
+```
+
+
+```{r, residual plot analysis}
+#Check female plots - looks like assumptions have been met. 
+plot(pt_f_lm)
+
+```
+STEP 8: EXPORT CLEANED DATA
+
+Change working directory and save clean file there. 
+Note: clean files should be saved in data folder in ABCD_puberty_RR project folder.
+```{r, export cleaned data}
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+saveRDS(pds_timing,"pds_timing_cleaned_R3.0.rds")
+
+```
+
+####------------ END OF MAIN SCRIPT -----------------####
+
+####NEXT STEPS:
+- pds_timing file to be used in glm models
+- remember to conduct sensitivity analyses when running models to check for male outlier effect. 
+- sort out violation of normality for male linear model. 
+
+
+
+#STEP X: GENERATE PDS AVERAGE SCORE --- do at later stage
+
+
+#STEP X: GENERATE PDS GONADAL AND ADRENAL SCORE --- do at a later stage. 
