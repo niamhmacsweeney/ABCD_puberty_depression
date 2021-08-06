@@ -245,7 +245,7 @@ raw_plot
 
 #Check for Outliers (±5 SD from mean)
 #Note: We are defining outliers as ±5SD from mean as with a sample this large (N= ~10,000), 
-# we should expect some responses greater than 3SD if the data are really normally distributed. 
+# we should expect some responses greater than 3SD (commonly used outlier cutoff) if the data are really normally distributed. 
 #As sensitivity analysis, we will run models with and without ouliers removed for PDS.
 #this will be for males only as no outlier detected for females. 
 

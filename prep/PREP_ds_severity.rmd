@@ -31,7 +31,7 @@ Required inputs:
  - directory where tabulated rds files are stored (e.g. 'release2.0.1/iii.data')
  - a [csv file](https://github.com/xshen796/ABCD_UoEPsych/raw/main/DataManagement/Phenotype/MDD_and_Depressive_symptoms/ls.questionnaires.csv) with all data fields needed
  
-ABCD data: [release 2.0.1](https://nda.nih.gov/data_dictionary.html?source=ABCD%2BRelease%2B2.0&submission=ALL)
+ABCD data: [release 2.0.1](https://nda.nih.gov/data_dictionary.html?source=ABCD%2BRelease%2B3.0&submission=ALL)
  
 * * *
 ### Main script body

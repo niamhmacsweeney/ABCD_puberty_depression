@@ -18,21 +18,39 @@ getwd()
 
 ant_df <- readRDS("abcd_ant01.rds")
 
+
 #NOTE:
 #height and weight measurements are in inches and lbs. Convert to m and kg to calculate BMI.
 #for the purposes of this study, a continuous measure of BMI will be used.
 #Check for extreme values. 
 
+str(ant_df) #check data classification to see if they are correct. 
+
+###NOTE correct classifications: interview age(months) = interger; src_subject_id, eventname, sex = factor; BMI measurements= numeric. 
+
+#Reclassify relevant variables
+ant_df %>% 
+  mutate(src_subject_id=as.factor(src_subject_id),
+         eventname=as.factor(eventname),
+         anthro_timestamp=as.factor(anthro_timestamp),
+         anthroheightcalc=as.numeric(anthroheightcalc),
+         anthroweightcalc=as.numeric(anthroweightcalc)
+        )
+
+str(ant_df) #check classification again
+
 #Select variables needed
 #anthroheightcalc = Standing Height Average
-#anthroweightcalc = Average Measured Weight
+#anthroweightcalc = Measured Weight Average
+
 colnames(ant_df)
 
-bmi_calc_vars <- c("src_subject_id", "eventname", "anthroheightcalc", "anthroweightcalc")
-bmi_vars <- ant_df[bmi_calc_vars] #create new dataframe
+bmi_vars <- ant_df %>% 
+  select(src_subject_id, eventname, anthroheightcalc, anthroweightcalc)
+
 
 #reduce to baseline data only, N=11,875
-bmi_vars <- subset(bmi_vars,eventname=="baseline_year_1_arm_1")
+bmi_vars<- subset(bmi_vars,eventname=="baseline_year_1_arm_1")
 
 ####BMI CALCULATION PREP
 

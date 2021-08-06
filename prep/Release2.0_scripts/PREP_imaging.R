@@ -5,6 +5,8 @@
 #### Introduction
 #The purpose of this script is to quality control and process the ABCD imaging data (cortical, diffusion/white matter, subcortical)
 
+#test
+
 #Helpful Documents:
 
 #Follow the QC criteria recommended by ABCD in NDA 2.0.1 Imaging Instrument Release Notes: https://nda.nih.gov/study.html?id=634
@@ -134,7 +136,7 @@ colnames(abcd.dti)=gsub('dmri_','',colnames(abcd.dti))
 colnames(abcd.dti)=gsub('fiberat_','',colnames(abcd.dti))
 
 colnames(abcd.dti)[grep('\\.all&rh$',colnames(abcd.dti))]=
-  paste0('rhtotal.',gsub('\\.all|rh$','',colnames(IM.dat)))[grep('\\.all|rh$',colnames(IM.dat))]
+  paste0('rhtotal.',gsub('\\.all|rh$','',colnames(abcd.dti)))[grep('\\.all|rh$',colnames(abcd.dti))]
 
 #rearrange col names as done for cortical measures to make reading easier. 
 colnames(abcd.dti)[grep('lh$',colnames(abcd.dti))]=paste0('lh.',gsub('lh$','',colnames(abcd.dti)))[grep('lh$',colnames(abcd.dti))]
