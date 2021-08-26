@@ -15,6 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The purpose of this script is to tidy and quality control the pubertal hormone data from ABCD release3.0. 
 
+#this is a test line of code for github commit
+
 #SETUP
 
 ```{r load libraries and set wd }
@@ -30,6 +32,8 @@ library(jtools) #great package for summarising regression results
 library(readr)
 library(gridExtra)
 library(sandwich) #for linear models
+library(RNOmni)
+library(gvlma) #test assumptions for regression residuals. 
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
 getwd()
@@ -240,9 +244,9 @@ sum(is.na(ph_df$filtered_estradiol)) #NAs = 6603 Complete cases= 5163
 ```
 
 #Distribution Checks
-Once each hormone has been filtered, we will check the distribution and log-transform if needed
+Once each hormone has been filtered, we will check the distribution and transform if needed
 
-```{r, distribution and log transformation}
+```{r, distribution}
 #check distribution - data is skewed, as expected, so we will log10 transform raw hormone levels before generating pt measure. 
 
 #histograms
@@ -270,59 +274,26 @@ print(estradiol_hist)
 hormones_hist <- grid.arrange(dhea_hist, testosterone_hist, estradiol_hist, ncol = 3)
 print(hormones_hist)
 
-#check skewness 
-skewness <- ph_df %>% 
-  select(filtered_dhea, filtered_testosterone, filtered_estradiol) %>% 
-skew()
-skewness
+### QQ Plots ###
+
+
+
+### we can check the skewness and kurtosis numerically too if needed ###
+# skewness <- ph_df %>% 
+# select(filtered_dhea, filtered_testosterone, filtered_estradiol) %>% 
+# skew()
+# skewness
 
 #check kurtosis
-kurtosis <- ph_df %>% 
-  select(filtered_dhea, filtered_testosterone, filtered_estradiol) %>% 
-kurtosi()
-kurtosis
-
-#Data is skewed so we will log10 transform the data. 
-
-
-
-#Log10 transformed data
-dhea_log_hist <- ggplot(ph_df, aes(x = filtered_dhea)) + 
-              geom_histogram(fill = "deepskyblue4",
-                              bins =30) + 
-              scale_x_log10()
-
-#plot pre-post log10 transformation. 
-dhea_log_compar_hist <- grid.arrange(dhea_hist, dhea_log_hist, ncol = 2,
-             top = "DHEA values before (left) and after log10 transformation (right)")
-
-#change wd and save plot.
-setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs")
-ggsave("dhea_log_compar_hist.pdf")
-
-#Let's look at summary of data before and after log10 transformation
-
-summary(ph_df$filtered_dhea)
-
-summary(log10(ph_df$filtered_dhea)) #note: if min value=0, should add +1 to avoid neg infinity. 
-
-
-#log10-transform and save as new variable. 
-
-ph_df <- ph_df %>%
-  mutate(dhea_log = log10(filtered_dhea))
-  
-colnames(ph_df) #check new col exists. 
-
-#Check for outliers after transformation
-
-outl_dhea <- ph_df %>% 
-  filter(mean(dhea_log) + 3*(sd(dhea_log)) & mean(dhea_log) - 3*(sd(dhea_log)))
-        
-#check outlier removal
-outl_dhea_upper <- (mean(ph_df$dhea_log) - 3*(sd(ph_df$dhea_log)))
-                             
+# kurtosis <- ph_df %>% 
+#  select(filtered_dhea, filtered_testosterone, filtered_estradiol) %>% 
+# kurtosi()
+# kurtosis
 ```
+
+Transforming Data
+
+We will first try log10 transformation to see if skewness is improved. 
 
 #Log10 transforming data 
 
@@ -371,16 +342,137 @@ ggsave("pre_post_log_ph_hist.pdf")
 
 
 ```
+##Inverse Normal Transformation 
+
+Due to the non normal QQ plots following log transformation in residuals used to generate pubertal timing measures, we will try inverse normal transformation. These changes will be version controlled on Git, so I can go back to log transformed version later if needed. 
+
+Note, we will use the Rank Normal function to do an inverse normal transformation but this function requires a wrapper to deal with missing data (Thanks to Mark Adams for this!)
+
+```{r, inverse normal transformation with wrapper}
+
+### Wrapper ###
+# calculate RankNorm with missing data
+RankNormNA <- function(u) {
+    # find complete elements
+    u_complete <- u[!is.na(u)]
+    # calculate rank norm
+    u_ranked <- RNOmni::RankNorm(u_complete)
+    u_ranked_all <- rep(NA, length(u))
+    # replace non-missing elements with their INT value (missing will still be NA)
+    u_ranked_all[which(!is.na(u))] <- u_ranked
+    return(u_ranked_all)
+}
+
+#Now use RankNormNA wrapper like RankNorm function --- it worked! 
+ph_df <- ph_df %>% 
+  mutate(dhea_ranknorm = RankNormNA(filtered_dhea),
+         test_ranknorm = RankNormNA(filtered_testosterone),
+         estr_ranknorm = RankNormNA(filtered_estradiol))
+
+#Plot inverse normal transformations (INT).
+
+dhea_ranknorm_hist <- ggplot(data=ph_df, aes(x= dhea_ranknorm)) +
+  geom_histogram(colour = "black", fill = "darkgreen",
+                 bins =30) +
+  ggtitle("INT DHEA")
+print(dhea_ranknorm_hist)
+
+test_ranknorm_hist <- ggplot(data=ph_df, aes(x= test_ranknorm)) +
+  geom_histogram(colour = "black", fill = "darkgreen",
+                 bins =30) +
+    ggtitle("INT Testosterone")
+  print(test_ranknorm_hist)
+  
+estr_ranknorm_hist <- ggplot(data=ph_df, aes(x= estr_ranknorm)) +
+  geom_histogram(colour = "black", fill = "darkgreen",
+                 bins =30) +
+  ggtitle("INT Estradiol")
+print(estr_ranknorm_hist)
+
+#Let's knit all the plots together, original, log10 transformation, and INT
+trans_all_hist <- grid.arrange(dhea_hist, testosterone_hist, estradiol_hist, 
+                              dhea_log_hist, test_log_hist, estr_log_hist,
+                              dhea_ranknorm_hist, test_ranknorm_hist, estr_ranknorm_hist,
+                              ncol = 3, nrow = 3)
+
+### INT produced the closest to normal distribution so we will use this method going forward ###
+
+
+
+
+```
+
+```{r, another INT method}
+
+### This is Amelia's code for inverse normal transformation (Rank Norm). Will need to use a wrapper to deal with missing data for this method also. ###
+
+# inverse normal transformation (RankNorm)
+# RankNorm_vars <- paste0("RankNorm_", min_bloods)
+# for(i in c(1:length(RankNorm_vars))){
+#  data[,RankNorm_vars[i]] <- RankNorm(data[,min_bloods[i]])
+#    }
+
+
+####Another method used by Amelia ####
+
+# inormal <- function(x)
+# {
+#  qnorm((rank(x, na.last = "keep") - 0.5) / sum(!is.na(x)))
+# }
+
+# INT_vars <- paste0("INT_", min_hormones)
+# for(i in c(1:length(INT_vars))){
+# ph_df[,INT_vars[i]] <- inormal(ph_df[,min_hormones[i]])
+# }
+```
 
 Outlier checks 
 
 We are defining outliers as ±5SD from mean as with a sample this large (N= ~10,000), 
 we should expect some responses greater than 3SD (commonly used outlier cutoff) if the data are really normally distributed. 
 
+For non-transformed and log10-transformed, there were outliers present but this is not the case for INT so we will not need to run a sensitivity analysis. 
+
 Remember to run sensitivity analyses to examine the effect of outliers on models. 
 
-```{r, outlier checks}
- 
+```{r, INT outlier checks}
+#define upper and lower limits for each hormone
+outl_dhea_upper <- (mean(ph_df$dhea_ranknorm, na.rm=T) +5*(sd(ph_df$dhea_ranknorm, na.rm=T))) 
+outl_dhea_lower <- (mean(ph_df$dhea_ranknorm, na.rm=T) -5*(sd(ph_df$dhea_ranknorm, na.rm=T)))
+outl_test_upper <- (mean(ph_df$test_ranknorm, na.rm=T) +5*(sd(ph_df$test_ranknorm, na.rm=T))) 
+outl_test_lower <- (mean(ph_df$test_ranknorm, na.rm=T) -5*(sd(ph_df$test_ranknorm, na.rm=T)))
+outl_estr_upper <- (mean(ph_df$estr_ranknorm, na.rm=T) +5*(sd(ph_df$estr_ranknorm, na.rm=T))) 
+outl_estr_lower <- (mean(ph_df$estr_ranknorm, na.rm=T) -5*(sd(ph_df$estr_ranknorm, na.rm=T)))
+
+#Plot outliers:
+#DHEA - NO OUTLIERS PRESENT
+hist(ph_df$dhea_ranknorm, main="", xlab="INT DHEA")
+abline(v=outl_dhea_upper,col="red")
+abline(v=outl_dhea_lower,col="red")
+
+#TESTOSTERONE - OUTLIERS PRESENT
+hist(ph_df$test_log, main="", xlab="INT TESTOSTERONE")
+abline(v=outl_test_upper,col="red")
+abline(v=outl_test_lower,col="red")
+
+#ESTRADIOL - OUTLIERS PRESENT 
+hist(ph_df$estr_log, main="", xlab="INT ESTRADIOL")
+abline(v=outl_estr_upper,col="red")
+abline(v=outl_estr_lower,col="red")
+
+#Identify number of outliers for testostrone and estradiol. 
+test_outl <- ph_df %>% 
+  filter(test_ranknorm > outl_test_upper |
+           test_ranknorm < outl_test_lower) #11 outliers for testosterone
+
+estr_outl <- ph_df %>% 
+  filter(estr_log > outl_estr_upper |  #10 outliers for estradiol 
+           estr_log < outl_estr_lower)
+```
+
+
+```{r, Log10 outlier checks}
+
 #define upper and lower limits for each hormone
 outl_dhea_upper <- (mean(ph_df$dhea_log, na.rm=T) +5*(sd(ph_df$dhea_log, na.rm=T))) 
 outl_dhea_lower <- (mean(ph_df$dhea_log, na.rm=T) -5*(sd(ph_df$dhea_log, na.rm=T)))
@@ -391,17 +483,17 @@ outl_estr_lower <- (mean(ph_df$estr_log, na.rm=T) -5*(sd(ph_df$estr_log, na.rm=T
 
 #Plot outliers:
 #DHEA - NO OUTLIERS PRESENT
-hist(ph_df$dhea_log, main="", xlab="DHEA LOG")
+hist(ph_df$dhea_log, main="", xlab= "LOG DHEA")
 abline(v=outl_dhea_upper,col="red")
 abline(v=outl_dhea_lower,col="red")
 
 #TESTOSTERONE - OUTLIERS PRESENT
-hist(ph_df$test_log, main="", xlab="TESTOSTERONE LOG")
+hist(ph_df$test_log, main="", xlab=" LOG TESTOSTERONE")
 abline(v=outl_test_upper,col="red")
 abline(v=outl_test_lower,col="red")
 
 #ESTRADIOL - OUTLIERS PRESENT 
-hist(ph_df$estr_log, main="", xlab="ESTRADIOL LOG")
+hist(ph_df$estr_log, main="", xlab="LOG ESTRADIOL")
 abline(v=outl_estr_upper,col="red")
 abline(v=outl_estr_lower,col="red")
 
@@ -413,7 +505,6 @@ test_outl <- ph_df %>%
 estr_outl <- ph_df %>% 
   filter(estr_log > outl_estr_upper |  #10 outliers for estradiol 
            estr_log < outl_estr_lower)
-
 
 #create new variable with outliers removed for later sensitivity analysis
 #duplicate test_log and name it test_log_no_outl. Same for estradiol. 
@@ -446,9 +537,11 @@ outl_estr_check  <- ph_df %>%
 
 ```
 
-#Generate pubertal timing score for each hormone measure
+### Generate pubertal timing score for each hormone measure
 
-We will use the log transformed hormone levels as per Barendse & Byrne et al. (pre-print)
+We will use the INT hormone levels due to non-normal distribution after log10 transformation. 
+
+Others, such as per Barendse & Byrne et al. (pre-print) used log10 transformation
 see script: https://github.com/dsnlab/TAG_scripts/blob/master/hormones/cleaningSaliva_concentrations_W2.Rmd
 
 see https://boostedml.com/2019/06/linear-regression-in-r-interpreting-summarylm.html for refresher on interpretation
@@ -458,7 +551,7 @@ DHEA
 ```{r, DHEA PT}
 
 #model summary
-dhea_lm <- lm(dhea_log~age_years, na.action=na.exclude, data = ph_df) # create lm, specify na.exclude so df size stays the same.
+dhea_lm <- lm(dhea_ranknorm~age_years, na.action=na.exclude, data = ph_df) # create lm, specify na.exclude so df size stays the same.
 summ(dhea_lm,
      robust = TRUE, #robust standard error = HC3 as per sandwich package
      scale = TRUE,  #scaled beta used
@@ -471,17 +564,13 @@ mutate(dhea_timing = resid(dhea_lm))
 
 summary(ph_df$dhea_timing)
 
-
-#Note - no sensitivity analysis to run later due to no outliers being present after Log10 transformation. 
-#--------------- for sensitivity analysis with outliers removed ---------------#
-
 ```
 
 TESTOSTERONE
 ```{r, TESTOSTERONE PT}
 
 #model summary
-test_lm <- lm(test_log~age_years, na.action=na.exclude, data = ph_df) # create linear model, and specify na.exclude so that df size stays the same.
+test_lm <- lm(test_ranknorm~age_years, na.action=na.exclude, data = ph_df) # create linear model, and specify na.exclude so that df size stays the same.
 summ(test_lm,
      robust = TRUE, #robust standard error = HC3 as per sandwich package
      scale = TRUE,  #scaled beta used
@@ -494,20 +583,27 @@ ph_df <- ph_df %>%
 
 summary(ph_df$test_timing)
 
-#--------------- test_timing for sensitivity analysis with outliers removed ---------------#
 
-test_lm_no_outl <- lm(test_log_no_outl~age_years, na.action=na.exclude, data = ph_df) # create linear model, and specify na.exclude so that df size stays the same.
-summ(test_lm_no_outl,
-     robust = TRUE, #robust standard error = HC3 as per sandwich package
-     scale = TRUE,  #scaled beta used
-     confint = TRUE, digits = 3) #get confidence intervals. 95% CI by default 
+
+
+#--------------- code for sensitivity analysis with outliers removed ---------------#
+
+# There are no outliers present for INT transformation but keeping code here for future ref.
+# May be asked to use a different form of transformation, e.g., Log10. 
+# This code can be used for any hormone, example below is testosterone. 
+
+# test_lm_no_outl <- lm(test_log_no_outl~age_years, na.action=na.exclude, data = ph_df) # create # linear model, and specify na.exclude so that df size stays the same.
+# summ(test_lm_no_outl,
+#      robust = TRUE, #robust standard error = HC3 as per sandwich package
+#      scale = TRUE,  #scaled beta used
+#      confint = TRUE, digits = 3) #get confidence intervals. 95% CI by default 
 
 #obtain standardised residual = measure of pubertal timing. Save as new variable. 
 
-ph_df <- ph_df %>% 
-  mutate(test_timing_no_outl = resid(test_lm_no_outl))
+# ph_df <- ph_df %>% 
+#   mutate(test_timing_no_outl = resid(test_lm_no_outl))
 
-summary(ph_df$test_timing_no_outl)
+# summary(ph_df$test_timing_no_outl)
 
 
 ```
@@ -516,7 +612,7 @@ ESTRADIOL
 ```{r, ESTRADIOL PT}
 
 #model summary
-estr_lm <- lm(estr_log~age_years, na.action=na.exclude, data = ph_df) # create linear model, and specify na.exclude so that df size stays the same.
+estr_lm <- lm(estr_ranknorm~age_years, na.action=na.exclude, data = ph_df) # create linear model, and specify na.exclude so that df size stays the same.
 summ(estr_lm,
      robust = TRUE, #robust standard error = HC3 as per sandwich package
      scale = TRUE,  #scaled beta used
@@ -529,41 +625,28 @@ ph_df <- ph_df %>%
 
 summary(ph_df$estr_timing)
 
-#--------------- estr_timing for sensitivity analysis with outliers removed ---------------#
-
-estr_lm_no_outl <- lm(estr_log_no_outl~age_years, na.action=na.exclude, data = ph_df) # create linear model, and specify na.exclude so that df size stays the same.
-summ(estr_lm_no_outl,
-     robust = TRUE, #robust standard error = HC3 as per sandwich package
-     scale = TRUE,  #scaled beta used
-     confint = TRUE, digits = 3) #get confidence intervals. 95% CI by default 
-
-#obtain standardised residual = measure of pubertal timing. Save as new variable. 
-
-ph_df <- ph_df %>% 
-  mutate(estr_timing_no_outl = resid(estr_lm_no_outl))
-
-summary(ph_df$estr_timing_no_outl)
-
 ```
-#Residual plot analysis 
-Examine plots to check to validity of the assumptions (i.e., residuals vs. leverage; residuals vs. fitted; Normal Q-Q; scale-location)
-This allows us to assess the quality of the regression
-see https://data.library.virginia.edu/diagnostic-plots/ for guidance on plot interpretation. 
+#Residual assumption check
+
+Let's look at plot analysis to check to validity of the assumptions (i.e., residuals vs. leverage; residuals vs. fitted; Normal Q-Q; scale-location)
+
+This allows us to assess the quality of the regression.
+See https://data.library.virginia.edu/diagnostic-plots/ for guidance on plot interpretation. 
 ```{r, residual plot checks}
 
-#Note sure about whether assumptions have been met. 
-#Check dhea plots -  
+#Check dhea plots -  looks good. 
 par(mfrow=c(2,2))
 plot(dhea_lm)
 
-#Check testosterone plots - 
+#Check testosterone plots - looks good. 
 par(mfrow=c(2,2))
 plot(test_lm)
 
-#Check estradiol plots - Worried that the Q-Q plot diverges slightly. Look into later. 
+#Check estradiol plots - looks good.  
 par(mfrow=c(2,2))
 plot(estr_lm)
 ```
+
 # EXPORT CLEANED DATA
 We now have single timing measure for each hormone plus other relevant variables. 
 We will use this dataframe in our models. 
@@ -575,8 +658,7 @@ Remember total Ns: DHEA= 10,931 ; Testosterone= 11011 ; Estradiol= 5163
 ```{r, export cleaning data}
 
 abcd3.0_hormones_clean <- ph_df %>% select("src_subject_id", "eventname", "sex",
-                                "dhea_timing","test_timing", "estr_timing", 
-                                "test_timing_no_outl", "estr_timing_no_outl")
+                                "dhea_timing","test_timing", "estr_timing")
 
 #Change working directory and save clean file there. 
 
