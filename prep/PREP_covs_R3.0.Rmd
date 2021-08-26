@@ -1,7 +1,7 @@
 ---
 title: "PREP_covs_R3.0"
 author: "Niamh MacSweeney"
-date: "8/5/2021"
+date: "5/8/2021"
 output: html_document
 ---
 
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Introduction
 
 The purpose of this script is to tidy and quality control the covariates for our analysis.
-#BMI, age, race/ethnicity, family income, motion, site, hemisphere (for bilateral brain measures)
+Covariates: Age, BMI, race/ethnicity, family income, motion, site, hemisphere (for bilateral brain measures)
 
 This data frame was downloaded via the DEAP portal which works off the most recent ABCD data release (3.0). 
 
@@ -65,14 +65,73 @@ covs <- covs %>%
   mutate(
     age_years = age/12 
   )
+
 colnames(covs) #check new variable exists
+
+#Let's reduce variables to those we need 
+#Note: removing age in months, extra race, education (high.educ = high.educ.bl) and income vars.
+
+covs <- covs %>% 
+  select(-age, -female, -race.4level,  -high.educ.bl, - household.income)
+
+#Let's reorder variables so that order is consistent with table above
+
+# Age, BMI, race/ethnicity, family income, site, motion,hemisphere (for bilateral brain measures),
+#parent depressive symptoms (fieldname: asr_scr_depress_r )
+
+temp <- covs %>% 
+  relocate("src_subject_id", "eventname", "sex", "age_years", "bmi", "race.6level", "demo_comb_income_p",         "abcd_site", "high.educ", "fsqc_qu_motion", "asr_scr_depress_r", "rel_family_id")
+
+```
+##Quality control covariates
+
+We will get a summary of each covariate and check for number of NAs. These will be removed when running the linear models later.  
+
+We will use the "rel_family_id" later to reduce sample to unrelated participants only. 
+
+##Core Covariates
+
+```{r, QC covs}
+### Core covariates for basic model ###
+
+#Note: Additional imaging covariates motion, hemisphere and ICV will be added later from PREP.imaging file when building models. 
+
+#Age --- looks good, no NAs
+summary(covs$age_years)
+
+#BMI --- NAs = 94
+summary(covs$bmi)
+
+#Race/ethnicity --- NAs = 171
+
+#Note: We are using a 6-level race measure instead of race_etnicity variable in an effort to make the measure more representative. "race.6level" includes White, Black, Asian, AIAN/NHPI (Asian Indian/Alaskan American/Native Hawaiian/Pacific Islander), Other, Mixed. 
+
+summary(covs$race.6level)
+
+#Study site --- why is there a site 22? 
+summary(covs$abcd_site)
 
 ```
 
-Note: to do after annual leave
+##Additional Covariates
 
-1. QC covariates and make sure they are okay for models. 
-2. Check Amelia's scripts for how she handled her covariates.
+```{r, QC covs}
+### Additional Covariates ###
+
+##Socio-economic variables
+
+#Family income --- Refuse to answer=512, Don't know = 504, NAs= 2
+summary(covs$demo_comb_income_p)
+
+#Parent highest education --- NAs = 14.
+summary(covs$high.educ)
+
+#Parent depression --- NAs = 5. 
+summary(covs$asr_scr_depress_r)
+
+```
+
+All covariates look within a normal range and can be exported. 
 
 
 
