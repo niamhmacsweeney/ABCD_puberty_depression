@@ -364,9 +364,7 @@ sum_dep_measures <- targetdat.clean %>%
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
 
-saveRDS(sum_dep_measures,"abcd3.0_dep_measures_cleaned.rds")
-
-
+saveRDS(sum_dep_measures,"dep_measures_cleaned_R3.0.rds")
 ```
  
 Get breakdown of MDD and DS for caregiver and child report. 

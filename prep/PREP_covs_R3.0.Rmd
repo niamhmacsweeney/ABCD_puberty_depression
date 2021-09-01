@@ -44,6 +44,10 @@ Need to insert table here of all the covariates used....
 
 ```{r, covariate table}
 
+vars <- factor(c("src_subject_id", "eventname", "sex", "age_years", "bmi", "race.6level", "demo_comb_income_p",  "abcd_site", "high.educ", "fsqc_qu_motion", "asr_scr_depress_r", "rel_family_id"))
+
+var_lables <- factor(c("Participant ID", "Data collection wave", "Sex at birth", "Age in years", "Body Mass Index", "Race (6-level categorisation", "Household income", "Study site", "Highest education of parents", "FreeSurfer QC motion", "Parent (self-report) depressive problems", "Family ID"))
+
 ```
 
 ```{r, load and tidy data}
@@ -79,8 +83,8 @@ covs <- covs %>%
 # Age, BMI, race/ethnicity, family income, site, motion,hemisphere (for bilateral brain measures),
 #parent depressive symptoms (fieldname: asr_scr_depress_r )
 
-temp <- covs %>% 
-  relocate("src_subject_id", "eventname", "sex", "age_years", "bmi", "race.6level", "demo_comb_income_p",         "abcd_site", "high.educ", "fsqc_qu_motion", "asr_scr_depress_r", "rel_family_id")
+covs <- covs %>% 
+  relocate("src_subject_id", "eventname", "sex", "age_years", "bmi", "race.6level", "demo_comb_income_p",  "abcd_site", "high.educ", "fsqc_qu_motion", "asr_scr_depress_r", "rel_family_id")
 
 ```
 ##Quality control covariates
@@ -133,8 +137,13 @@ summary(covs$asr_scr_depress_r)
 
 All covariates look within a normal range and can be exported. 
 
+##Export cleaned data 
 
-
+```{r, export data}
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+saveRDS(covs,"covariates_cleaned_R3.0.rds")
+```
+####------------ END OF MAIN SCRIPT -----------------####
 
 
 

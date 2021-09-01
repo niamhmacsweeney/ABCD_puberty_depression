@@ -15,8 +15,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The purpose of this script is to tidy and quality control the pubertal hormone data from ABCD release3.0. 
 
-#this is a test line of code for github commit - test 2
-
 #SETUP
 
 ```{r load libraries and set wd }
@@ -276,8 +274,6 @@ print(hormones_hist)
 
 ### QQ Plots ###
 
-
-
 ### we can check the skewness and kurtosis numerically too if needed ###
 # skewness <- ph_df %>% 
 # select(filtered_dhea, filtered_testosterone, filtered_estradiol) %>% 
@@ -396,9 +392,6 @@ trans_all_hist <- grid.arrange(dhea_hist, testosterone_hist, estradiol_hist,
                               ncol = 3, nrow = 3)
 
 ### INT produced the closest to normal distribution so we will use this method going forward ###
-
-
-
 
 ```
 
@@ -583,9 +576,6 @@ ph_df <- ph_df %>%
 
 summary(ph_df$test_timing)
 
-
-
-
 #--------------- code for sensitivity analysis with outliers removed ---------------#
 
 # There are no outliers present for INT transformation but keeping code here for future ref.
@@ -663,7 +653,7 @@ abcd3.0_hormones_clean <- ph_df %>% select("src_subject_id", "eventname", "sex",
 #Change working directory and save clean file there. 
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
-saveRDS(abcd3.0_hormones_clean,"abcd3.0_hormones_clean.rds")
+saveRDS(abcd3.0_hormones_clean,"hormones_cleaned_R3.0.rds")
 ```
 
 -------------END OF SCRIPT----------------------

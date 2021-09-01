@@ -11,7 +11,7 @@ There are three main folders:
 2. PREP: Scripts for data cleaning and manipulation
 3. ANALY: Scripts for analysis
 
-File naming system: TYPE_variable.filetype  e.g., PREP_pds.csv = prep file for pubertal development scale.csv
+File naming system: TYPE_variable_datarelease.filetype  e.g., PREP_pds_R3.0.csv = prep file for pubertal development scale.csv from data release 3.0.
 
 ####DATA 
 
