@@ -1,0 +1,286 @@
+---
+title: "ANALY_pilot"
+author: "Niamh MacSweeney"  Credit to X. Shen for function templates. 
+date: "30/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#ABCD Pilot Analysis Script
+
+#Introduction
+
+The purpose of this script is to run the pilot analysis for the Puberty RR. For this analysis, we will be using a random sub-sample (N=1,000) to generate ROIs for the pubertal timing ~ brain structure association. 
+
+We will be using an un-related sample of participants for our analysis. The pilot analysis will use a basic model, outlined below. 
+
+Note that we are using inverse normal transformed data for the puberty variables (hormones and PDS).
+
+###Required Inputs
+
+Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data
+
+####Independent Variable
+Pubertal timing: pds_timing_INT_cleaned_R3.0.rds + hormones_cleaned_R3.0.rds
+
+####Dependent Variable
+Brain structure: cortical_cleaned_R3.0.rds + subcort_cleaned_R3.O.rds + dti_cleaned_R3.0.rds
+
+####Covariates
+Covariates: covariates_cleaned_R3.0.rds
+
+____________________________________________
+
+####Workflow 
+1. Setup: Load data, merge to create master dataframe, keep unrelated participants only
+2. Pilot prep: Get subsample of 10% of unrelated sample (N= 9,775). 
+3. Set up lme function using Shen's template script
+
+
+####STEP 1: SETUP
+Load libraries and set wd
+```{r, load libraries, set wd}
+
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(readr)
+library(pbapply)
+library(nlme)
+library(gridExtra)
+library(sandwich)
+library(stringr)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
+```
+
+Load data
+```{r,load data}
+
+#Puberty data 
+pds <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/pds_timing_INT_cleaned_R3.0.rds")
+
+hormones <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/hormones_cleaned_R3.0.rds")
+
+#Imaging data
+cortical <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/cortical_cleaned_R3.0.rds")
+
+subcort <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/subcort_cleaned_R3.0.rds")
+
+dti <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dti_cleaned_R3.0.rds")
+
+#Covariates
+covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covariates_cleaned_R3.0.rds")
+
+```
+
+Merge dataframes to create master dataframe
+
+As we have a six data frames to merge, we are going to do it stepwise using dplyr function. 
+```{r, merge DFs}
+
+df <- hormones %>% 
+  left_join(y=pds, by= "src_subject_id") %>% 
+  left_join(y=cortical, by= "src_subject_id") %>% 
+  left_join(y=subcort, by= "src_subject_id") %>% 
+  left_join(y=dti, by= "src_subject_id") %>% 
+  left_join(y=covs, by="src_subject_id")
+
+#Remove duplicate columns after merge (i.e, for sex, eventname and age_years)
+#This is not the most efficient way of doing thing but will do for now. 
+df <- df %>% 
+  select(-age_years.y, -eventname.x, -eventname.y, -sex.x, -sex.y)
+
+#rename year variable
+df <- df  %>% 
+  rename(age_years = age_years.x)
+
+#check col names
+colnames(df)
+
+```
+Check variable classifcation
+```{r, variable classification}
+
+covs_str <- df %>% 
+  select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
+  str()
+```
+Reduce to unrelated sample only 
+Before N=11766, After N=9,775
+```{r, get unrelated sample}
+
+unrel_df =df[!duplicated(df$rel_family_id),]
+```
+
+####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=978
+
+```{r, generate subsample}
+
+targetdata <- unrel_df %>% 
+  sample_frac(size = 0.1, replace = FALSE)
+
+#check males and females breakdown F= 482, M=496
+targetdata %>% 
+  dplyr::count(sex)
+
+```
+
+####STEP 3: Model set up 
+We are using X.Shen's phewasStyle.R function to run the linear models.
+
+We need to change "src_subject_id" to "f.eid" so that function will run. 
+```{r, colnames}
+colnames(targetdata)[1]='f.eid'
+colnames(targetdata) #check it worked
+
+```
+
+Set categorical variables 
+```{r, set categorical variables}
+
+targetdata$race.6level = as.factor(targetdata$race.6level)
+targetdata$sex = as.factor(targetdata$sex)
+targetdata$fsqc_qu_motion = as.factor(targetdata$fsqc_qu_motion)
+targetdata$abcd_site = as.factor(targetdata$abcd_site)
+
+```
+
+Generate long-format data.
+
+Unsure here about what is happening when I convert to long format, it looks like there are two entries for every participant - one for imaging vars and one for non-imaging vars?
+```{r, gen long-format data}
+# colnames of imaging data
+dat_colnames = colnames(targetdata)[grep('lh\\.|rh\\.',colnames(targetdata))] 
+
+# colnames of non-imaging data/unilateral img data
+cols_nonimg = colnames(targetdata)[!grepl('lh\\.|rh\\.',colnames(targetdata))]  
+cols_nonimg = cols_nonimg[2:length(cols_nonimg)]
+
+source('../functions/long_format_new.R')
+targetdata_longformat <- long_format(targetdata,cols_nonimg,cols_img)
+
+#Exploratory work to see what above script is doing. 
+#We have two separate entries for each ID - the values are different so not sure what is happening??? Will revisit. 
+
+test <- targetdata_longformat %>% 
+  filter(f.eid ==	"NDAR_INVGY65ZZBV")
+
+```
+
+Define functions
+```{r, Phewas function}
+
+source('../functions/reg_phewasStyle.R')
+
+```
+
+Define global variables
+```{r, global vars}
+targetdata=targetdata
+dat_long=targetdata_longformat
+```
+
+Set up dependent variables (brain measures)
+```{r, set up DVs}
+ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|dtiFA\\.|dtiMD\\.|\\.ASEG\\.',colnames(dat_long))]
+ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.',colnames(targetdata))]
+ls.dep.all=c(ls.dep.fs.long,ls.dep.fs.short)
+
+ls.dep.all=ls.dep.all[c(grep('sa\\.|thk\\.|vol\\.|sulc\\.',ls.dep.all),
+                        grep('\\.ASEG\\.',ls.dep.all),
+                        grep('dtiFA\\.',ls.dep.all),
+                        grep('dtiMD\\.',ls.dep.all))]
+ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
+
+```
+Set up Independent Variables (or factors) (puberty measures) 
+```{r, set up IVs}
+
+ls.factor=colnames(targetdata)[grep('dhea_timing|test_timing|estr_timing|pt_all_INT',colnames(targetdata))]
+
+```
+Combine DVs and IVs so that we get a list of the DV and IV
+```{r, combine DVs and IVs}
+
+ls.dep.factor.combo=expand.grid(ls.dep.all,ls.factor,stringsAsFactors = F)
+
+```
+Set up Covariates 
+Note: We are adding hemisphere as a covariate here... 
+```{r, set up covs}
+
+ls.models=data.frame(dependent=ls.dep.factor.combo$Var1,
+                     factor=ls.dep.factor.combo$Var2,
+                     covs='',stringsAsFactors = F)
+
+ls.models$covs=paste0(c('age_years','bmi','abcd_site','race.6level','fsqc_qu_motion'),collapse='+')
+
+ls.models$covs[!grepl('bl\\.',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.',ls.models$dependent)],'+hemi')
+
+```
+
+#### STEP 4: Specify models
+
+```{r, specify models}
+
+ls.models$model.est=''
+ls.models$model.est[grep('hemi',ls.models$covs)]='lme'
+ls.models$model.est[ls.models$model.est=='']='glm'
+
+```
+
+Divide models into bulk measures and individual regions
+
+Bulk (global) measures
+```{r, bulk measures}
+ls.model.bulk=ls.models[grep('mean|total|wholeb',ls.models$dependent),]
+ls.model.bulk$p_batch=1
+```
+
+Individual regions
+```{r, individual regions}
+
+ls.model.region=ls.models[!grepl('mean|total|wholeb',ls.models$dependent),]
+
+ls.model.region$p_batch=99999
+target.model=ls.model.region
+ls.dep.cate=c('thk\\.','sa\\.','vol\\.APARC','sulc\\.','vol\\.ASEG','dtiFA','dtiMD')
+ls.factor.cate=unique(target.model$factor)
+cate.no = 1
+for (fac in ls.factor.cate){
+      for (dep in ls.dep.cate){
+            loc = grepl(dep,target.model$dependent)&grepl(fac,target.model$factor)
+            target.model$p_batch[loc]=cate.no
+            cate.no=cate.no+1
+      }
+}
+ls.model.region=target.model
+
+# individual region models add intracranial volume as a covariate
+ls.model.region.covWholeB=ls.model.region
+ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)]=
+      paste0(ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)],'+ICV_ASEG')
+
+```
+
+#### STEP 5: Run Models 
+
+```{r, run models}
+
+result.PT_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
+
+result.PT_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
+
+save(result.PT_brain.bulk,result.PT_brain.region.covWholeB,file='../results/PT_brain_pilot_analysis.RData')
+
+```
+
+
+
+
