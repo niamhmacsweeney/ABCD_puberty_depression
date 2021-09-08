@@ -326,9 +326,9 @@ abcd.dti.final.excl.outl[abs(scale(abcd.dti.final.excl.outl$bl.dtimd_allfibers))
 
 Note, #DTI data final N = 10,643 (excluding outliers)
 
-Subcortical measures (before QC, N =11,736)
+####Subcortical measures (before QC, N =11,736)
 
-These are not included in the Puberty RR but I am processing them here for future reference
+
 ```{r, load in subcortical measures}
 
 abcd.subcort <- rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/abcd_smrip201.rds")
@@ -336,7 +336,7 @@ abcd.subcort <- rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release
 abcd.subcort <- abcd.subcort %>% 
 filter(eventname == "baseline_year_1_arm_1") %>% #reduce to baseline --- N = 11,736
 .[,grep("subject|smri_vol_scs_", colnames(.))] %>%   #select smri vol data
-.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|cranial|subcortical",colnames(.))] #select columns overlap with ENIGMA 
+.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|subcortical",colnames(.))] #select columns overlap with ENIGMA + ventral diencephalon
 
 ```
 ```{r, tidy column names}
@@ -383,7 +383,7 @@ abcd.subcort.final %>%
 
 ```
 
-Let's look at the final variables for subcortical measures (17 in total) after QC
+Let's look at the final variables for subcortical measures (18 in total) after QC
 ```{r, subcortical column names}
 
 colnames(abcd.subcort.final)

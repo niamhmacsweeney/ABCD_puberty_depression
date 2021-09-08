@@ -256,7 +256,6 @@ pds_org_hist_combo <- pds_timing %>%
   ggplot(aes(x = pds_tot_all)) +
   geom_histogram(color="black",fill="deepskyblue4") +
   facet_wrap(~ sex, scales="free")
-raw_plot
 
 ```
 Let's just check what Log10 transformation looks like first.
