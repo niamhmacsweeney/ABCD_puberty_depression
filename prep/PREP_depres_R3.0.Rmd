@@ -360,7 +360,7 @@ In targetdat.clean (all columns below are life-time measures):
 ```{r}
 
 sum_dep_measures <- targetdat.clean %>% 
-  select (KSADS.MDD.y, KSADS.MDD.p, KSADS.Dep_symptoms_sum_ever.y, KSADS.Dep_symptoms_sum_ever.p, KSADS.Depressive_symptoms_ever.y, KSADS.Depressive_symptoms_ever.p)
+  select (src_subject_id, KSADS.MDD.y, KSADS.MDD.p, KSADS.Dep_symptoms_sum_ever.y, KSADS.Dep_symptoms_sum_ever.p, KSADS.Depressive_symptoms_ever.y, KSADS.Depressive_symptoms_ever.p)
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
 
