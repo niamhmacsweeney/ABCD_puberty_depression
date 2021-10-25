@@ -341,7 +341,7 @@ ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWho
   arrange(p.value)
 
 #save as R.data
-save(ROI_dep_brain_females_regional_results,file='../results/tables/ROIs_dep_brain_males_pilot_analysis_withCI.RData')
+save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_analysis_withCI.RData')
 
 #save as .csv
 write.csv(ROI_dep_brain_females_regional_results, file = "../results/tables/ROIs_dep_brain_females.csv")
