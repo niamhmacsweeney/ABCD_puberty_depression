@@ -288,6 +288,22 @@ result.males.PT_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB
 #Save as R.Data file
 save(result.males.PT_brain.bulk,result.males.PT_brain.region.covWholeB,file='../results/PT_males_brain_pilot_analysis_withCI.RData')
 
+#add TRUE column if nominal p value < 0.005 for pilot ROIs
+
+#global results
+result.males.PT_brain.bulk$Sig <- as.numeric((as.character(result.males.PT_brain.bulk[,"p.value"]))) < 0.005
+
+#regional results
+result.males.PT_brain.region.covWholeB$Sig <- as.numeric((as.character(result.males.PT_brain.region.covWholeB[,"p.value"]))) < 0.005
+
+#Save results as .csv files
+
+#global results
+write.csv(result.males.PT_brain.bulk, file = "../results/tables/pilot_analy_males.PT_brain.bulk.csv")
+
+#regional results 
+write.csv(result.males.PT_brain.region.covWholeB, file = "../results/tables/pilot_analy_males.PT_brain.regional.csv")
+
 ```
 STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value =< 0.005
 
@@ -301,13 +317,18 @@ ROI_pt_brain_males_regional_results <- result.males.PT_brain.region.covWholeB %>
 #Save as R.Data file
 save(ROI_pt_brain_males_regional_results,file='../results/ROIs_PT_males_brain_pilot_analysis_withCI.RData')
 
-ROI_males_regional %>% 
-         kable(digits = c(2,5), format = "html",
-        caption = "Male ROIs (PT~Regional Brain Measures)") %>% 
-                kable_styling(font_size = 15,
-                              position = "left") %>% 
-                kable_classic("striped", 
-                            full_width = F)
+#save as .csv
+write.csv(ROI_PT_brain_males_regional_results, file = "../results/tables/ROIs_PT_brain_males.csv")
+
+
+
+# ROI_males_regional %>% 
+#       kable(digits = c(2,5), format = "html",
+#        caption = "Male ROIs (PT~Regional Brain Measures)") %>% 
+#                kable_styling(font_size = 15,
+#                              position = "left") %>% 
+#                kable_classic("striped", 
+#                            full_width = F)
 
 ```
 
