@@ -1,0 +1,7 @@
+Field.name	Description
+bl.mean.thk.APARC	Cortical thickness
+bl.mean.sulc.APARC	Cortical sulcal depth
+bl.total.sa.APARC	Cortical surface area
+bl.total.vol.APARC	Cortical volume
+bl.total.dtiFA.FiberAtlas.fibers	White-matter fractional anisotropy
+bl.total.dtiMD.FiberAtlas.fibers	White-matter mean diffusivity

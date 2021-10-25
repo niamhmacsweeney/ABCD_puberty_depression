@@ -1,0 +1,18 @@
+Field.name	Description
+fx	Fornix
+cc	Corpus Callosum
+fmaj	Foreceps Major
+fmin	Foreceps Minor
+atr	Anterior Thalamic Radiations
+cgc	Cingulate Cingulum
+cgh	Parahippocampal Cingulum
+cst	Corticospinal/Pyramidal
+ifo	Inferior-Fronto-Occipital Fasiculus
+ifsfc	Inferior Frontal Superior Frontal Cortex
+ilf	Inferior Longitudinal Fasiculus
+.pslf	Parietal Superior Longitudinal Fasiculus
+scs	Superior Corticostriate
+sifc	Striatal Inferior Frontal Cortex
+.slf	Superior Longitudinal Fasiculus
+.tslf	Temporal Superior Longitudinal Fasiculus
+unc	Uncinate Fasciculus

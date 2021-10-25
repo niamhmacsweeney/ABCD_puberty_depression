@@ -1,11 +1,11 @@
 ---
-title: "Creating DSM-V MDD severity measure in ABCD"
+title: "Creating DSM-V MDD severity measure in ABCD R 3.0"
 author: Xueyi Shen
 date:  "`r Sys.Date()`"
 output: github_document
 ---
 
-Note: This script was used by Niamh to create lifetime MDD and DS severity measures for use in models. 
+Note: This script was used by Niamh to create lifetime MDD and DS severity measures for use in models with data release 3.0.
 
 * * *
 ### Contact and credit
@@ -390,6 +390,18 @@ targetdat.clean %>%
 ```
  
 
+####STEP 1: Data cleaning
+```{r, data cleaning}
+
+#Convert age in months to years, save new variable
+df <- df %>%
+  mutate(
+    age_years = interview_age/12 
+  )
+
+colnames(ph_df) #check new variable exists
+
+```
 
 
 

@@ -276,39 +276,39 @@ Create new FA and MD variables with outliers removed for later sensitivity analy
 I can't get this to work at the moment. I want to do a sensitivity analysis with and without outliers for the DTI measures but I'm finding it difficult to remove the outlier IDs and then save as a new variable because the "all fibers" variable is a kind of grouping measure for many FA and MD measures. 
 ```{r, outlier removal}
 
-#new FA variable excl. outliers
-abcd.dti.final <- abcd.dti.final %>% 
-  mutate(bl.dtifa_allfibers_excl_outl = bl.dtifa_allfibers) 
+# new FA variable excl. outliers
+# abcd.dti.final <- abcd.dti.final %>% 
+# mutate(bl.dtifa_allfibers_excl_outl = bl.dtifa_allfibers) 
 
-#new MD variable excl. outliers
-abcd.dti.final <- abcd.dti.final %>% 
-  mutate(bl.dtimd_allfibers_excl_outl = bl.dtimd_allfibers) 
+# new MD variable excl. outliers
+# abcd.dti.final <- abcd.dti.final %>% 
+#  mutate(bl.dtimd_allfibers_excl_outl = bl.dtimd_allfibers) 
 
 
-#Change outlier values to NA
+# Change outlier values to NA
 
-#FA
-abcd.dti.final$bl.dtifa_allfibers_excl_outl[abcd.dti.final$bl.dtifa_allfibers_excl_outl > outl_fa_upper |abcd.dti.final$bl.dtifa_allfibers_excl_outl < outl_fa_lower] <- NA
-#MD
-abcd.dti.final$bl.dtimd_allfibers_excl_outl[abcd.dti.final$bl.dtimd_allfibers_excl_outl > outl_md_upper |abcd.dti.final$bl.dtimd_allfibers_excl_outl < outl_md_lower] <- NA
+# FA
+# abcd.dti.final$bl.dtifa_allfibers_excl_outl[abcd.dti.final$bl.dtifa_allfibers_excl_o   utl > outl_fa_upper |abcd.dti.final$bl.dtifa_allfibers_excl_outl < outl_fa_lower] <-   NA
+# MD
+# abcd.dti.final$bl.dtimd_allfibers_excl_outl[abcd.dti.final$bl.dtimd_allfibers_excl_ou  tl > outl_md_upper |abcd.dti.final$bl.dtimd_allfibers_excl_outl < outl_md_lower] <- NA
 
 ```
 ```{r, check it worked} 
 
-fa_outl_check <- abcd.dti.final %>% 
-  filter(bl.dtifa_allfibers > outl_fa_upper |
-           bl.dtifa_allfibers < outl_fa_lower) #14 outliers present
-
-md_outl_check <- abcd.dti.final %>% 
-  filter(bl.dtimd_allfibers > outl_md_upper |  #6 outliers present 
-           bl.dtimd_allfibers < outl_md_lower)
+# fa_outl_check <- abcd.dti.final %>% 
+#  filter(bl.dtifa_allfibers > outl_fa_upper |
+#          bl.dtifa_allfibers < outl_fa_lower) #14 outliers present
+#
+# md_outl_check <- abcd.dti.final %>% 
+#  filter(bl.dtimd_allfibers > outl_md_upper |  #6 outliers present 
+#          bl.dtimd_allfibers < outl_md_lower)
 
 #THE ABOVE DOES NOT WORK AT THE MOMENT FOR THE REASONS OUTLINED ABOVE. FOR THE MOMENT, I WIL TRY AND PROCEED WITH THE REST OF QC AND ASK PEOPLE FOR THEIR HELP. 
 
 ```
 
 
-Below, I've created a dataframe with the outlier excluded. I think I will have to export this as a separate RDS file and then run the sensitivity analysis separately.... 
+Below, I've created a dataframe with the outliers excluded. I think I will have to export this as a separate RDS file and then run the sensitivity analysis separately in the full analysis, not for pilot analysis. 
 
 ```{r, identify outliers and create additional variables for sensitivity analysis} 
 
@@ -321,6 +321,10 @@ abcd.dti.final.excl.outl[abs(scale(abcd.dti.final.excl.outl$bl.dtifa_allfibers))
 abcd.dti.final.excl.outl[abs(scale(abcd.dti.final.excl.outl$bl.dtimd_allfibers))>5,
                          grep('dtimd',colnames(abcd.dti.final.excl.outl))]=NA
 
+#Check complete cases
+#Removed 18 cases. 
+
+dti_outlier_check <- abcd.dti.final.excl.outl[complete.cases(abcd.dti.final.excl.outl), ]
 
 ```
 
@@ -360,6 +364,8 @@ colnames(abcd.subcort)[grep('l$|lh$',colnames(abcd.subcort))]=paste0('lh.',gsub(
 colnames(abcd.subcort)[grep('r$|rh$',colnames(abcd.subcort))]=paste0('rh.',gsub('r$|rh$','',colnames(abcd.subcort)))[grep('r$|rh$',colnames(abcd.subcort))]
 colnames(abcd.subcort)[grep('^vol.',colnames(abcd.subcort))]=paste0('bl.',colnames(abcd.subcort))[grep('^vol.',colnames(abcd.subcort))]
 
+colnames(abcd.subcort)
+
 ```
 
 Select IDs that passed QC, N=11,232
@@ -383,7 +389,11 @@ abcd.subcort.final %>%
 
 ```
 
-Let's look at the final variables for subcortical measures (18 in total) after QC
+Let's look at the final variables for subcortical measures (18 in total, including lh and rh) after QC. Note: subcortical_gv = subcortical grey volume. 
+
+Note that for the LME models, we are using hemisphere as a repeated measure. There are 8 subcortical measures in total:
+
+Caudate; putamen, amygdala, thalamus proper (tp), pallidum, accumbens area, hippocampus, ventral diencephalon (vedc)
 ```{r, subcortical column names}
 
 colnames(abcd.subcort.final)
@@ -397,6 +407,7 @@ Note: clean files should be saved in data folder in ABCD_puberty_RR project fold
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
 saveRDS(abcd.cortical.final,"cortical_cleaned_R3.0.rds")
 saveRDS(abcd.dti.final,"dti_cleaned_R3.0.rds")
+saveRDS(abcd.dti.final.excl.outl, "dti_cleaned_excl_outl_R3.0.rds")
 saveRDS(abcd.subcort.final,"subcort_cleaned_R3.0.rds")
 
 ```

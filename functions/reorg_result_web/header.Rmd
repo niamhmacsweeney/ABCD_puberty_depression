@@ -1,0 +1,52 @@
+---
+title: "Adolescent MDD & Brain: Main Results"
+author: "X Shen"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4
+    code_folding: hide
+---
+
+* * *
+## Contact 
+
+X Shen (xueyi.shen@ed.ac.uk)
+
+* * *
+## R settings
+
+Required packages: 
+ 
+ - dplyr
+ - readr
+ - ggplot2
+
+Extra packages for Rmarkdown:
+
+ - rmarkdown
+ - knitr
+
+Required inputs:
+ - result objects from scripts in the ANALY folder
+
+ABCD data: [release 2.0.1](https://nda.nih.gov/data_dictionary.html?source=ABCD%2BRelease%2B2.0&submission=ALL)
+ 
+* * *
+## Results
+
+Model: Brain measures ~ MDD/Depressive symptoms (by child/caregiver)
+
+```{r message=FALSE}
+library(dplyr)
+library(rmarkdown)
+library(data.table)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+
+load('../../result/i.Main_result/YouthDepre_brain_reorganised_forweb.RData')
+result=obj.disply
+```
+

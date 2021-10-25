@@ -189,6 +189,7 @@ pds%>% dplyr::count(pds_f_pt_valid)
 
 Total males valid = 5723
 Total females valid = 5250
+Total excluded = 905
 
 Second, generate PDS total score for valid IDs
 
@@ -240,14 +241,14 @@ Let's look at the distribution first
 pds_org_m_hist <- ggplot(data=pds_timing, aes(x= pds_tot_m)) +
   geom_histogram(colour = "black", fill = "deepskyblue4",
                  bins =30) +
-  ggtitle("Original PDS Males")
+  ggtitle("Raw PDS Total Males")
 print(pds_org_m_hist)
 
 #Females
 pds_org_f_hist <- ggplot(data=pds_timing, aes(x= pds_tot_f)) +
   geom_histogram(colour = "black", fill = "deepskyblue4",
                  bins =30) +
-  ggtitle("Original PDS Feales")
+  ggtitle("Raw PDS Total Females")
 print(pds_org_f_hist)
 
 
@@ -269,14 +270,14 @@ pds_log_vars <- pds_timing %>%
 pds_log_m_hist <- ggplot(data=pds_log_vars, aes(x= pds_log_m)) +
   geom_histogram(colour = "black", fill = "aquamarine4",
                  bins =30) +
-  ggtitle("Log10 PDS Males")
+  ggtitle("Log10 PDS Total Males")
 print(pds_log_m_hist)
 
 #Plot Log10 females
 pds_log_f_hist <- ggplot(data=pds_log_vars, aes(x= pds_log_f)) +
   geom_histogram(colour = "black", fill = "aquamarine4",
                  bins =30) +
-  ggtitle("Log10 PDS females")
+  ggtitle("Log10 PDS Total females")
 print(pds_log_f_hist)
 
 ```
@@ -313,14 +314,14 @@ pds_INT_vars <- pds_timing %>%
 pds_INT_m_hist <- ggplot(data=pds_INT_vars, aes(x= pds_m_INT)) +
   geom_histogram(colour = "black", fill = "darkgreen",
                  bins =30) +
-  ggtitle("INT PDS Males")
+  ggtitle("INT PDS Total Males")
 print(pds_INT_m_hist)
 
 #Females
 pds_INT_f_hist <- ggplot(data=pds_INT_vars, aes(x= pds_f_INT)) +
   geom_histogram(colour = "black", fill = "darkgreen",
                  bins =30) +
-  ggtitle("INT PDS Females")
+  ggtitle("INT PDS Total Females")
 print(pds_INT_f_hist)
 
 
@@ -454,8 +455,17 @@ Data visualisation
 trans_all_hist <- grid.arrange(pds_org_m_hist, pds_org_f_hist, pds_log_m_hist, pds_log_f_hist,
                                pds_INT_m_hist, pds_INT_f_hist,
                               ncol = 2, nrow = 3)
+```
+```{r, save plots}
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs")
+
+ggsave("trans_all_hist.png")
+
+```
 
 
+```{r, knit all histograms together}
 #can't get qqplot working
 #trans_all_qqplot <- grid.arrange(org_m_QQplot, org_f_QQplot, log_m_QQplot, log_f_QQplot,
 #                                INT_m_QQplot, INT_f_QQplot,

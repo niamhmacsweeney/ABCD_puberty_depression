@@ -79,10 +79,10 @@ ph_df <-  ph_df[!(is.na(ph_df$hormone_sal_sex) | ph_df$hormone_sal_sex==""), ]
 table(ph_df$sex, ph_df$hormone_sal_sex) #Check missing values have been removed and now check for mismatches. 
 
 ```
-#STEP 2: Check that sex matches hormone sex given. Remove data that is unusable: N= 11875 --> 11766
+#STEP 2: Check that sex matches hormone sex given. Remove data that is unusable: N= 11875 --> 11766. Total removed: N=112
 
-18 male tubes miscaslsified as female, 6 female tubes misclassified as male ---> REMOVE (N=33)
-59 unable to complete sample, 19 refused to give sample, 7 sample not collected/other ---> REMOVE (N=81)
+18 male tubes misclassified as female, 6 female tubes misclassified as male ---> REMOVE (N=24)
+59 unable to complete sample, 19 refused to give sample, 7 sample not collected/other ---> REMOVE (N=85)
 ```{r sex and hormone sex matching}
 
 ph_df %>% 
@@ -149,7 +149,7 @@ Lower limits of sensitivity (5 pg/ml; 1 pg/ml; 0.1 pg/ml).
 
 #DHEA
 
-Complete cases for filtered DHEA = 10,931 11011
+Complete cases for filtered DHEA = 10,931
 ```{r, filter DHEA}
 
 #Generate new columns for filtered data

@@ -25,7 +25,8 @@ p_plot<-function(TargetResult,color_theme_usr='Shen',shape_sig=T,sig_nominal=F,
                  category.input,labels_annot,outputpath=NA,plot_title=NA,
                  add_category_name=F,fig_size=c(24,20),y_lim=5){
   
-  # Add label for significant results to have a different shape
+  # Add label for some regions to have a different shape
+
   TargetResult$shape=1
   if (shape_sig==T){
     TargetResult$shape[TargetResult$p.corrected<0.05]=19
@@ -106,12 +107,12 @@ p_plot<-function(TargetResult,color_theme_usr='Shen',shape_sig=T,sig_nominal=F,
   
   # Make the plot
   fig=ggplot(TargetResult, aes(x=ord, y=-log10(p.value),label=labels)) +
-    geom_point(size=2, shape=TargetResult$shape,stroke=1.5,
+    geom_point(size=1, shape=TargetResult$shape,stroke=1.5,
                aes(colour = category),
                alpha=0.5)+
     scale_colour_manual(values = cl.theme)+
-    geom_text_repel(box.padding = unit(1.5,'lines'),segment.size = 0.2,
-                    max.iter = 2000)+
+    geom_text_repel(box.padding = unit(0.5,'lines'),segment.size = 0.2,
+                    max.iter = 2000, max.overlaps = 10,position = position_dodge(0.5))+
     theme(axis.title.x=element_blank(),
           axis.text.x=element_text(angle = 90, size = 12,hjust=1, vjust = 1, face='bold'),
           axis.ticks.x=element_blank(),

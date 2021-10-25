@@ -1,0 +1,7 @@
+region	modality	modality.fullname
+^thk.APARC	thk	Cortical thickness
+^sa.APARC	sa	Cortical surface area
+^sulc.APARC	sulc	Cortical sulcal depth
+^vol.APARC	vol	Cortical volume
+^dtiFA.FiberAtlas	fa	White matter fractional anisotropy
+^dtiMD.FiberAtlas	md	White matter mean diffusivity

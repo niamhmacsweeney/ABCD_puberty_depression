@@ -12,11 +12,11 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-\#ABCD Pilot Analysis Script - Females
+\#ABCD Pilot Analysis Script - Depression ~ Brain Structure -> Females
 
 \#Introduction
 
-The purpose of this script is to run the pilot analysis (DR~BS) for the Puberty RR. For this analysis, we will be using a random sub-sample of 10% (N= \~1,000) to generate ROIs for the depression ~ brain structure association.
+The purpose of this script is to run the pilot analysis (DR~BS) for the Puberty RR. For this analysis, we will be using a random sub-sample of 10% (N= ~1,000) to generate ROIs for the depression ~ brain structure association.
 
 This sub-sample will be split into males and females and the script will be run independently for each.
 
@@ -26,7 +26,7 @@ We will be using an un-related sample of participants for our analysis. The pilo
 
 Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data
 
-\#\#\#\#Independent Variable Pubertal timing: dep_measures_cleaned_R3.0.rds
+\#\#\#\#Independent Variable Depression Rating (Parent report): dep_measures_cleaned_R3.0.rds
 
 \#\#\#\#Dependent Variable Brain structure: cortical_cleaned_R3.0.rds + subcort_cleaned_R3.O.rds + dti_cleaned_R3.0.rds
 
@@ -34,7 +34,11 @@ Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/pub
 
 ------------------------------------------------------------------------
 
-####Workflow 1. Setup: Load data, merge to create master dataframe, keep unrelated participants only 2. Pilot prep: Get subsample of 10% of unrelated sample (N= 9,775). Split into males and females. 3. Set up lme function using Shen's template script
+####Workflow 
+
+1. Setup: Load data, merge to create master dataframe, keep unrelated participants only 
+2. Pilot prep: Get subsample of 10% of unrelated sample (N= 9,775). Split into males and females. 
+3. Set up glm/lme function using Shen's template script
 
 ####STEP 1: SETUP Load libraries and set wd
 
@@ -125,7 +129,7 @@ unrel_df %>%
   summary()
 ```
 
-####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=978 Get females only
+####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=986 Get males only
 
 ```{r, generate subsample, get females only}
 
@@ -133,17 +137,17 @@ set.seed(2507) #set seed for reproducibility
 targetdata <- unrel_df %>% 
   sample_frac(size = 0.1, replace = FALSE)
 
-#check males and females breakdown F= 456, M=522
+#check males and females breakdown F= 475, M=511
 targetdata %>% 
   dplyr::count(sex)
 
-#Get female sample only 
+#Get Female sample only 
 targetdata <- targetdata %>% 
   filter(sex == "F")
 
 ```
 
-####STEP 3: Model set up We are using X.Shen's phewasStyle.R function to run the linear models.
+####STEP 3: Model set up We are using X.Shen's phewasStyle_withCI.R function to run the linear models.
 
 We need to change "src_subject_id" to "f.eid" so that function will run.
 
@@ -185,7 +189,7 @@ Define functions
 
 ```{r, Phewas function}
 
-source('../functions/reg_phewasStyle.R')
+source('../functions/reg_phewasStyle_withCI.R')
 
 ```
 
@@ -211,11 +215,18 @@ ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
 ```
 
-Set up Independent Variables (or factors) (puberty measures)
+Set up Independent Variables (or factors) (depression measures)
+Depression measures are indexed in two ways:
+  1. MDD diagnosis = KSADS.MDD (1=yes, 0= no, binary)
+  2. Depression symptom severity (ordinal measure:none, mild, moderate, severe (rated 0-3         respectively)) = KSADS.Depressive_symptoms_ever
+  
+We have also derived a continuous measure of depression symptom severity, which will not be used in current analysis but may be useful for future analysis = KSADS.Dep_symptoms_sum_ever (0-15 continuous scale). 
 
 ```{r, set up IVs}
 
-ls.factor=colnames(targetdata)[grep('dhea_timing|test_timing|estr_timing|pt_f_INT',colnames(targetdata))]
+ls.factor=colnames(targetdata)[grep('^KSADS\\.MDD\\.|^KSADS\\.Depressive_symptoms_ever',
+                                    colnames(targetdata))]
+ls.factor=c(ls.factor[grep('.p$',ls.factor)]) #ls.factor[grep('.y$',ls.factor)]) #we are not including youth report in current analysis. 
 
 ```
 
@@ -292,13 +303,13 @@ ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG
 ```{r, run models}
 
 #Global (bulk) models
-result.females.PT_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
+result.females.dep_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
 
 #Regional (Individual) models
-result.females.PT_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
+result.females.dep_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
 
 #Save as R.Data file
-save(result.females.PT_brain.bulk,result.females.PT_brain.region.covWholeB,file='../results/PT_females_brain_pilot_analysis.RData')
+save(result.females.dep_brain.bulk,result.females.dep_brain.region.covWholeB,file='../results/females_dep_brain_pilot_analysis_withCI.RData')
 
 ```
 
@@ -307,24 +318,24 @@ STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value =\< 
 ```{r, make tables}
 
 
-ROI_females_regional <- result.females.PT_brain.region.covWholeB %>% 
+ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWholeB %>% 
   filter(p.value <0.005) %>% 
   select(-dependent, -factor) %>% 
   #mutate(as.numeric(ROI_females_regional)) %>% 
   #mutate_if(is.numeric, ~round(., 4)) %>% 
   arrange(p.value)
 
-str(ROI_females_regional) #check variable chars
 
+save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_males_pilot_analysis_withCI.RData')
 
-str(ROI_females_regional)
+str(ROI_dep_brain_females_regional_results) #check variable chars
 
-ROI_females_regional %>% 
-         kable(digits=4, format = "html",
-        caption = "Female ROIs (PT~Regional Brain Measures)") %>% 
-                kable_styling(font_size = 15,
-                              position = "left",
-                              full_width = F) #%>% 
-        #save_kable(file = "../figs/female_ROIs_PT_brain_pilot_analysis.png")
+# ROI_males_regional %>% 
+#        kable(digits=4, format = "html",
+#        caption = "Female ROIs (PT~Regional Brain Measures)") %>% 
+#                kable_styling(font_size = 15,
+#                              position = "left",
+#                              full_width = F) #%>% 
+#       #save_kable(file = "../figs/female_ROIs_PT_brain_pilot_analysis.png")
 
 ```

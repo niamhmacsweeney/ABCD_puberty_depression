@@ -1,0 +1,40 @@
+```{r}
+dat.IM=result$Vtargetnumber
+```
+
+```{r, message=FALSE, fig.height=nrow(dat.IM)*0.2, fig.width=9, fig.pos="H"}
+
+dat.IM[,2:(ncol(dat.IM)-1)]=apply(dat.IM[,2:(ncol(dat.IM)-1)],MARGIN = 2,as.numeric)
+dat.IM$`p corr`=gsub('\\*','',dat.IM$`p corr`) %>% as.numeric
+dat.IM=dat.IM[order(dat.IM$Beta),]
+dat.IM$ord=1:nrow(dat.IM)
+dat.IM$sig = 'pcor>=0.05'
+dat.IM$sig[dat.IM$`p corr`<0.05]='pcor<0.05'
+dat.IM$sig = as.factor(dat.IM$sig)
+ggplot(dat.IM, aes(x=reorder(`Dependent variable`,ord), y=Beta)) + 
+  geom_point(aes(colour = sig),  position=position_dodge(width = 0.1), stat="identity", size=3) +
+  geom_errorbar(aes(ymin=Beta-std, ymax=Beta+std), width=.1,
+                position=position_dodge(.9),colour="grey")+
+  theme(
+    panel.background = element_blank(),
+    panel.grid = element_blank(),
+    axis.line.x = element_line(size=0.5),
+    axis.text=element_text(size=10), axis.title=element_text(size=11),
+    plot.title = element_text(lineheight=1, face="bold", vjust=1, hjust=0.5,size=9),
+    strip.text = element_text(size=8),
+    plot.margin=unit(c(1,1,1,3),'mm')) +
+  ylab("Standardised regression coefficient") + xlab('Phenotype')+
+  scale_x_discrete(position='top')+
+  geom_hline(yintercept=0,color = "black", size=0.3)+
+  coord_flip()
+
+```
+
+
+```{r, message=FALSE}
+
+result$Vtargetnumber %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+```
