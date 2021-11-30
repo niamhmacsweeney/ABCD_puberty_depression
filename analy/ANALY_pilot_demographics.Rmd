@@ -1,0 +1,155 @@
+---
+title: "ANALY_demo"
+author: "Niamh MacSweeney"
+date: "12/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+This is a script to quantify demographic statistics for the RR, such as number of case/controls for MDD as well. 
+
+####STEP 1: SETUP Load libraries and set wd
+
+```{r, load libraries, set wd}
+
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(readr)
+library(pbapply)
+library(nlme)
+library(gridExtra)
+library(sandwich)
+library(stringr)
+library(kableExtra)
+library(epiDisplay)
+library(gmodels)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
+```
+
+#Load data 
+```{r, }
+
+#Puberty data 
+pds <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/pds_timing_INT_cleaned_R3.0.rds")
+
+hormones <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/hormones_cleaned_R3.0.rds")
+
+#Depression data
+
+dep <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dep_measures_cleaned_R3.0.rds")
+
+#Covariates
+covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covariates_cleaned_R3.0.rds")
+
+
+
+```
+Merge dataframes to create master dataframe
+
+As we have a four data frames to merge, we are going to do it stepwise using dplyr function.
+```{r, merge DFs}
+
+df <- hormones %>% 
+  left_join(y=pds, by= "src_subject_id") %>% 
+  left_join(y=dep, by= "src_subject_id") %>% 
+  left_join(y=covs, by= "src_subject_id")
+
+#Remove duplicate columns after merge (i.e, for sex, eventname and age_years)
+#This is not the most efficient way of doing thing but will do for now. 
+df <- df %>% 
+  select(-age_years.y, -eventname.x, -eventname.y, -sex.x, -sex.y)
+
+#rename year variable
+df <- df  %>% 
+  rename(age_years = age_years.x)
+
+#check col names
+colnames(df)
+
+
+```
+
+#Get demographic details for depression measures
+```{r, depression measures details}
+df$sex = as.numeric(df$sex)
+
+#select depression measures
+dep_demo <- df %>% 
+  select (KSADS.MDD.p, KSADS.Depressive_symptoms_ever.p, src_subject_id, sex, age_years)
+
+#Create table 
+
+dep_demo$sex <- 
+  factor(dep_demo$sex, levels=c(1,2),
+         labels=c("Female",
+                  "Male"))
+
+dep_demo$KSADS.MDD.p <-
+  factor(dep_demo$KSADS.MDD.p, levels=c(0,1),
+         labels=c("Control",
+                  "Case"))
+dep_demo$KSADS.Depressive_symptoms_ever.p <-
+  factor(dep_demo$KSADS.Depressive_symptoms_ever.p, levels=c(3,2,1,0),
+         labels=c("Severe",
+                  "Moderate",
+                  "Mild",
+                  "None of the above"))
+
+label(dep_demo$sex) <- "Sex"
+label(dep_demo$age_years) <- "Age"
+label(dep_demo$KSADS.Depressive_symptoms_ever.p) <- "Depression Symptom Severity"
+label(dep_demo$KSADS.MDD.p) <- "MDD Status"
+
+table1(~ sex + age_years + KSADS.Depressive_symptoms_ever.p + KSADS.MDD.p |  )
+```
+
+
+```{r, depression measures details}
+#MDD Case Control
+tab1(dep_demo$KSADS.MDD.p, cum.percent = TRUE)
+
+#Depressive symptom severity categories
+tab1(dep_demo$KSADS.Depressive_symptoms_ever.p, cum.percent = TRUE)
+
+
+
+
+
+
+CrossTable(dep_demo$KSADS.MDD.p, dep_demo$KSADS.Depressive_symptoms_ever.p, 
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+CrossTable(dep_demo$KSADS.MDD.p, dep_demo$sex,
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+####Misc details for RR
+
+1. Check N for depression measures for year two follow up. 
+
+```{r, follow-up N for dep measures}
+
+dep_year2 <- df %>% 
+
+```
+

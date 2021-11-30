@@ -56,6 +56,9 @@ library(gridExtra)
 library(sandwich)
 library(stringr)
 library(kableExtra)
+library(epiDisplay)
+library(gmodels)
+library(plyr)
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
 ```
@@ -110,7 +113,7 @@ Check variable classifcation
 ```{r, variable classification}
 
 covs_str <- df %>% 
-  select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
+  dplyr::select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
   str()
 ```
 
@@ -125,8 +128,17 @@ Get sample demographics
 ```{r, sample demographics}
 
 unrel_df %>% 
-  select(age_years, sex) %>% 
+  dplyr::select(age_years, sex) %>% 
   summary()
+
+#get sd
+sd(unrel_df$age_years) #SD=0.62
+#get mean
+mean(unrel_df$age_years) #mean=9.90
+
+#make df with unrelated males only for demographic table purposes
+unrel_males <- unrel_df %>% #N= 4673
+    filter(sex == "M")
 ```
 
 ####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=986 Get males only
@@ -141,12 +153,52 @@ targetdata <- unrel_df %>%
 targetdata %>% 
   dplyr::count(sex)
 
+#get mean age and sd for pilot sample
+mean(targetdata$age_years)
+sd(targetdata$age_years)
+
 #Get Male sample only 
 targetdata <- targetdata %>% 
   filter(sex == "M")
 
 ```
 
+Make demographics table for MDD/DS breakdown 
+```{r, MDD/DS demographics table}
+
+####TOTAL MALE UNRELATED SAMPLE
+
+#MDD case control
+CrossTable(unrel_males$KSADS.MDD.p, 
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+#MDD and age breakdown
+ddply(unrel_males,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
+
+#DS category breakdown
+CrossTable(unrel_males$KSADS.Depressive_symptoms_ever.p, 
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+#DS and age breakdown
+ddply(unrel_males,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years),sd=sd(age_years))
+
+#### PILOT ANALYSIS SAMPLE
+#MDD case control
+CrossTable(targetdata$KSADS.MDD.p, 
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+#MDD and age breakdown
+ddply(targetdata,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
+
+#DS category breakdown
+CrossTable(targetdata$KSADS.Depressive_symptoms_ever.p, 
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+#DS and age breakdown
+ddply(targetdata,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years),sd=sd(age_years))
+
+
+```
 ####STEP 3: Model set up We are using X.Shen's phewasStyle.R function to run the linear models.
 
 We need to change "src_subject_id" to "f.eid" so that function will run.

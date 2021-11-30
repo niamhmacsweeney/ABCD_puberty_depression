@@ -9,7 +9,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 \#ABCD Pilot Analysis Script - Depression ~ Brain Structure -> Females
@@ -56,6 +56,9 @@ library(gridExtra)
 library(sandwich)
 library(stringr)
 library(kableExtra)
+library(epiDisplay)
+library(gmodels)
+library(plyr)
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
 ```
@@ -109,9 +112,9 @@ Check variable classifcation
 
 ```{r, variable classification}
 
-covs_str <- df %>% 
-  select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
-  str()
+#covs_str <- df %>% 
+#  select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
+#  str()
 ```
 
 Reduce to unrelated sample only Before N=11878, After N=9,856
@@ -127,6 +130,16 @@ Get sample demographics
 unrel_df %>% 
   select(age_years, sex) %>% 
   summary()
+#get sd
+sd(unrel_df$age_years)
+#get mean
+mean(unrel_df$age_years)
+
+#make df with unrelated females only for demographic table purposes
+unrel_females <- unrel_df %>% #N= 4673
+    filter(sex == "F")
+  
+
 ```
 
 ####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=986 Get males only
@@ -141,9 +154,49 @@ targetdata <- unrel_df %>%
 targetdata %>% 
   dplyr::count(sex)
 
+#get mean age and sd for pilot sample
+mean(targetdata$age_years)
+sd(targetdata$age_years)
+
 #Get Female sample only 
 targetdata <- targetdata %>% 
   filter(sex == "F")
+
+```
+Make demographics table for MDD/DS breakdown 
+```{r, MDD/DS demographics table}
+
+####TOTAL FEMALE UNRELATED SAMPLE
+
+#MDD case control
+CrossTable(unrel_females$KSADS.MDD.p, 
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+#MDD and age breakdown
+ddply(unrel_females,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
+
+#DS category breakdown
+CrossTable(unrel_females$KSADS.Depressive_symptoms_ever.p, 
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+#DS and age breakdown
+ddply(unrel_females,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years),sd=sd(age_years))
+
+#### PILOT ANALYSIS SAMPLE
+#MDD case control
+CrossTable(targetdata$KSADS.MDD.p, 
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+#MDD and age breakdown
+ddply(targetdata,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
+
+#DS category breakdown
+CrossTable(targetdata$KSADS.Depressive_symptoms_ever.p, 
+           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+
+#DS and age breakdown
+ddply(targetdata,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years),sd=sd(age_years))
+
 
 ```
 
@@ -357,3 +410,13 @@ str(ROI_dep_brain_females_regional_results) #check variable chars
 #       #save_kable(file = "../figs/female_ROIs_PT_brain_pilot_analysis.png")
 
 ```
+
+Make demographic table for paper - where we have a breakdown of the MDD and DS categories for each sex
+
+```{r, demographic table}
+
+
+
+```
+
+

@@ -1,0 +1,24 @@
+---
+title: "Brain Plots_pilot_analysis_RR"
+author: "Niamh MacSweeney"
+date: "10/13/2021"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+This script will be used to make brain maps to illustrate ROIs obtained from the pilot analysis as per the tutorial outlined by Mowinckel & Vidal-Pineiro (2020).
+
+See Resources:
+https://journals.sagepub.com/doi/full/10.1177/2515245920928009
+https://github.com/ggseg/ggseg
+
+## Setup
+
+```{r, load packages}
+
+library(ggseg)
+library(patchwork)
+library(ggplot2)
+```
+

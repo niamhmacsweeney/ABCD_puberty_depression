@@ -1,5 +1,5 @@
-# by Shen
-# 15/05/2020
+# by Shen and adapted by Niamh 
+# 23/011/2021
 # *result.table
 # *ls.vertical.vars= a vector of values in factor variable
 # *cols.select= cols to keep in the result table
