@@ -1,0 +1,33 @@
+Category	File.name	Field.name	Description
+Physical_Health	abcd_hsss01	src_subject_id	Subject ID how it's defined in lab/project
+Physical_Health	abcd_hsss01	interview_date	Date on which the interview/genetic test/sampling/imaging/biospecimen was completed. MM/DD/YYYY
+Physical_Health	abcd_hsss01	interview_age	Age in months at the time of the interview/test/sampling/imaging.
+Physical_Health	abcd_hsss01	sex	Sex of the subject
+Physical_Health	abcd_hsss01	eventname	The event name for which the data was collected
+Physical_Health	abcd_hsss01	hormone_scr_dhea_mean	Salimetrics hormone test DHEA mean of measures (pg/mL)
+Physical_Health	abcd_hsss01	hormone_scr_dhea_rep1	Salimetrics hormone test DHEA repetition 1 (pg/mL)
+Physical_Health	abcd_hsss01	hormone_scr_dhea_rep1_ll	Salimetrics hormone test DHEA below lower limit of sensitivity (repetition 1)
+Physical_Health	abcd_hsss01	hormone_scr_dhea_rep1_qns	Salimetrics hormone test DHEA quality not sufficient (repetition 1)
+Physical_Health	abcd_hsss01	hormone_scr_dhea_rep1_nd	Salimetrics hormone test DHEA none detected (repetition 1)
+Physical_Health	abcd_hsss01	hormone_scr_dhea_rep2	Salimetrics hormone test DHEA repetition 2 (pg/mL)
+Physical_Health	abcd_hsss01	hormone_scr_dhea_rep2_ll	Salimetrics hormone test DHEA below lower limit of sensitivity (repetition 2)
+Physical_Health	abcd_hsss01	hormone_scr_dhea_rep2_qns	Salimetrics hormone test DHEA quality not sufficient (repetition 2)
+Physical_Health	abcd_hsss01	hormone_scr_dhea_rep2_nd	Salimetrics hormone test DHEA none detected (repetition 2)
+Physical_Health	abcd_hsss01	hormone_scr_hse_mean	Salimetrics hormone test estradiol (HSE) mean of measures (pg/mL)
+Physical_Health	abcd_hsss01	hormone_scr_hse_rep1	Salimetrics hormone test estradiol (HSE) repetition 1 (pg/mL)
+Physical_Health	abcd_hsss01	hormone_scr_hse_rep1_ll	Salimetrics hormone test estradiol (HSE) below lower limit of sensitivity (repetition 1)
+Physical_Health	abcd_hsss01	hormone_scr_hse_rep1_qns	Salimetrics hormone test estradiol (HSE)  quality not sufficient (repetition 1)
+Physical_Health	abcd_hsss01	hormone_scr_hse_rep1_nd	Salimetrics hormone test estradiol (HSE) none detected (repetition 1)
+Physical_Health	abcd_hsss01	hormone_scr_hse_rep2	Salimetrics hormone test estradiol (HSE) repetition 2 (pg/mL)
+Physical_Health	abcd_hsss01	hormone_scr_hse_rep2_ll	Salimetrics hormone test estradiol (HSE)  below lower limit of sensitivity (repetition 2)
+Physical_Health	abcd_hsss01	hormone_scr_hse_rep2_qns	Salimetrics hormone test estradiol (HSE)  quality not sufficient (repetition 2)
+Physical_Health	abcd_hsss01	hormone_scr_hse_rep2_nd	Salimetrics hormone test estradiol (HSE)  none detected (repetition 2)
+Physical_Health	abcd_hsss01	hormone_scr_ert_mean	Salimetrics hormone test testosterone (ERT) mean of measures (pg/mL)
+Physical_Health	abcd_hsss01	hormone_scr_ert_rep1	Salimetrics hormone test testosterone (ERT) repetition 1 (pg/mL)
+Physical_Health	abcd_hsss01	hormone_scr_ert_rep1_ll	Salimetrics hormone test testosterone (ERT) below lower limit of sensitivity (repetition 1)
+Physical_Health	abcd_hsss01	hormone_scr_ert_rep1_qns	Salimetrics hormone test testosterone (ERT)  quality not sufficient (repetition 1)
+Physical_Health	abcd_hsss01	hormone_scr_ert_rep1_nd	Salimetrics hormone test testosterone (ERT) none detected (repetition 1)
+Physical_Health	abcd_hsss01	hormone_scr_ert_rep2	Salimetrics hormone test testosterone (ERT) repetition 2 (pg/mL)
+Physical_Health	abcd_hsss01	hormone_scr_ert_rep2_ll	Salimetrics hormone test testosterone (ERT) below lower limit of sensitivity (repetition 2)
+Physical_Health	abcd_hsss01	hormone_scr_ert_rep2_qns	Salimetrics hormone test testosterone (ERT)  quality not sufficient (repetition 2)
+Physical_Health	abcd_hsss01	hormone_scr_ert_rep2_nd	Salimetrics hormone test Salimetrics hormone test testosterone (ERT)  quality not sufficient (repetition 2) none detected (repetition 2)

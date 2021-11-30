@@ -128,7 +128,7 @@ Get sample demographics
 ```{r, sample demographics}
 
 unrel_df %>% 
-  select(age_years, sex) %>% 
+  dplyr::select(age_years, sex) %>% 
   summary()
 #get sd
 sd(unrel_df$age_years)
@@ -240,6 +240,8 @@ targetdata_longformat <- long_format(targetdata,cols_nonimg,cols_img)
 
 Define functions
 
+**Note: 30/11/21 - had to update the "select" function in reg_phewasStyle_withCI.R function to specify that it was dplyr::select as it wasn't working propertly. 
+
 ```{r, Phewas function}
 
 source('../functions/reg_phewasStyle_withCI.R')
@@ -270,14 +272,15 @@ ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
 Set up Independent Variables (or factors) (depression measures)
 Depression measures are indexed in two ways:
-  1. MDD diagnosis = KSADS.MDD (1=yes, 0= no, binary)
+  1. Depression symptom severity (continuous measure: (0-15 continuous scale). =              KSADS.Dep_symptoms_sum_ever
+  
   2. Depression symptom severity (ordinal measure:none, mild, moderate, severe (rated 0-3         respectively)) = KSADS.Depressive_symptoms_ever
   
-We have also derived a continuous measure of depression symptom severity, which will not be used in current analysis but may be useful for future analysis = KSADS.Dep_symptoms_sum_ever (0-15 continuous scale). 
+**Note: We are no longer using MDD diagnosis = KSADS.MDD (1=yes, 0= no, binary) due to possible errors in the KSADS MDD diagnosis algorithm flagged by the ABCD team in 4.0 release notes (November 2021)
 
 ```{r, set up IVs}
 
-ls.factor=colnames(targetdata)[grep('^KSADS\\.MDD\\.|^KSADS\\.Depressive_symptoms_ever',
+ls.factor=colnames(targetdata)[grep('^KSADS\\.Dep_symptoms_sum_ever|^KSADS\\.Depressive_symptoms_ever',
                                     colnames(targetdata))]
 ls.factor=c(ls.factor[grep('.p$',ls.factor)]) #ls.factor[grep('.y$',ls.factor)]) #we are not including youth report in current analysis. 
 
@@ -394,10 +397,10 @@ ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWho
   arrange(p.value)
 
 #save as R.data
-save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_analysis_withCI.RData')
+save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_analysis_no_MDD.RData')
 
 #save as .csv
-write.csv(ROI_dep_brain_females_regional_results, file = "../results/tables/ROIs_dep_brain_females.csv")
+write.csv(ROI_dep_brain_females_regional_results, file = "../results/tables/ROIs_dep_brain_females_no_MDD.csv")
 
 str(ROI_dep_brain_females_regional_results) #check variable chars
 
@@ -411,12 +414,5 @@ str(ROI_dep_brain_females_regional_results) #check variable chars
 
 ```
 
-Make demographic table for paper - where we have a breakdown of the MDD and DS categories for each sex
-
-```{r, demographic table}
-
-
-
-```
-
+############## End of Script ##################
 

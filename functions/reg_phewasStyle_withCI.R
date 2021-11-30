@@ -23,14 +23,14 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
       fit=lme(as.formula(as.character(mod)),data=mod.dat_long,
               na.action=na.exclude,random=~1|f.eid,control=lmeControl(opt = "optim"))
       tmp.ci = intervals(fit,which='fixed')$fixed %>% as.data.frame %>% 
-         select(Lower_95CI=lower,Upper_95CI=upper) %>% 
+         dplyr::select(Lower_95CI=lower,Upper_95CI=upper) %>% 
          tail(1)
       tmp.res = summary(fit)$tTable %>% 
          as.data.frame %>% 
-         select(beta=Value,std=Std.Error,t.value=`t-value`,p.value=`p-value`) %>% 
+         dplyr::select(beta=Value,std=Std.Error,t.value=`t-value`,p.value=`p-value`) %>% 
          tail(1) %>% 
          mutate(mod_name = paste0(mod.dep,'~',mod.factor),tmp.ci) %>% 
-         select(mod_name, everything())
+         dplyr::select(mod_name, everything())
       
       
    }else{
@@ -43,14 +43,14 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
          fit=glm(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude)
       }            
       tmp.ci = confint(fit) %>% as.data.frame %>% 
-         select(Lower_95CI=`2.5 %`,Upper_95CI=`97.5 %`) %>% 
+         dplyr::select(Lower_95CI=`2.5 %`,Upper_95CI=`97.5 %`) %>% 
          tail(1)
       tmp.res = summary(fit)$coefficients %>% 
          as.data.frame %>% 
-         select(beta=Estimate,std=`Std. Error`,t.value=`t value`,p.value=`Pr(>|t|)`) %>% 
+         dplyr::select(beta=Estimate,std=`Std. Error`,t.value=`t value`,p.value=`Pr(>|t|)`) %>% 
          tail(1)%>% 
          mutate(mod_name = paste0(mod.dep,'~',mod.factor),tmp.ci) %>% 
-         select(mod_name, everything())
+         dplyr::select(mod_name, everything())
    }
    
    return(tmp.res)

@@ -1,0 +1,15 @@
+---
+title: "PREP_CBCL_R3.0"
+author: "Niamh MacSweeney"
+date: "30/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+The purpose of this script is to generate a summary depression ratings from the CBCL. This script is adapted from "PREP.Questionnaires.R" by X.Shen 
+
+#### SETUP
+Load libraries needed and set working directory

@@ -1,0 +1,222 @@
+Category	File.name	Field.name	Description																
+Culture_and_Environment	acspsw03	src_subject_id	'''Subject ID how it''''s defined in lab/project'''																
+Culture_and_Environment	acspsw03	interview_date	Date on which the interview/genetic test/sampling/imaging/biospecimen was completed. MM/DD/YYYY																
+Culture_and_Environment	acspsw03	interview_age	Age in months at the time of the interview/test/sampling/imaging.																
+Culture_and_Environment	acspsw03	gender	Sex of the subject																
+Culture_and_Environment	acspsw03	eventname	The event name for which the data was collected																
+Culture_and_Environment	acspsw03	race_ethnicity	Race Ethnicity (Child)																
+Culture_and_Environment	acspsw03	rel_family_id	Family ID (participants belonging to the same family share a family ID). The family ID is autocalculated and will change after the addition/removal of subjects from the ABCD study. Family IDs will therefore differ between data releases																
+Culture_and_Environment	acspsw03	rel_group_id	Group ID (twins and triplets in the same family share a group ID).  																
+Culture_and_Environment	acspsw03	rel_ingroup_order	In-Group Order ID (twins and triplets in the same family and in the same group have different values) therefore differ between data releases																
+Culture_and_Environment	acspsw03	rel_relationship	Relationship of the participant in his or her family																
+Culture_and_Environment	acspsw03	rel_same_sex	Same sex twin																
+Culture_and_Environment	abcd_lt01	site_id_l	Site ID at each event																
+Mental_Health	fhxp102	famhx_4_p	4. Has ANY blood relative of your child ever had any problems due to alcohol	 such as: Marital  separation or divorce; Laid off or fired from work; Arrests or DUIs; Alcohol harmed their health; In an alcohol treatment program; Suspended or expelled from school 2 or more times; Isolated self from family	 caused arguments or were drunk a lot. ¿Algún pariente consanguíneo de su niño(a) ha tenido alguna vez problemas debido al alcohol	 como una separación o divorcio	 Despido o cese laboral	 Arrestos o multas por conducir bajo la influencia de drogas	 Daños a la salud por causa del alcohol	 Ingreso a un programa de tratamiento contra el alcoholismo	 suspensión o expulsión de la escuela en 2 o más ocasiones	 se aisló de la familia	 provocó conflictos o con frecuencia estaba embriagado?						
+Mental_Health	fhxp102	famhx_4d_p___1	biological mother Madre biolÃ³gica (Marital Matrimonial)																
+Mental_Health	fhxp102	famhx_4d_p___2	biological mother Madre biolÃ³gica (Work Laboral)																
+Mental_Health	fhxp102	famhx_4d_p___3	biological mother Madre biolÃ³gica (Arrests/DUI Arrestos/DUI)																
+Mental_Health	fhxp102	famhx_4d_p___7	biological mother Madre biolÃ³gica (Health Salud)																
+Mental_Health	fhxp102	famhx_4d_p___4	biological mother Madre biolÃ³gica (Alcohol treatment program Programas por el uso de drogas)																
+Mental_Health	fhxp102	famhx_4d_p___5	biological mother Madre biolÃ³gica (School Escolares)																
+Mental_Health	fhxp102	famhx_4d_p___6	biological mother Madre biolÃ³gica (Isolated self	  arguments	  drunk a lot Se aÃ­slo de la familia	  Discusiones	  drogado/a con frecuencia)												
+Mental_Health	fhxp102	famhx4a_p___1	biological father Padre biolÃ³gico (Marital Matrimonial)																
+Mental_Health	fhxp102	famhx4a_p___2	biological father Padre biolÃ³gico (Work Laboral)																
+Mental_Health	fhxp102	famhx4a_p___3	biological father Padre biolÃ³gico (Arrests/DUI Arrestos/DUI)																
+Mental_Health	fhxp102	famhx4a_p___7	biological father Padre biolÃ³gico (Health Salud)																
+Mental_Health	fhxp102	famhx4a_p___4	biological father Padre biolÃ³gico (Alcohol treatment program Programas por el uso de drogas)																
+Mental_Health	fhxp102	famhx4a_p___5	biological father Padre biolÃ³gico (School Escolares)																
+Mental_Health	fhxp102	famhx4a_p___6	biological father Padre biolÃ³gico (Isolated self	  arguments	  drunk a lot Se aÃ­slo de la familia	  Discusiones	  drogado/a con frecuencia)												
+Mental_Health	fhxp102	fam_history_5_yes_no	5. Has ANY blood relative of your child ever had any problems due to drugs	 such as: Marital  separation or divorce; Laid off or fired from work; Arrests or DUIs; Drugs harmed their health; In a drug treatment program; Suspended or expelled from school 2 or more times; Isolated self from family	 caused arguments or were high a lot. ¿ALGÚN pariente consanguíneo de su niño(a) ha tenido alguna vez problemas debido a las drogas	 tal como una separación o divorcio	 despido o cese laboral	 arrestos o multas por conducir bajo la influencia de drogas	 Ingresó a un programa de tratamiento contra la drogadicción	 suspensión o expulsión de la escuela en 2 o más ocasiones	 se aisló de la familia	 provocó conflictos o con frecuencia estaba drogado?							
+Mental_Health	fhxp102	fam_history_q5d_drugs___1	biological mother Madre biolÃ³gica (Marital Matrimonial)																
+Mental_Health	fhxp102	fam_history_q5d_drugs___2	biological mother Madre biolÃ³gica (Work Laboral)																
+Mental_Health	fhxp102	fam_history_q5d_drugs___3	biological mother Madre biolÃ³gica (Arrests/DUI Arrestos/DUI)																
+Mental_Health	fhxp102	fam_history_q5d_drugs___7	biological mother Madre biolÃ³gica (Health Salud)																
+Mental_Health	fhxp102	fam_history_q5d_drugs___4	biological mother Madre biolÃ³gica (Drug treatment program Programas por el uso de drogas)																
+Mental_Health	fhxp102	fam_history_q5d_drugs___5	biological mother Madre biolÃ³gica (School Escolares)																
+Mental_Health	fhxp102	fam_history_q5d_drugs___6	biological mother Madre biolÃ³gica (Isolated self	  arguments	  was high a lot Se aÃ­slo de la familia	  Discusiones	  drogado/a con frecuencia)												
+Mental_Health	fhxp102	fam_history_q5a_drugs___1	biological father Padre biolÃ³gico (Marital Matrimonial)																
+Mental_Health	fhxp102	fam_history_q5a_drugs___2	biological father Padre biolÃ³gico (Work Laboral)																
+Mental_Health	fhxp102	fam_history_q5a_drugs___3	biological father Padre biolÃ³gico (Arrests/DUI Arrestos/DUI)																
+Mental_Health	fhxp102	fam_history_q5a_drugs___7	biological father Padre biolÃ³gico (Health Salud)																
+Mental_Health	fhxp102	fam_history_q5a_drugs___4	biological father Padre biolÃ³gico (Drug treatment program Programas por el uso de drogas)																
+Mental_Health	fhxp102	fam_history_q5a_drugs___5	biological father Padre biolÃ³gico (School Escolares)																
+Mental_Health	fhxp102	fam_history_q5a_drugs___6	biological father Padre biolÃ³gico (Isolated self	  arguments	  was high a lot Se aÃ­slo de la familia	  Discusiones	  drogado/a con frecuencia)												
+Mental_Health	fhxp102	fam_history_6_yes_no	6. Has ANY blood relative of your child ever suffered from depression  that is  have they felt so low for a period of at least two weeks that they hardly ate or slept or couldn't work or do whatever they usually do? ¿ALGÚN pariente consanguíneo de su niño(a) alguna vez ha sufrido depresión? Es decir  ¿se ha sentido tan decaído por un período de al menos dos semanas en el que apenas comía dormía o no podía trabajar o hacer lo que normalmente haría?																
+Mental_Health	fhxp102	fam_history_q6a_depression	biological father Padre biológico																
+Mental_Health	fhxp102	fam_history_q6d_depression	biological mother Madre biológica																
+Mental_Health	fhxp201	fam_history_7_yes_no	7. Has ANY blood relative of your child ever had a period of time when others were concerned  because they suddenly became more active day and night and seemed not to need any sleep and talked much more than usual for them? ¿ALGÚN pariente consanguíneo de su niño(a) ha pasado alguna vez por un período en el que otras personas se preocuparan por él o ella porque repentinamente se volvió  más activo(a) de día y de noche parecía no necesitar dormir y hablaba mucho más de lo normal para él o ella?																
+Mental_Health	fhxp201	fam_history_q7a_mania	biological father Padre biológico																
+Mental_Health	fhxp201	fam_history_q7d_mania	biological mother Madre biológica																
+Mental_Health	fhxp201	fam_history_8_yes_no	8. Has ANY blood relative of your child ever had a period lasting six months when they saw visions or heard voices or thought people were spying on them or plotting against them?  ¿ALGÚN pariente consanguíneo de su niño(a) ha pasado alguna vez por un período que haya durado seis meses en el que tuviese visiones o escuchara voces o pensara que la gente lo estaba espiando o conspirando en su contra?																
+Mental_Health	fhxp201	fam_history_q8a_visions	biological father Padre biológico																
+Mental_Health	fhxp201	fam_history_q8d_visions	biological mother Madre biológica																
+Mental_Health	fhxp201	fam_history_10_yes_no	10. Has ANY blood relative of your child ever had any other problems with their nerves or had a nervous breakdown? ¿ALGÚN pariente consanguíneo de su niño(a) ha tenido alguna vez problemas de los nervios o un colapso nervioso?																
+Mental_Health	fhxp201	fam_history_q10a_nerves	biological father Padre biológico																
+Mental_Health	fhxp201	fam_history_q10d_nerves	biological mother Madre biológica																
+Mental_Health	fhxp201	fam_history_11_yes_no	11. Has ANY blood relative of your child ever been to a doctor or a counselor about any emotional  or mental problems or problems with alcohol or drugs? ¿ALGÚN pariente consanguíneo de su niño(a) ha visitado alguna vez a un médico o terapeuta para tratar algún problema emocional o mental o problemas con el alcohol o las drogas?																
+Mental_Health	fhxp201	fam_history_q11a_professional	biological father Padre biológico																
+Mental_Health	fhxp201	fam_history_q11d_professional	biological mother Madre biológica																
+Mental_Health	fhxp201	fam_history_12_yes_no	12. Has ANY blood relative of your child ever been hospitalized because of emotional or mental problems  or drug or alcohol problems? ¿ALGÚN pariente consanguíneo de su niño(a) ha estado hospitalizado alguna vez por problemas emocionales o mentales  o por problemas con el alcohol o las drogas?																
+Mental_Health	fhxp201	fam_history_q12a_hospitalized	biological father Padre biológico																
+Mental_Health	fhxp201	fam_history_q12d_hospitalized	biological mother Madre biológica																
+Mental_Health	fhxp201	fam_history_13_yes_no	13. Has ANY blood relative of your child ever attempted or committed suicide? ¿ALGÚN pariente consanguíneo de su niño(a) ha intentado alguna vez suicidarse o se ha suicidado?																
+Mental_Health	fhxp201	fam_history_q13a_suicide	biological father Padre biológico																
+Mental_Health	fhxp201	fam_history_q13d_suicide	biological mother Madre biológica																
+Mental_Health	pdem02	demo_prim	You are the: Usted es:																
+Mental_Health	pdem02	demo_prnt_prtnr_v2	Do you have a partner? ¿Usted tiene una pareja?																
+Mental_Health	pdem02	demo_prnt_prtnr_bio	Is your partner the child's biological parent? ¿Su pareja es el padre o la madre biológico(a) del niño o de la niña?																
+Mental_Health	pdem02	demo_prnt_empl_v2	Are you working now	 looking for work	 retired	 stay at home parent	 a student	 or something else? ¿Trabaja actualmente	 está buscando trabajo	 está retirado	 se dedica al hogar	 estudia o realiza alguna otra actividad?							
+Mental_Health	pdem02	demo_prnt_income_v2	How much did you earn	 before taxes and other deductions	 during the past 12 months? ¿Cuál fue su ingreso	 antes de impuestos y otras deducciones	 en los últimos 12 meses?												
+Mental_Health	pdem02	demo_prtnr_empl_v2	We would like to know about what your partner does - are they working	 looking for work	 retired	 stay at home parent	 a student	 or what? Nos gustaría saber a qué se dedica su pareja. ¿Trabaja actualmente	 está buscando trabajo	 está retirado(a)	 se dedica al hogar	 estudia o realiza alguna otra actividad?							
+Mental_Health	pdem02	demo_prtnr_income_v2	How much does your partner earn	 before taxes and other deductions	 during the past 12 months? ¿Cuál fue el ingreso de su pareja	 antes de impuestos y otras deducciones	 en los últimos 12 meses?												
+Mental_Health	pdem02	demo_comb_income_v2	What is your TOTAL COMBINED FAMILY INCOME for the past 12 months? This should include income (before taxes and deductions) from all sources	 wages	 rent from properties	 social security	 disability and/or veteran's benefits	 unemployment benefits	 workman's compensation	 help from relative (include child payments and alimony)	 and so on. ¿Cuál de estas categorías es la que mejor describe su INGRESO FAMILIAR TOTAL COMBINADO de los últimos 12 meses? Este debe incluir los ingresos (antes de impuestos y deducciones) provenientes de todas las fuentes	 salarios	 renta de propiedades	 seguro social	 pagos por incapacidad o subsidios para veteranos	 subsidios por desempleo	 compensación por accidentes de trabajo	 ayuda de familiares (incluya pensiones alimenticias para hijos y cónyuges divorciados)	 etc.
+Culture_and_Environment	abcd_lpds01	demo_prnt_ed_v2_l	What is the highest grade or level of school you have completed or the highest degree you have received? ¿Cuál es su máximo nivel de estudios completados o el máximo título que ha recibido?																
+Culture_and_Environment	abcd_lpds01	demo_prtnr_ed_v2_l	What is the highest grade or level of school your partner completed or highest degree they received? ¿Cuál es el máximo nivel de estudios completados de su pareja o el máximo título que ha recibido?																
+Mental_Health	pdem02	demo_fam_exp1_v2	In the past 12 months	 has there been a time when you and your immediate family experienced any of the following: Needed food but couldn't afford to buy it or couldn't afford to go out to get it? ¿Necesitaban comida pero no les alcanzaba el dinero para comprarla o para salir a comprarla?															
+Mental_Health	pdem02	demo_fam_exp2_v2	In the past 12 months	 has there been a time when you and your immediate family experienced any of the following: Were without telephone service because you could not afford it? ¿Estuvieron sin servicio telefónico porque no les alcanzaba el dinero?															
+Mental_Health	pdem02	demo_fam_exp3_v2	In the past 12 months	 has there been a time when you and your immediate family experienced any of the following: Didn't pay the full amount of the rent or mortgage because you could not afford it? ¿No pagaron el monto total de la renta o hipoteca porque no les alcanzaba el dinero?															
+Mental_Health	pdem02	demo_fam_exp4_v2	In the past 12 months	 has there been a time when you and your immediate family experienced any of the following: Were evicted from your home for not paying the rent or mortgage? ¿Los desalojaron de su casa por no pagar la renta o hipoteca?															
+Mental_Health	pdem02	demo_fam_exp5_v2	In the past 12 months	 has there been a time when you and your immediate family experienced any of the following: Had services turned off by the gas or electric company	 or the oil company wouldn't deliver oil because payments were not made? ¿Les suspendieron el servicio de gas o electricidad	 o la compañía de petróleo se negó a abastecerles por falta de pago?													
+Mental_Health	pdem02	demo_fam_exp6_v2	In the past 12 months	 has there been a time when you and your immediate family experienced any of the following: Had someone who needed to see a doctor or go to the hospital but didn't go because you could not afford it? ¿Tuvieron a alguien quien necesitaba ir al médico o al hospital	 pero no fueron porque no les alcanzaba el dinero?														
+Mental_Health	pdem02	demo_fam_exp7_v2	In the past 12 months	 has there been a time when you and your immediate family experienced any of the following: Had someone who needed a dentist but couldn't go because you could not afford it? ¿Tuvieron a alguien quien necesitaba ir al dentista	 pero no pudieron ir porque no les alcanzaba el dinero?														
+Mental_Health	abcd_ksad01	ksads_20_874_p	Diagnosis - Stimulant Use Disorder Present: Cocaine																
+Mental_Health	abcd_ksad01	ksads_20_883_p	Diagnosis - Stimulant Use Disorder Past: Cocaine																
+Mental_Health	abcd_ksad01	ksads_20_872_p	Diagnosis - Stimulant Use Disorder Present: ξAmphetamine-type substance																
+Mental_Health	abcd_ksad01	ksads_20_881_p	Diagnosis - Stimulant Use Disorder Past: ξAmphetamine-type substance																
+Mental_Health	abcd_ksad01	ksads_20_889_p	Diagnosis - Substance Use Disorder CURRENT																
+Mental_Health	abcd_ksad01	ksads_20_890_p	Diagnosis - Substance Use Disorder PAST																
+Mental_Health	abcd_ksad01	ksads_20_887_p	Diagnosis - Inhalant Use Disorder Past																
+Mental_Health	abcd_ksad01	ksads_20_878_p	Diagnosis - Inhalant Use Disorder Present																
+Mental_Health	abcd_ksad01	ksads_20_877_p	Diagnosis - Phencycllidine (PCP) Use Disorder Present																
+Mental_Health	abcd_ksad01	ksads_20_886_p	Diagnosis - Phencycllidine (PCP) Use Disorder Past																
+Mental_Health	abcd_ksad01	ksads_20_875_p	Diagnosis - Opiod Use Disorder Present																
+Mental_Health	abcd_ksad01	ksads_20_884_p	Diagnosis - Opiod Use Disorder Past																
+Mental_Health	abcd_ksad01	ksads_20_876_p	Diagnosis - Other Hallucinagen Use Disorder Present																
+Mental_Health	abcd_ksad01	ksads_20_885_p	Diagnosis - Other Hallucinagen Use Disorder Past																
+Mental_Health	abcd_ksad01	ksads_20_879_p	Diagnosis - Other Drugs Use Disorder Present																
+Mental_Health	abcd_ksad01	ksads_20_888_p	Diagnosis - Other Drugs Use Disorder Past																
+Mental_Health	abcd_ksad01	ksads_20_873_p	Diagnosis - Sedative Hypnotic or Anxiolytic Use Disorder Present																
+Mental_Health	abcd_ksad01	ksads_20_882_p	Diagnosis - Sedative Hypnotic or Anxiolytic Use Disorder Past																
+Mental_Health	abcd_ksad01	ksads_20_880_p	Diagnosis - Cannabis Use Disorder Past																
+Mental_Health	abcd_ksad01	ksads_20_871_p	Diagnosis - Cannabis Use Disorder Present																
+Mental_Health	abcd_ksad01	ksads_14_856_p	Diagnosis - Unspecified Attention-Deficit/Hyperactivity Disorder (F90.9)																
+Mental_Health	abcd_ksad01	ksads_14_855_p	Diagnosis - Attention-Deficit/Hyperactivity Disorder IN PARTIAL REMISSION																
+Mental_Health	abcd_ksad01	ksads_14_853_p	Diagnosis - Attention-Deficit/Hyperactivity Disorder Present																
+Mental_Health	abcd_ksad01	ksads_14_854_p	Diagnosis - Attention-Deficit/Hyperactivity Disorder Past																
+Mental_Health	abcd_cbcls01	cbcl_scr_dsm5_anxdisord_r	AnxDisord CBCL DSM5 Scale (raw score)																
+Mental_Health	abcd_cbcls01	cbcl_scr_dsm5_somaticpr_r	SomaticPr CBCL DSM5 Scale (raw score)																
+Mental_Health	abcd_cbcls01	cbcl_scr_dsm5_adhd_r	ADHD CBCL DSM5 Scale (raw score)																
+Mental_Health	abcd_cbcls01	cbcl_scr_dsm5_opposit_r	Opposit CBCL DSM5 Scale (raw score)																
+Mental_Health	abcd_cbcls01	cbcl_scr_dsm5_conduct_r	Conduct CBCL DSM5 Scale (raw score)			
+Mental_Health	pdem02	demo_race_a_p___10	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (10, White Blanca)
+Mental_Health	pdem02	demo_race_a_p___11	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (11, Black/African American Negra o afroamericana)
+Mental_Health	pdem02	demo_race_a_p___12	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (12, American Indian,  Native American India Americana,  India Nativa Americana)
+Mental_Health	pdem02	demo_race_a_p___13	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (13, Alaska Native Nativa de Alaska)
+Mental_Health	pdem02	demo_race_a_p___14	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (14, Native Hawaiian Nativa de Hawái)
+Mental_Health	pdem02	demo_race_a_p___15	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (15, Guamanian Guamaniana)
+Mental_Health	pdem02	demo_race_a_p___16	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (16, Samoan Samoana)
+Mental_Health	pdem02	demo_race_a_p___17	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (17, Other Pacific Islander Nativa de otras islas del Pacifico)
+Mental_Health	pdem02	demo_race_a_p___18	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (18, Asian Indian India asiática)
+Mental_Health	pdem02	demo_race_a_p___19	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (19, Chinese China)
+Mental_Health	pdem02	demo_race_a_p___20	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (20, Filipino Filipina)
+Mental_Health	pdem02	demo_race_a_p___21	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (21, Japanese Japonesa)
+Mental_Health	pdem02	demo_race_a_p___22	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (22, Korean Coreana)
+Mental_Health	pdem02	demo_race_a_p___23	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (23, Vietnamese Vietnamita)
+Mental_Health	pdem02	demo_race_a_p___24	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (24, Other Asian Otra raza asiática)
+Mental_Health	pdem02	demo_race_a_p___25	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (25, Other Race Otra raza)
+Mental_Health	pdem02	demo_race_a_p___77	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (77, Refuse To Answer Niego contestar)
+Mental_Health	pdem02	demo_race_a_p___99	What race do you consider the child to be? Please check all that apply. ¿De qué raza considera que es el/la niño(a)?  Seleccione 1 o más de estas categorías: (99, Don't Know No lo sé)
+Mental_Health	pdem02	demo_race_notes_v2	If Other, please specify: Por favor especifique otro:
+Mental_Health	pdem02	demo_ethn_v2	Do you consider the child Hispanic/Latino/Latina? ¿Considera que el/la niño(a) es hispano(a) o latino(a)?
+Mental_Health	pdem02	demo_ethn2_v2	Please choose the group that best represents the child's Hispanic origin or ancestry Elija el grupo que mejor represente el origen o la ascendencia hispana del niño o la niña.
+Mental_Health	pdem02	demo_origin_v2	In which country was the child born? ¿En qué país nació el/la niño(a)?
+Mental_Health	pdem02	demo_years_us_v2	How many years has the child lived in the United States? ¿Cuántos años lleva el/la niño(a) viviendo en los Estados Unidos?
+Mental_Health	pdem02	demo_years_us_v2_dk	How many years has the child lived in the United States? ¿Cuántos años lleva el/la niño(a) viviendo en los Estados Unidos?
+Mental_Health	pdem02	demo_relig_v2	What is the child's religious preference? ¿Cuál es la preferencia religiosa del niño / de la niña?
+Mental_Health	pdem02	demo_relig2_v2	Something else (Specify): Otra (Especifique):
+Mental_Health	pdem02	demo_prnt_age_v2	How old are you? ¿Qué edad tiene usted?
+Mental_Health	pdem02	demo_prnt_age_v2_bl_refuse	How old are you? ¿Qué edad tiene usted?
+Mental_Health	pdem02	demo_prnt_race_a_v2___10	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (10, White Blanca)
+Mental_Health	pdem02	demo_prnt_race_a_v2___11	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (11, Black/African American Negra o afroamericana)
+Mental_Health	pdem02	demo_prnt_race_a_v2___12	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (12, American Indian,  Native American India Americana,  India Nativa Americana)
+Mental_Health	pdem02	demo_prnt_race_a_v2___13	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (13, Alaska Native Nativa de Alaska)
+Mental_Health	pdem02	demo_prnt_race_a_v2___14	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (14, Native Hawaiian Nativa de Hawái)
+Mental_Health	pdem02	demo_prnt_race_a_v2___15	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (15, Guamanian Guamaniana)
+Mental_Health	pdem02	demo_prnt_race_a_v2___16	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (16, Samoan Samoana)
+Mental_Health	pdem02	demo_prnt_race_a_v2___17	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (17, Other Pacific Islander Nativa de otras islas del Pacifico)
+Mental_Health	pdem02	demo_prnt_race_a_v2___18	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (18, Asian Indian India asiática)
+Mental_Health	pdem02	demo_prnt_race_a_v2___19	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (19, Chinese China)
+Mental_Health	pdem02	demo_prnt_race_a_v2___20	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (20, Filipino Filipina)
+Mental_Health	pdem02	demo_prnt_race_a_v2___21	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (21, Japanese Japonesa)
+Mental_Health	pdem02	demo_prnt_race_a_v2___22	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (22, Korean Coreana)
+Mental_Health	pdem02	demo_prnt_race_a_v2___23	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (23, Vietnamese Vietnamita)
+Mental_Health	pdem02	demo_prnt_race_a_v2___24	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (24, Other Asian Otra raza asiática)
+Mental_Health	pdem02	demo_prnt_race_a_v2___25	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (25, Other Race Otra raza)
+Mental_Health	pdem02	demo_prnt_race_a_v2___77	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (77, Refuse To Answer Niego contestar)
+Mental_Health	pdem02	demo_prnt_race_a_v2___99	What race do you consider yourself to be? Please check all that apply. ¿De qué raza se considera usted? Seleccione 1 o más de estas categorías: (99, Don't Know No lo sé)
+Mental_Health	pdem02	naas_id	How does your child's Native American parent identify? ¿Cómo se identifica el padre / la madre Americano(a) Nativo(a) del niño / la niña?
+Mental_Health	pdem02	naas_mom_id	Which identification does (did) your  child's Native American parent's mother use?  ¿Qué identificación usa (usaba) la mamá del padre / la madre Americano(a) Nativo(a) del niño / la niña?
+Mental_Health	pdem02	naas_id_dad	Which identification does (did) your child's Native American parent's father use?  ¿Qué identificación usa (usaba) el papá del padre / la madre Americano(a) Nativo(a) del niño / la niña?
+Mental_Health	pdem02	naas_birthplace	Where were your child's Native American parents  born? ¿En dónde nacieron los padres Nativo Americanos del niño / la niña?
+Mental_Health	pdem02	naas_raised	Where were your child's Native American parents raised? ¿Dónde se crió el padre / la madre Americano(a) Nativo(a) del niño / la niña?
+Mental_Health	pdem02	naas_comm_contact	What contact did your child's Native American parent have with Native American communities? ¿Qué contacto ha tenido el padre / la madre Americano(a) Nativo(a) del niño / la niña con las comunidades nativas americanas?
+Mental_Health	pdem02	naas_pride	How much pride does your family have in Native American culture and heritage? ¿Cuánto orgullo tiene su familia en la cultura y el patrimonio Nativo Americano?
+Mental_Health	pdem02	naas_self_rating	How would you rate your child? ¿Cómo calificaría a su niño(a)?
+Mental_Health	pdem02	naas_traditions	Does your family participate in Native American traditions, ceremonies, occasions, and so on? ¿Participa su familia en tradiciones, eventos o ceremonias Americanas Nativas?
+Mental_Health	pdem02	demo_prnt_ethn_v2	Do you consider yourself Hispanic/Latino/Latina? ¿Se considera usted hispano(a) o latino(a)?
+Mental_Health	pdem02	demo_prnt_ethn2_v2	Please choose the group that best represents your Hispanic origin or ancestry. Elija el grupo que mejor represente su origen o ascendencia hispana.
+Mental_Health	pdem02	demo_prnt_16	Was anyone in your child's family born outside of the United States?  By your child's family, I mean you, your child's father (or mother if talking to father) or your child's maternal or paternal grandparents. ¿Hubo alguien en la familia de su niño(a) que nació fuera de los Estados Unidos? Por la familia de su niño(a), me refiero a usted, al padre de su niño(a) (o madre si habla con su padre) o los abuelos maternos o paternos de su niño(a).
+Mental_Health	pdem02	demo_prnt_16a	Okay, so to confirm, everyone in your child's family was born in the United States? Bien, así que para confirmar, ¿todos en la familia de su niño(a) nacieron en los Estados Unidos?
+Mental_Health	pdem02	demo_prnt_origin_v2	In which country were you born? ¿En qué país nació usted?
+Mental_Health	pdem02	demo_biofather_v2	biological father El padre biológico
+Mental_Health	pdem02	demo_biomother_v2	biological mother La madre biológica
+Mental_Health	pdem02	demo_matgrandm_v2	maternal grandmother La abuela materna
+Mental_Health	pdem02	demo_matgrandf_v2	maternal grandfather El abuelo materno
+Mental_Health	pdem02	demo_patgrandm_v2	paternal grandmother La abuela paterna
+Mental_Health	pdem02	demo_patgrandf_v2	paternal grandfather El abuelo paterno
+Mental_Health	pdem02	demo_prnt_years_us_v2	How many years have you lived in the United States? ¿Cuántos años lleva usted viviendo en los Estados Unidos?
+Mental_Health	pdem02	demo_prnt_years_us_v2_dk	Don't know No lo sé
+Mental_Health	pdem02	demo_prnt_marital_v2	Are you now married, widowed, divorced, separated, never married or living with a partner? ¿Usted actualmente está casado(a), viudo(a), divorciado(a), separado(a), nunca se ha casado(a) o vive con una pareja?
+Mental_Health	pdem02	demo_prnt_ed_v2	What is the highest grade or level of school you have completed or the highest degree you have received? ¿Cuál es su máximo nivel de estudios completados o el máximo título que ha recibido?
+Mental_Health	pdem02	demo_prnt_empl_v2	Are you working now, looking for work, retired, stay at home parent, a student, or something else? ¿Trabaja actualmente, está buscando trabajo, está retirado, se dedica al hogar, estudia o realiza alguna otra actividad?
+Mental_Health	pdem02	demo_prnt_empl_time	Working Full time or Part time? a. Trabajo de Tiempo COMPLETO MEDIO Tiempo
+Mental_Health	pdem02	demo_prnt_income_v2	How much did you earn, before taxes and other deductions, during the past 12 months? ¿Cuál fue su ingreso, antes de impuestos y otras deducciones, en los últimos 12 meses?
+Mental_Health	pdem02	demo_prnt_prtnr_v2	Do you have a partner? ¿Usted tiene una pareja?
+Mental_Health	pdem02	demo_prnt_prtnr_bio	Is your partner the child's biological parent? ¿Su pareja es el padre o la madre biológico(a) del niño o de la niña?
+Mental_Health	pdem02	demo_prnt_prtnr_adopt	Is your partner the child's adoptive parent? ¿Es su pareja el padre o la madre adoptiva de el niño o la niña?
+Mental_Health	pdem02	demo_prtnr_ed_v2	What is the highest grade or level of school your partner completed or highest degree they received? ¿Cuál es el máximo nivel de estudios completados de su pareja o el máximo título que ha recibido?
+Mental_Health	pdem02	demo_prtnr_empl_v2	We would like to know about what your partner does - are they working, looking for work, retired, stay at home parent, a student, or what? Nos gustaría saber a qué se dedica su pareja. ¿Trabaja actualmente, está buscando trabajo, está retirado(a), se dedica al hogar, estudia o realiza alguna otra actividad?
+Mental_Health	pdem02	demo_prtnr_empl_time	Work Full time or Part time? a. ¿Trabaja de tiempo completo o medio tiempo?
+Mental_Health	pdem02	demo_prtnr_income_v2	How much does your partner earn, before taxes and other deductions, during the past 12 months? ¿Cuál fue el ingreso de su pareja, antes de impuestos y otras deducciones, en los últimos 12 meses?
+Mental_Health	pdem02	demo_comb_income_v2	What is your TOTAL COMBINED FAMILY INCOME for the past 12 months? This should include income (before taxes and deductions) from all sources, wages, rent from properties, social security, disability and/or veteran's benefits, unemployment benefits, workman's compensation, help from relative (include child payments and alimony), and so on. ¿Cuál de estas categorías es la que mejor describe su INGRESO FAMILIAR TOTAL COMBINADO de los últimos 12 meses? Este debe incluir los ingresos (antes de impuestos y deducciones) provenientes de todas las fuentes, salarios, renta de propiedades, seguro social, pagos por incapacidad o subsidios para veteranos, subsidios por desempleo, compensación por accidentes de trabajo, ayuda de familiares (incluya pensiones alimenticias para hijos y cónyuges divorciados), etc.
+Mental_Health	pdem02	demo_fam_exp1_v2	In the past 12 months, has there been a time when you and your immediate family experienced any of the following: Needed food but couldn't afford to buy it or couldn't afford to go out to get it? ¿Necesitaban comida pero no les alcanzaba el dinero para comprarla o para salir a comprarla?
+Mental_Health	pdem02	demo_fam_exp2_v2	In the past 12 months, has there been a time when you and your immediate family experienced any of the following: Were without telephone service because you could not afford it? ¿Estuvieron sin servicio telefónico porque no les alcanzaba el dinero?
+Mental_Health	pdem02	demo_fam_exp3_v2	In the past 12 months, has there been a time when you and your immediate family experienced any of the following: Didn't pay the full amount of the rent or mortgage because you could not afford it? ¿No pagaron el monto total de la renta o hipoteca porque no les alcanzaba el dinero?
+Mental_Health	pdem02	demo_fam_exp4_v2	In the past 12 months, has there been a time when you and your immediate family experienced any of the following: Were evicted from your home for not paying the rent or mortgage? ¿Los desalojaron de su casa por no pagar la renta o hipoteca?
+Mental_Health	pdem02	demo_fam_exp5_v2	In the past 12 months, has there been a time when you and your immediate family experienced any of the following: Had services turned off by the gas or electric company, or the oil company wouldn't deliver oil because payments were not made? ¿Les suspendieron el servicio de gas o electricidad, o la compañía de petróleo se negó a abastecerles por falta de pago?
+Mental_Health	pdem02	demo_fam_exp6_v2	In the past 12 months, has there been a time when you and your immediate family experienced any of the following: Had someone who needed to see a doctor or go to the hospital but didn't go because you could not afford it? ¿Tuvieron a alguien quien necesitaba ir al médico o al hospital, pero no fueron porque no les alcanzaba el dinero?
+Mental_Health	pdem02	demo_fam_exp7_v2	In the past 12 months, has there been a time when you and your immediate family experienced any of the following: Had someone who needed a dentist but couldn't go because you could not afford it? ¿Tuvieron a alguien quien necesitaba ir al dentista, pero no pudieron ir porque no les alcanzaba el dinero?
+Mental_Health	pdem02	demo_roster_v2	How many people are living at your address? INCLUDE everyone who is living or staying at your address for more than 2 months. ¿Cuántas personas están viviendo o quedándose en su domicilio? INCLUYA a todas las personas que lleven viviendo o quedándose en su domicilio durante más de 2 meses.
+Mental_Health	pdem02	demo_roster_v2_refuse	How many people are living at your address?
+Mental_Health	pdem02	fam_roster_2c_v2	Person #2, relationship to you (Person #1): Persona #2, parentesco a usted (Persona #1):
+Mental_Health	pdem02	fam_roster_3c_v2	Person #3, relationship to you: Persona #3, parentesco a usted:
+Mental_Health	pdem02	fam_roster_4c_v2	Person #4, relationship to you: Persona #4, parentesco a usted:
+Mental_Health	pdem02	fam_roster_5c_v2	Person #5, relationship to you: Persona #5, parentesco a usted:
+Mental_Health	pdem02	fam_roster_6c_v2	Person #6, relationship to you: Persona #6, parentesco a usted:
+Mental_Health	pdem02	fam_roster_7c_v2	Person #7, relationship to you: Persona #7, parentesco a usted:
+Mental_Health	pdem02	fam_roster_8c_v2	Person #8, relationship to you: Persona #8, parentesco a usted:
+Mental_Health	pdem02	fam_roster_9c_v2	Person #9, relationship to you: Persona #9, parentesco a usted:
+Mental_Health	pdem02	fam_roster_10c_v2	Person #10, relationship to you: Persona #10, parentesco a usted:
+Mental_Health	pdem02	fam_roster_11c_v2	Person #11, relationship to you: Persona #11, parentesco a usted:
+Mental_Health	pdem02	fam_roster_12c_v2	Person #12, relationship to you: Persona #12, parentesco a usted:
+Mental_Health	pdem02	fam_roster_13c_v2	Person #13, relationship to you: Persona #13, parentesco a usted:
+Mental_Health	pdem02	fam_roster_14c_v2	Person #14, relationship to you: Persona #14, parentesco a usted:
+Mental_Health	pdem02	fam_roster_15c_v2	Person #15, relationship to you: Persona #15, parentesco a usted:
+Mental_Health	pdem02	demo_child_time_v2	Is there another household in which the child spends a significant amount of time? ¿Hay otro hogar en donde su niño(a) pase una cantidad importante de tiempo?
+Mental_Health	pdem02	demo_child_time2_v2	About how much time does the child spend at this other household? Approximately how many hours per week ¿Aproximadamente cuánto tiempo pasa su niño(a) en ese otro hogar? ¿Aproximadamente cuántas horas por semana?
+Mental_Health	pdem02	demo_child_time2_v2_dk	About how much time does the child spend at this other household? Approximately how many hours per week ¿Aproximadamente cuánto tiempo pasa su niño(a) en ese otro hogar? ¿Aproximadamente cuántas horas por semana?
+Mental_Health	pdem02	demo_child_time3_v2	Who is the best person to contact about that household? Please select the relationship they have with the child. ¿Quien es la mejor persona para contactar con respecto a ese hogar? Por favor seleccione la relación que tienen con su niño(a).						
+Mental_Health	abcd_asrs01	asr_scr_depress_r	Depressive Problems ASR DSM-5-Oriented Scale (raw score)
+Mental_Health	abcd_asrs01	asr_scr_depress_t	Depressive Problems ASR DSM-5-Oriented Scale (t-score)
+Mental_Health	abcd_asrs01	asr_scr_depress_total	Depressive Problems ASR DSM-5-Oriented Scale (number of dependent raw scores)
+Mental_Health	abcd_asrs01	asr_scr_depress_nm	Depressive Problems ASR DSM-5-Oriented Scale (number of dependent raw scores missing)				
