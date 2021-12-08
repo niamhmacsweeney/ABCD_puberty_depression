@@ -9,7 +9,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 \#ABCD Pilot Analysis Script - Depression ~ Brain Structure -> Males
@@ -45,6 +45,7 @@ Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/pub
 ```{r, load libraries, set wd}
 
 library(tidyr)
+library(plyr) #load before dplyr
 library(dplyr)
 library(tidyverse)
 library(psych)
@@ -56,16 +57,19 @@ library(gridExtra)
 library(sandwich)
 library(stringr)
 library(kableExtra)
-library(epiDisplay)
+#library(epiDisplay)
 library(gmodels)
 library(plyr)
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
 ```
-
-Load data:
+Load data
 
 Note on depression variables:
+
+As noted in Mental Health release notes for 4.0, the ABCD Team spotted inaccuracies in the algorithm used to derive the MDD diagnosis. For this reason, we have decided to not use the MDD diagnosis as a depression rating measure in the pilot analysis. Instead, we will use the ordinal measure of DS only (KSADS.Depressive_symptoms_ever).
+
+The following measures are all available in the dep_measures_cleaned.rds file but we will only focus on the KSADS.Depressive_symptoms_ever.p for the pilot analysis. 
 
 - KSADS.MDD.y: MDD diagnosis based on child report
 - KSADS.MDD.p: MDD diagnosis based on caregiver report
@@ -97,7 +101,7 @@ As we have a five data frames to merge, we are going to do it stepwise using dpl
 
 ```{r, merge DFs}
 
-df <- dep %>% 
+ df_tmp <- df <- dep %>% 
   left_join(y=cortical, by= "src_subject_id") %>% 
   left_join(y=subcort, by= "src_subject_id") %>% 
   left_join(y=dti, by= "src_subject_id") %>% 
@@ -119,9 +123,45 @@ covs_str <- df %>%
 
 Reduce to unrelated sample only Before N=11878, After N=9,856
 
-```{r, get unrelated sample}
+```{r, get unrelated sample using randomisation approach}
 
-unrel_df =df[!duplicated(df$rel_family_id),]
+#Assign random number to each family ID. Set random 
+
+df$random <- NA #generate new column of NAs
+unrel_df <- data.frame() #make new df
+
+#iterate through family IDs using for loop (this will take a few minutes)
+# set.seed(2507) #to make sure random sample is the same random sample each time
+unique_fam_id <- unique(df$rel_family_id)
+for (i in unique_fam_id[1:length(unique_fam_id)]){
+  
+  set.seed(2507)
+  
+  #subset each family and assign random number to each individual within each family
+  df$random[df$rel_family_id == i] <- sample(nrow(df[df$rel_family_id == i,]),nrow(df[df$rel_family_id == i,]), replace= FALSE)
+  
+  #select individual with highest number for unrelated dataframe
+  unrel_individual <- df[df$rel_family_id == i,][which.max(df$random[df$rel_family_id == i]),]
+    
+  #append unrelated individual to unrelated dataframe
+  unrel_df <- rbind(unrel_df, unrel_individual)
+  
+}
+
+# i <- 8781 #for trouble shooting. 
+nrow(unrel_df) #check that N= 9856
+length(unique(unrel_df$rel_family_id)) #check that no. of unique IDs is correct. 
+
+#Check that set.seed worked so that we get the same IDs each timescript is run
+
+test_set_seed <- unrel_df$src_subject_id #make new vector of un_rel individual ids
+
+#the rerun df$random lines + for loop, without clearing global environment
+#check if new participant id list matches test_set_seed
+
+all(unrel_df$src_subject_id == test_set_seed) #it worked! 
+
+
 ```
 
 Get sample demographics 
@@ -132,12 +172,12 @@ unrel_df %>%
   summary()
 
 #get sd
-sd(unrel_df$age_years) #SD=0.62
+sd(unrel_df$age_years) #SD=0.62 #0.25
 #get mean
-mean(unrel_df$age_years) #mean=9.90
+mean(unrel_df$age_years) #mean=9.90  #10.8
 
 #make df with unrelated males only for demographic table purposes
-unrel_males <- unrel_df %>% #N= 4673
+unrel_males <- unrel_df %>% #N= 5183
     filter(sex == "M")
 ```
 
@@ -168,12 +208,12 @@ Make demographics table for MDD/DS breakdown
 
 ####TOTAL MALE UNRELATED SAMPLE
 
-#MDD case control
-CrossTable(unrel_males$KSADS.MDD.p, 
-           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
-
-#MDD and age breakdown
-ddply(unrel_males,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
+# #MDD case control
+# CrossTable(unrel_males$KSADS.MDD.p, 
+#            prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+# 
+# #MDD and age breakdown
+# ddply(unrel_males,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
 
 #DS category breakdown
 CrossTable(unrel_males$KSADS.Depressive_symptoms_ever.p, 
@@ -184,11 +224,11 @@ ddply(unrel_males,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_year
 
 #### PILOT ANALYSIS SAMPLE
 #MDD case control
-CrossTable(targetdata$KSADS.MDD.p, 
-           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
-
-#MDD and age breakdown
-ddply(targetdata,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
+# CrossTable(targetdata$KSADS.MDD.p, 
+#            prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+# 
+# #MDD and age breakdown
+# ddply(targetdata,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
 
 #DS category breakdown
 CrossTable(targetdata$KSADS.Depressive_symptoms_ever.p, 
@@ -268,17 +308,20 @@ ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 ```
 
 Set up Independent Variables (or factors) (depression measures)
-Depression measures are indexed in two ways:
-  1. MDD diagnosis = KSADS.MDD (1=yes, 0= no, binary)
-  2. Depression symptom severity (ordinal measure:none, mild, moderate, severe (rated 0-3         respectively)) = KSADS.Depressive_symptoms_ever
+
+  Depression symptom severity = (ordinal measure:none, mild, moderate, severe (rated 0-3, respectively)) 
+                              = KSADS.Depressive_symptoms_ever
   
-We have also derived a continuous measure of depression symptom severity, which will not be used in current analysis but may be useful for future analysis = KSADS.Dep_symptoms_sum_ever (0-15 continuous scale). 
+**Note: We are no longer using MDD diagnosis = KSADS.MDD (1=yes, 0= no, binary) due to possible errors in the KSADS MDD diagnosis algorithm flagged by the ABCD team in 4.0 release notes (November 2021)
 
 ```{r, set up IVs}
 
-ls.factor=colnames(targetdata)[grep('^KSADS\\.MDD\\.|^KSADS\\.Depressive_symptoms_ever',
+ls.factor=colnames(targetdata)[grep('^KSADS\\.Depressive_symptoms_ever',
                                     colnames(targetdata))]
-ls.factor=c(ls.factor[grep('.p$',ls.factor)]) #ls.factor[grep('.y$',ls.factor)]) #we are not including youth report in current analysis. 
+ls.factor=c(ls.factor[grep('.p$',ls.factor)]) 
+
+#we are not including youth report in current analysis. 
+#ls.factor[grep('.y$',ls.factor)]) 
 
 #^KSADS\\.Depressive_symptoms_ever = binary measure of DS. Not using in models. 
 
@@ -363,33 +406,33 @@ result.males.dep_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata,d
 result.males.dep_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
 
 #Save as R.Data file
-save(result.males.dep_brain.bulk,result.males.dep_brain.region.covWholeB,file='../results/males_dep_brain_pilot_analysis_withCI.RData')
+save(result.males.dep_brain.bulk,result.males.dep_brain.region.covWholeB,file='../results/males_dep_brain_pilot_analysis_no_MDD.RData')
 
 #add TRUE column if nominal p value < 0.005 for pilot ROIs
 
 #global results
-result.males.dep_brain.bulk$Sig <- as.numeric((as.character(result.males.dep_brain.bulk[,"p.value"]))) < 0.005
+result.males.dep_brain.bulk$Sig <- as.numeric((as.character(result.males.dep_brain.bulk[,"p.value"]))) < 0.05
 
 #regional results
-result.males.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.males.dep_brain.region.covWholeB[,"p.value"]))) < 0.005
+result.males.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.males.dep_brain.region.covWholeB[,"p.value"]))) < 0.05
 
 #Save results as .csv files
 
 #global results
-write.csv(result.males.dep_brain.bulk, file = "../results/tables/pilot_analy_males.dep_brain.bulk.csv")
+write.csv(result.males.dep_brain.bulk, file = "../results/tables/pilot_analy_males.dep_brain.bulk_no_MDD.csv")
 
 #regional results 
-write.csv(result.males.dep_brain.region.covWholeB, file = "../results/tables/pilot_analy_males.dep_brain.regional.csv")
+write.csv(result.males.dep_brain.region.covWholeB, file = "../results/tables/pilot_analy_males.dep_brain.regional_no_MDD.csv")
 
 ```
 
-STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value =\< 0.005
+STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value =\< 0.05
 
 ```{r, make tables}
 
 
 ROI_dep_brain_males_regional_results <- result.males.dep_brain.region.covWholeB %>% 
-  filter(p.value <0.005) %>% 
+  filter(p.value <0.05) %>% 
   select(-dependent, -factor) %>% 
   #mutate(as.numeric(ROI_females_regional)) %>% 
   #mutate_if(is.numeric, ~round(., 4)) %>% 
@@ -397,18 +440,21 @@ ROI_dep_brain_males_regional_results <- result.males.dep_brain.region.covWholeB 
 
 str(ROI_dep_brain_males_regional_results) #check variable chars
 
-save(ROI_dep_brain_males_regional_results,file='../results/ROIs_dep_brain_males_pilot_analysis_withCI.RData')
+save(ROI_dep_brain_males_regional_results,file='../results/ROIs_dep_brain_males_pilot_analysis_no_MDD.RData')
 
 #save as .csv
-write.csv(ROI_dep_brain_males_regional_results, file = "../results/tables/ROIs_dep_brain_males.csv")
+write.csv(ROI_dep_brain_males_regional_results, file = "../results/tables/ROIs_dep_brain_males_no_MDD.csv")
 
-# ROI_males_regional %>% 
-#        kable(digits=4, format = "html",
-#        caption = "Female ROIs (PT~Regional Brain Measures)") %>% 
-#                kable_styling(font_size = 15,
-#                              position = "left",
-#                              full_width = F) #%>% 
-#       #save_kable(file = "../figs/female_ROIs_PT_brain_pilot_analysis.png")
+#save as Kable Table 
+
+ROI_table <- ROI_dep_brain_males_regional_results %>%
+       kable(digits=4, format = "html",
+      caption = "Males: Depressive symptoms-brain structure models and associated statistics with significant ROI associations") %>%
+               kable_styling(font_size = 15,
+                             position = "left",
+                             full_width = F) #%>%
+      #save_kable(file = "../figs/male_ROIs_PT_brain_pilot_analysis.png")
 
 ```
 
+############## End of Script ##################

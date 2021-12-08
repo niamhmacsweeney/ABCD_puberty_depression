@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 #ABCD Pilot Analysis Script - Pubertal timing ~ Brain Structure -> Males
@@ -25,13 +25,13 @@ Note that we are using inverse normal transformed data for the puberty variables
 
 Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data
 
-####Independent Variable
+##Independent Variable
 Pubertal timing: pds_timing_INT_cleaned_R3.0.rds + hormones_cleaned_R3.0.rds
 
-####Dependent Variable
+##Dependent Variable
 Brain structure: cortical_cleaned_R3.0.rds + subcort_cleaned_R3.O.rds + dti_cleaned_R3.0.rds
 
-####Covariates
+##Covariates
 Covariates: covariates_cleaned_R3.0.rds
 
 ____________________________________________
@@ -99,7 +99,7 @@ df <- hormones %>%
 #Remove duplicate columns after merge (i.e, for sex, eventname and age_years)
 #This is not the most efficient way of doing thing but will do for now. 
 df <- df %>% 
-  select(-age_years.y, -eventname.x, -eventname.y, -sex.x, -sex.y)
+  dplyr::select(-age_years.y, -eventname.x, -eventname.y, -sex.x, -sex.y)
 
 #rename year variable
 df <- df  %>% 
@@ -113,14 +113,48 @@ Check variable classifcation
 ```{r, variable classification}
 
 covs_str <- df %>% 
-  select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
+  dplyr::select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
   str()
 ```
 Reduce to unrelated sample only 
 Before N=11766, After N=9,775
-```{r, get unrelated sample}
+```{r, get unrelated sample using randomisation approach}
 
-unrel_df =df[!duplicated(df$rel_family_id),]
+#Assign random number to each family ID. Set random 
+
+df$random <- NA #generate new column of NAs
+unrel_df <- data.frame() #make new df
+
+#iterate through family IDs using for loop (this will take a few minutes)
+# set.seed(2507) #to make sure random sample is the same random sample each time
+unique_fam_id <- unique(df$rel_family_id)
+for (i in unique_fam_id[1:length(unique_fam_id)]){
+  
+  set.seed(2507)
+  
+  #subset each family and assign random number to each individual within each family
+  df$random[df$rel_family_id == i] <- sample(nrow(df[df$rel_family_id == i,]),nrow(df[df$rel_family_id == i,]), replace= FALSE)
+  
+  #select individual with highest number for unrelated dataframe
+  unrel_individual <- df[df$rel_family_id == i,][which.max(df$random[df$rel_family_id == i]),]
+    
+  #append unrelated individual to unrelated dataframe
+  unrel_df <- rbind(unrel_df, unrel_individual)
+  
+}
+
+# i <- 8781 #for trouble shooting. 
+nrow(unrel_df) #check that N= 9775
+length(unique(unrel_df$rel_family_id)) #check that no. of unique IDs is correct. 
+
+#Check that set.seed worked so that we get the same IDs each timescript is run
+
+test_set_seed <- unrel_df$src_subject_id #make new vector of un_rel individual ids
+
+#the rerun df$random lines + for loop, without clearing global environment
+#check if new participant id list matches test_set_seed
+
+all(unrel_df$src_subject_id == test_set_seed) #it worked! 
 ```
 
 ####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=978
@@ -311,11 +345,11 @@ STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value =< 0
 
 ROI_PT_brain_males_regional_results <- result.males.PT_brain.region.covWholeB %>% 
   filter(p.value <0.005) %>% 
-  select(-dependent, -factor) %>% 
+  dplyr::select(-dependent, -factor) %>% 
   arrange(p.value)
 
 #Save as R.Data file
-save(ROI_pt_brain_males_regional_results,file='../results/ROIs_PT_males_brain_pilot_analysis_withCI.RData')
+save(ROI_PT_brain_males_regional_results,file='../results/ROIs_PT_males_brain_pilot_analysis_withCI.RData')
 
 #save as .csv
 write.csv(ROI_PT_brain_males_regional_results, file = "../results/tables/ROIs_PT_brain_males.csv")
