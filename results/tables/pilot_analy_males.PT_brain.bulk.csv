@@ -1,0 +1,25 @@
+"","mod_name","beta","std","t.value","p.value","CI.Lower_95CI","CI.Upper_95CI","dependent","factor","p.corrected","Sig"
+"1","bl.thk.APARC.mean~dhea_timing",-0.0507769669,0.04346286,-1.16828397,0.24341705,-0.135962615, 0.034408681,"bl.thk.APARC.mean","dhea_timing",0.5821598,FALSE
+"2","bl.sulc.APARC.mean~dhea_timing",-0.0094288532,0.04935835,-0.19102853,0.84860420,-0.106169445, 0.087311739,"bl.sulc.APARC.mean","dhea_timing",0.9864324,FALSE
+"3","bl.sa.APARC.total~dhea_timing", 0.0284390758,0.04865748, 0.58447484,0.55924411,-0.066927842, 0.123805994,"bl.sa.APARC.total","dhea_timing",0.8947906,FALSE
+"4","bl.vol.APARC.total~dhea_timing", 0.0111950671,0.04941101, 0.22657031,0.82087844,-0.085648727, 0.108038861,"bl.vol.APARC.total","dhea_timing",0.9864324,FALSE
+"5","bl.dtifa_allfibers~dhea_timing",-0.0489156911,0.04156611,-1.17681671,0.24003344,-0.130383767, 0.032552385,"bl.dtifa_allfibers","dhea_timing",0.5821598,FALSE
+"6","bl.dtifa_allfibers_excl_outl~dhea_timing",-0.0489156911,0.04156611,-1.17681671,0.24003344,-0.130383767, 0.032552385,"bl.dtifa_allfibers_excl_outl","dhea_timing",0.5821598,FALSE
+"7","bl.dtimd_allfibers~dhea_timing", 0.0395459318,0.04870829, 0.81189331,0.41738057,-0.055920555, 0.135012419,"bl.dtimd_allfibers","dhea_timing",0.7705487,FALSE
+"8","bl.dtimd_allfibers_excl_outl~dhea_timing", 0.0735837474,0.04811278, 1.52940125,0.12703116,-0.020715571, 0.167883065,"bl.dtimd_allfibers_excl_outl","dhea_timing",0.5821598,FALSE
+"9","bl.thk.APARC.mean~test_timing",-0.0091533309,0.04551625,-0.20110029,0.84072636,-0.098363541, 0.080056879,"bl.thk.APARC.mean","test_timing",0.9864324,FALSE
+"10","bl.sulc.APARC.mean~test_timing", 0.0300645258,0.05143699, 0.58449232,0.55923147,-0.070750122, 0.130879174,"bl.sulc.APARC.mean","test_timing",0.8947906,FALSE
+"11","bl.sa.APARC.total~test_timing",-0.0110113363,0.05088394,-0.21640103,0.82878978,-0.110742018, 0.088719346,"bl.sa.APARC.total","test_timing",0.9864324,FALSE
+"12","bl.vol.APARC.total~test_timing",-0.0062426533,0.05168018,-0.12079396,0.90391725,-0.107533941, 0.095048634,"bl.vol.APARC.total","test_timing",0.9864324,FALSE
+"13","bl.dtifa_allfibers~test_timing",-0.0555385843,0.04271384,-1.30024799,0.19433194,-0.139256172, 0.028179004,"bl.dtifa_allfibers","test_timing",0.5821598,FALSE
+"14","bl.dtifa_allfibers_excl_outl~test_timing",-0.0555385843,0.04271384,-1.30024799,0.19433194,-0.139256172, 0.028179004,"bl.dtifa_allfibers_excl_outl","test_timing",0.5821598,FALSE
+"15","bl.dtimd_allfibers~test_timing", 0.0060145307,0.04995329, 0.12040309,0.90422973,-0.091892122, 0.103921184,"bl.dtimd_allfibers","test_timing",0.9864324,FALSE
+"16","bl.dtimd_allfibers_excl_outl~test_timing", 0.0564546135,0.04964476, 1.13717161,0.25621049,-0.040847332, 0.153756559,"bl.dtimd_allfibers_excl_outl","test_timing",0.5821598,FALSE
+"17","bl.thk.APARC.mean~pt_m_INT",-0.0487737751,0.04430253,-1.10092525,0.27157197,-0.135605140, 0.038057590,"bl.thk.APARC.mean","pt_m_INT",0.5821598,FALSE
+"18","bl.sulc.APARC.mean~pt_m_INT",-0.0005850463,0.05077159,-0.01152311,0.99081167,-0.100095529, 0.098925436,"bl.sulc.APARC.mean","pt_m_INT",0.9908117,FALSE
+"19","bl.sa.APARC.total~pt_m_INT", 0.0028483779,0.05020280, 0.05673743,0.95478186,-0.095547300, 0.101244056,"bl.sa.APARC.total","pt_m_INT",0.9908117,FALSE
+"20","bl.vol.APARC.total~pt_m_INT",-0.0173858263,0.05070306,-0.34289501,0.73185233,-0.116761998, 0.081990346,"bl.vol.APARC.total","pt_m_INT",0.9864324,FALSE
+"21","bl.dtifa_allfibers~pt_m_INT",-0.0451844378,0.04274063,-1.05717772,0.29107988,-0.128954526, 0.038585650,"bl.dtifa_allfibers","pt_m_INT",0.5821598,FALSE
+"22","bl.dtifa_allfibers_excl_outl~pt_m_INT",-0.0451844378,0.04274063,-1.05717772,0.29107988,-0.128954526, 0.038585650,"bl.dtifa_allfibers_excl_outl","pt_m_INT",0.5821598,FALSE
+"23","bl.dtimd_allfibers~pt_m_INT", 0.1051047234,0.04928296, 2.13267892,0.03357029, 0.008511903, 0.201697544,"bl.dtimd_allfibers","pt_m_INT",0.4028434,FALSE
+"24","bl.dtimd_allfibers_excl_outl~pt_m_INT", 0.1043154199,0.04862406, 2.14534584,0.03253899, 0.009014018, 0.199616822,"bl.dtimd_allfibers_excl_outl","pt_m_INT",0.4028434,FALSE
