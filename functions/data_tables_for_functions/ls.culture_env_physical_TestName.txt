@@ -1,0 +1,17 @@
+short_name,description,category
+meim_p_ss_total,Parent: Multi-group ethnic identity,cultural and social environment
+via_p_ss_hc,Parent: Vancouver index of acculturation (heritage culture),cultural and social environment
+via_p_ss_amer,Parent: Vancouver index of acculturation (American 'mainstream' culture),cultural and social environment
+nsc_p_ss_mean_3_items,Parent: Neighbourhood safety,cultural and social environment
+fes_p_ss_fc_pr,Parent: Family conflict,family environment
+psb_p_ss_mean,Parent: Prosocial behaviour,family environment
+pmq_y_ss_mean,Child: Parent monitoring,family environment
+fes_y_ss_fc_pr,Child: Family conflict,family environment
+psb_y_ss_mean,Child: Prosocial behaviour,family environment
+crpbi_y_ss_parent,Child: acceptance by parent,family environment
+crpbi_y_ss_caregiver,Child: acceptance by secondary caregiver,family environment
+srpf_y_ss_ses,Child: School risk and protective factors (school environment),cultural and social environment
+srpf_y_ss_iiss,Child: School risk and protective factors (school involvement),cultural and social environment
+srpf_y_ss_dfs,Child: School risk and protective factors (school disengagement),cultural and social environment
+sds_p_ss_total,Parent: Sleep Disturbance,physical health
+pds_p_ss_category,Parent: Pubertal development scale,physical health

@@ -1,0 +1,147 @@
+Category	File.name	Field.name	Description
+Mental_Health	abcd_ksad01	src_subject_id	Subject ID how it's defined in lab/project
+Mental_Health	abcd_ksad501	ksads_1_840_t	Diagnosis - Major Depressive Disorder Present
+Mental_Health	abcd_ksad501	ksads_1_841_t	Diagnosis - Major Depressive Disorder Current in Partial Remission (F32.4)
+Mental_Health	abcd_ksad501	ksads_1_842_t	Diagnosis - Major Depressive Disorder Past (F32.9)
+Mental_Health	abcd_ksad501	ksads_1_843_t	Diagnosis - Persistent Depressive Disorder (Dysthymia) PRESENT F34.1
+Mental_Health	abcd_ksad501	ksads_1_844_t	Diagnosis - Persistent Depressive Disorder (Dysthymia) In Partial Remission F34.1
+Mental_Health	abcd_ksad501	ksads_1_845_t	Diagnosis - Persistent Depressive Disorder (Dysthymia) PAST F34.1
+Mental_Health	abcd_ksad501	ksads_1_846_t	Diagnosis - Unspecified Depressive Disorder Current (F32.9)
+Mental_Health	abcd_ksad501	ksads_1_847_t	Diagnosis - Unspecified Depressive Disorder PAST (F32.9)
+Mental_Health	abcd_ksad501	ksads_1_1_t	Symptom - Depressed Mood, Present
+Mental_Health	abcd_ksad501	ksads_1_2_t	Symptom - Depressed Mood, Past
+Mental_Health	abcd_ksad501	ksads_1_3_t	Symptom - Irritability, Present
+Mental_Health	abcd_ksad501	ksads_1_4_t	Symptom - Irritability, Past
+Mental_Health	abcd_ksad501	ksads_1_5_t	Symptom - Anhedonia, Present
+Mental_Health	abcd_ksad501	ksads_1_6_t	Symptom - Anhedonia, Past
+Mental_Health	abcd_ksad501	ksads_22_141_t	Symptom - Insomnia, Present
+Mental_Health	abcd_ksad501	ksads_1_156_t	Symptom - Insomnia when depressed Past
+Mental_Health	abcd_ksad501	ksads_1_157_t	Symptom - Hypersomnia Present
+Mental_Health	abcd_ksad501	ksads_1_158_t	Symptom - Hypersomnia Past
+Mental_Health	abcd_ksad501	ksads_1_159_t	Symptom - Fatigue Present
+Mental_Health	abcd_ksad501	ksads_1_160_t	Symptom - Fatigue Past
+Mental_Health	abcd_ksad501	ksads_1_161_t	Symptom - Concentration Disturbance Present
+Mental_Health	abcd_ksad501	ksads_1_162_t	Symptom - Concentration Disturbance Past
+Mental_Health	abcd_ksad501	ksads_1_163_t	Symptom - Indecision Present
+Mental_Health	abcd_ksad501	ksads_1_164_t	Symptom - Indecision Past
+Mental_Health	abcd_ksad501	ksads_1_165_t	Symptom - Decreased Appetite Present
+Mental_Health	abcd_ksad501	ksads_1_166_t	Symptom - Decreased Appetite Past
+Mental_Health	abcd_ksad501	ksads_1_167_t	Symptom - Weight Loss Present
+Mental_Health	abcd_ksad501	ksads_1_168_t	Symptom - Weight Loss Past
+Mental_Health	abcd_ksad501	ksads_1_169_t	Symptom - Increased Appetite Present
+Mental_Health	abcd_ksad501	ksads_1_170_t	Symptom - Increased Appetite Past
+Mental_Health	abcd_ksad501	ksads_1_171_t	Symptom - Weight Gain Present
+Mental_Health	abcd_ksad501	ksads_1_172_t	Symptom - Weight Gain Past
+Mental_Health	abcd_ksad501	ksads_1_173_t	Symptom - Psychomotor Agitation in Depressive Disorder Present
+Mental_Health	abcd_ksad501	ksads_1_174_t	Symptom - Psychomotor Agitation in Depressive Disorder Past
+Mental_Health	abcd_ksad501	ksads_1_175_t	Symptom - Psychomotor Retardation Present
+Mental_Health	abcd_ksad501	ksads_1_176_t	Symptom - Psychomotor Retardation Past
+Mental_Health	abcd_ksad501	ksads_1_177_t	Symptom - Guilt Present
+Mental_Health	abcd_ksad501	ksads_1_178_t	Symptom - Guilt Past
+Mental_Health	abcd_ksad501	ksads_1_179_t	Symptom - Hopeless Present
+Mental_Health	abcd_ksad501	ksads_1_180_t	Symptom - Hopeless Past
+Mental_Health	abcd_ksad501	ksads_1_181_t	Symptom - Decreased Self-Esteem Present
+Mental_Health	abcd_ksad501	ksads_1_182_t	Symptom - Decreased Self-Esteem Past
+Mental_Health	abcd_ksad501	ksads_1_183_t	Symptom - Impairment in functioning due to depression Present
+Mental_Health	abcd_ksad501	ksads_1_184_t	Symptom - Impairment in functioning due to depression Past
+Mental_Health	abcd_ksad501	ksads_23_945_t	Diagnosis - SelfInjuriousBehaviorwithoutsuicidalintentPresent
+Mental_Health	abcd_ksad501	ksads_23_946_t	Diagnosis - SuicidalideationPassivePresent
+Mental_Health	abcd_ksad501	ksads_23_947_t	Diagnosis - SuicidalideationActivenonspecificPresent
+Mental_Health	abcd_ksad501	ksads_23_948_t	Diagnosis - SuicidalideationActivemethodPresent
+Mental_Health	abcd_ksad501	ksads_23_949_t	Diagnosis - SuicidalideationActiveintentPresent
+Mental_Health	abcd_ksad501	ksads_23_950_t	Diagnosis - SuicidalideationActiveplanPresent
+Mental_Health	abcd_ksad501	ksads_23_951_t	Diagnosis - PreparatoryActionstowardimminentSuicidalbehaviorPresent
+Mental_Health	abcd_ksad501	ksads_23_952_t	Diagnosis - InterruptedAttemptPresent
+Mental_Health	abcd_ksad501	ksads_23_953_t	Diagnosis - AbortedAttemptPresent
+Mental_Health	abcd_ksad501	ksads_23_954_t	Diagnosis - SuicideAttemptPresent
+Mental_Health	abcd_ksad501	ksads_23_956_t	Diagnosis - SelfInjuriousBehaviorwithoutsuicidalintentPast
+Mental_Health	abcd_ksad501	ksads_23_957_t	Diagnosis - SuicidalideationPassivePast
+Mental_Health	abcd_ksad501	ksads_23_958_t	Diagnosis - SuicidalideationActivenonspecificPast
+Mental_Health	abcd_ksad501	ksads_23_959_t	Diagnosis - SuicidalideationActivemethodPast
+Mental_Health	abcd_ksad501	ksads_23_960_t	Diagnosis - SuicidalideationActiveintentPast
+Mental_Health	abcd_ksad501	ksads_23_961_t	Diagnosis - SuicidalideationActiveplanPast
+Mental_Health	abcd_ksad501	ksads_23_962_t	Diagnosis - PreparatoryActionstowardimminentSuicidalbehaviorPast
+Mental_Health	abcd_ksad501	ksads_23_963_t	Diagnosis - InterruptedAttemptPast
+Mental_Health	abcd_ksad501	ksads_23_964_t	Diagnosis - AbortedAttemptPast
+Mental_Health	abcd_ksad501	ksads_23_965_t	Diagnosis - SuicideAttemptPast
+Mental_Health	abcd_ksad01	ksads_1_843_p	Diagnosis - Persistent Depressive Disorder (Dysthymia) PRESENT F34.1
+Mental_Health	abcd_ksad01	ksads_1_845_p	Diagnosis - Persistent Depressive Disorder (Dysthymia) PAST F34.1
+Mental_Health	abcd_ksad01	ksads_1_844_p	Diagnosis - Persistent Depressive Disorder (Dysthymia) In Partial Remission F34.1
+Mental_Health	abcd_ksad01	ksads_1_840_p	Diagnosis - Major Depressive Disorder Present
+Mental_Health	abcd_ksad01	ksads_1_841_p	Diagnosis - Major Depressive Disorder Current in Partial Remission (F32.4)
+Mental_Health	abcd_ksad01	ksads_1_842_p	Diagnosis - Major Depressive Disorder Past (F32.9)
+Mental_Health	abcd_ksad01	ksads_1_847_p	Diagnosis - Unspecified Depressive Disorder PAST (F32.9)
+Mental_Health	abcd_ksad01	ksads_1_846_p	Diagnosis - Unspecified Depressive Disorder Current (F32.9)
+Mental_Health	abcd_ksad01	ksads_1_172_p	Symptom - Weight Gain Past
+Mental_Health	abcd_ksad01	ksads_1_168_p	Symptom - Weight Loss Past
+Mental_Health	abcd_ksad01	ksads_1_171_p	Symptom - Weight Gain Present
+Mental_Health	abcd_ksad01	ksads_1_167_p	Symptom - Weight Loss Present
+Mental_Health	abcd_ksad01	ksads_1_3_p	Symptom - Irritability Present
+Mental_Health	abcd_ksad01	ksads_1_4_p	Symptom - Irritability Past
+Mental_Health	abcd_ksad01	ksads_22_141_p	Symptom - Insomnia Present
+Mental_Health	abcd_ksad01	ksads_1_156_p	Symptom - Insomnia when depressed Past
+Mental_Health	abcd_ksad01	ksads_1_163_p	Symptom - Indecision Present
+Mental_Health	abcd_ksad01	ksads_1_164_p	Symptom - Indecision Past
+Mental_Health	abcd_ksad01	ksads_1_170_p	Symptom - Increased Appetite Past
+Mental_Health	abcd_ksad01	ksads_1_169_p	Symptom - Increased Appetite Present
+Mental_Health	abcd_ksad01	ksads_1_175_p	Symptom - Psychomotor Retardation Present
+Mental_Health	abcd_ksad01	ksads_1_176_p	Symptom - Psychomotor Retardation Past
+Mental_Health	abcd_ksad01	ksads_1_173_p	Symptom - Psychomotor Agitation in Depressive Disorder Present
+Mental_Health	abcd_ksad01	ksads_1_174_p	Symptom - Psychomotor Agitation in Depressive Disorder Past
+Mental_Health	abcd_ksad01	ksads_1_166_p	Symptom - Decreased Appetite Past
+Mental_Health	abcd_ksad01	ksads_1_181_p	Symptom - Decreased Self-Esteem Present
+Mental_Health	abcd_ksad01	ksads_1_165_p	Symptom - Decreased Appetite Present
+Mental_Health	abcd_ksad01	ksads_1_182_p	Symptom - Decreased Self-Esteem Past
+Mental_Health	abcd_ksad01	ksads_1_1_p	Symptom - Depressed Mood Present
+Mental_Health	abcd_ksad01	ksads_1_2_p	Symptom - Depressed Mood Past
+Mental_Health	abcd_ksad01	ksads_1_5_p	Symptom - Anhedonia Present
+Mental_Health	abcd_ksad01	ksads_1_6_p	Symptom - Anhedonia Past
+Mental_Health	abcd_ksad01	ksads_1_161_p	Symptom - Concentration Disturbance Present
+Mental_Health	abcd_ksad01	ksads_1_162_p	Symptom - Concentration Disturbance Past
+Mental_Health	abcd_ksad01	ksads_1_159_p	Symptom - Fatigue Present
+Mental_Health	abcd_ksad01	ksads_1_160_p	Symptom - Fatigue Past
+Mental_Health	abcd_ksad01	ksads_1_183_p	Symptom - Impairment in functioning due to depression Present
+Mental_Health	abcd_ksad01	ksads_1_184_p	Symptom - Impairment in functioning due to depression Past
+Mental_Health	abcd_ksad01	ksads_1_180_p	Symptom - Hopeless Past
+Mental_Health	abcd_ksad01	ksads_1_179_p	Symptom - Hopeless Present
+Mental_Health	abcd_ksad01	ksads_1_157_p	Symptom - Hypersomnia Present
+Mental_Health	abcd_ksad01	ksads_1_158_p	Symptom - Hypersomnia Past
+Mental_Health	abcd_ksad01	ksads_1_177_p	Symptom - Guilt Present
+Mental_Health	abcd_ksad01	ksads_1_178_p	Symptom - Guilt Past
+Mental_Health	abcd_ksad01	ksads_23_946_p	Diagnosis - SuicidalideationPassivePresent
+Mental_Health	abcd_ksad01	ksads_23_957_p	Diagnosis - SuicidalideationPassivePast
+Mental_Health	abcd_ksad01	ksads_23_954_p	Diagnosis - SuicideAttemptPresent
+Mental_Health	abcd_ksad01	ksads_23_965_p	Diagnosis - SuicideAttemptPast
+Mental_Health	abcd_ksad01	ksads_23_956_p	Diagnosis - SelfInjuriousBehaviorwithoutsuicidalintentPast
+Mental_Health	abcd_ksad01	ksads_23_945_p	Diagnosis - SelfInjuriousBehaviorwithoutsuicidalintentPresent
+Mental_Health	abcd_ksad01	ksads_23_950_p	Diagnosis - SuicidalideationActiveplanPresent
+Mental_Health	abcd_ksad01	ksads_23_961_p	Diagnosis - SuicidalideationActiveplanPast
+Mental_Health	abcd_ksad01	ksads_23_947_p	Diagnosis - SuicidalideationActivenonspecificPresent
+Mental_Health	abcd_ksad01	ksads_23_958_p	Diagnosis - SuicidalideationActivenonspecificPast
+Mental_Health	abcd_ksad01	ksads_23_948_p	Diagnosis - SuicidalideationActivemethodPresent
+Mental_Health	abcd_ksad01	ksads_23_959_p	Diagnosis - SuicidalideationActivemethodPast
+Mental_Health	abcd_ksad01	ksads_23_949_p	Diagnosis - SuicidalideationActiveintentPresent
+Mental_Health	abcd_ksad01	ksads_23_960_p	Diagnosis - SuicidalideationActiveintentPast
+Mental_Health	abcd_ksad01	ksads_23_952_p	Diagnosis - InterruptedAttemptPresent
+Mental_Health	abcd_ksad01	ksads_23_963_p	Diagnosis - InterruptedAttemptPast
+Mental_Health	abcd_ksad01	ksads_23_951_p	Diagnosis - PreparatoryActionstowardimminentSuicidalbehaviorPresent
+Mental_Health	abcd_ksad01	ksads_23_962_p	Diagnosis - PreparatoryActionstowardimminentSuicidalbehaviorPast
+Mental_Health	abcd_ksad01	ksads_23_953_p	Diagnosis - AbortedAttemptPresent
+Mental_Health	abcd_ksad01	ksads_23_964_p	Diagnosis - AbortedAttemptPast
+Mental_Health	abcd_cbcls01	cbcl_scr_dsm5_depress_r	Depress CBCL DSM5 Scale (raw score)
+Mental_Health	abcd_cbcls01	cbcl_scr_dsm5_depress_t	Depress CBCL DSM5 Scale (t-score)
+Mental_Health	abcd_cbcls01	cbcl_scr_dsm5_depress_m	Depress CBCL DSM5 Scale (missing values)
+Mental_Health	abcd_cbcls01	cbcl_scr_dsm5_depress_nm	Depress CBCL DSM5 Scale (number of missing values)
+Mental_Health	abcd_cbcl01	cbcl_q05_p	There is very little he/she enjoys Disfruta de muy pocas cosas
+Mental_Health	abcd_cbcl01	cbcl_q14_p	Cries a lot Llora mucho
+Mental_Health	abcd_cbcl01	cbcl_q18_p	Deliberately harms self or attempts suicide Se hace daño a sí mismo(a) deliberadamente o ha intentado suicidarse
+Mental_Health	abcd_cbcl01	cbcl_q24_p	Doesn't eat well No come bien
+Mental_Health	abcd_cbcl01	cbcl_q35_p	Feels worthless or inferior Se siente inferior o cree que no vale nada
+Mental_Health	abcd_cbcl01	cbcl_q52_p	Feels too guilty Se siente demasiado culpable
+Mental_Health	abcd_cbcl01	cbcl_q54_p	Overtired without good reason Se siente demasiado cansado(a) sin razón para estarlo
+Mental_Health	abcd_cbcl01	cbcl_q76_p	Sleeps less than most kids Duerme menos que la mayoría de los/las niños(as)/jóvenes
+Mental_Health	abcd_cbcl01	cbcl_q77_p	Sleeps more than most kids during day and/or night Duerme más que la mayoría de los/las niños(as)/jóvenes durante el día y/o la noche
+Mental_Health	abcd_cbcl01	cbcl_q91_p	Talks about killing self Habla de querer matarse
+Mental_Health	abcd_cbcl01	cbcl_q100_p	Trouble sleeping No duerme bien
+Mental_Health	abcd_cbcl01	cbcl_q102_p	Underactive, slow moving, or lacks energy Poco activo(a), lento(a), o le falta energía
+Mental_Health	abcd_cbcl01	cbcl_q103_p	Unhappy, sad, or depressed Infeliz, triste, o deprimido(a)

@@ -1,0 +1,257 @@
+Category	File.name	Field.name	Description
+MRI_T_roi	abcd_betnet02	src_subject_id	Subject ID how it's defined in lab/project
+MRI_T_roi	abcd_betnet02	interview_date	Date on which the interview/genetic test/sampling/imaging/biospecimen was completed. MM/DD/YYYY
+MRI_T_roi	abcd_betnet02	interview_age	Age in months at the time of the interview/test/sampling/imaging.
+MRI_T_roi	abcd_betnet02	sex	Sex of the subject
+MRI_T_roi	abcd_betnet02	eventname	The event name for which the data was collected
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_visitid	Visit name
+MRI_QC	freesqc01	fsqc_qc	QC score
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_tr	Pulse repetition time in seconds
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_numtrs	Number of frames in acquisition
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_nvols	Number of frames after removing dummy frames
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_stnvols	Number of frames with FD < 0.2
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_stcontignvols	Number of frames with FD < 0.2 and at least 5 contiguous, supra-threshold frames
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ntpoints	Number of frames after excluding outlier frames (based on standard deviation across ROIs)
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_meanmotion	Average framewise displacement in mm
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_maxmotion	Maximum framewise displacement in mm
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_meantrans	Average framewise translation in mm
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_maxtrans	Maximum framewise translation in mm
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_meanrot	Average framewise rotation in radians
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_maxrot	Maximum framewise rotation in radians
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_ad	Average correlation between auditory network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_cgc	Average correlation between auditory network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_ca	Average correlation between auditory network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_dt	Average correlation between auditory network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_dla	Average correlation between auditory network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_fo	Average correlation between auditory network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_n	"Average correlation between auditory network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_rspltp	Average correlation between auditory network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_smh	Average correlation between auditory network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_smm	Average correlation between auditory network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_sa	Average correlation between auditory network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_vta	Average correlation between auditory network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ad_ngd_vs	Average correlation between auditory network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_ad	Average correlation between cingulo-opercular network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_cgc	Average correlation between cingulo-opercular network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_ca	Average correlation between cingulo-opercular network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_dt	Average correlation between cingulo-opercular network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_dla	Average correlation between cingulo-opercular network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_fo	Average correlation between cingulo-opercular network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_n	"Average correlation between cingulo-opercular network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_rspltp	Average correlation between cingulo-opercular network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_smh	Average correlation between cingulo-opercular network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_smm	Average correlation between cingulo-opercular network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_sa	Average correlation between cingulo-opercular network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_vta	Average correlation between cingulo-opercular network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_cgc_ngd_vs	Average correlation between cingulo-opercular network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_ad	Average correlation between cingulo-parietal network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_cgc	Average correlation between cingulo-parietal network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_ca	Average correlation between cingulo-parietal network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_dt	Average correlation between cingulo-parietal network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_dla	Average correlation between cingulo-parietal network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_fo	Average correlation between cingulo-parietal network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_n	"Average correlation between cingulo-parietal network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_rspltp	Average correlation between cingulo-parietal network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_smh	Average correlation between cingulo-parietal network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_smm	Average correlation between cingulo-parietal network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_sa	Average correlation between cingulo-parietal network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_vta	Average correlation between cingulo-parietal network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_ca_ngd_vs	Average correlation between cingulo-parietal network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_ad	Average correlation between default network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_cgc	Average correlation between default network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_ca	Average correlation between default network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_dt	Average correlation between default network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_dla	Average correlation between default network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_fo	Average correlation between default network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_n	"Average correlation between default network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_rspltp	Average correlation between default network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_smh	Average correlation between default network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_smm	Average correlation between default network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_sa	Average correlation between default network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_vta	Average correlation between default network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dt_ngd_vs	Average correlation between default network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_ad	Average correlation between dorsal attention network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_cgc	Average correlation between dorsal attention network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_ca	Average correlation between dorsal attention network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_dt	Average correlation between dorsal attention network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_dla	Average correlation between dorsal attention network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_fo	Average correlation between dorsal attention network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_n	"Average correlation between dorsal attention network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_rspltp	Average correlation between dorsal attention network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_smh	Average correlation between dorsal attention network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_smm	Average correlation between dorsal attention network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_sa	Average correlation between dorsal attention network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_vta	Average correlation between dorsal attention network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_dla_ngd_vs	Average correlation between dorsal attention network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_ad	Average correlation between fronto-parietal network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_cgc	Average correlation between fronto-parietal network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_ca	Average correlation between fronto-parietal network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_dt	Average correlation between fronto-parietal network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_dla	Average correlation between fronto-parietal network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_fo	Average correlation between fronto-parietal network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_n	"Average correlation between fronto-parietal network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_rspltp	Average correlation between fronto-parietal network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_smh	Average correlation between fronto-parietal network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_smm	Average correlation between fronto-parietal network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_sa	Average correlation between fronto-parietal network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_vta	Average correlation between fronto-parietal network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_fo_ngd_vs	Average correlation between fronto-parietal network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_ad	"Average correlation between ""none"" network and auditory network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_cgc	"Average correlation between ""none"" network and cingulo-opercular network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_ca	"Average correlation between ""none"" network and cingulo-parietal network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_dt	"Average correlation between ""none"" network and default network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_dla	"Average correlation between ""none"" network and dorsal attention network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_fo	"Average correlation between ""none"" network and fronto-parietal network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_n	"Average correlation between ""none"" network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_rspltp	"Average correlation between ""none"" network and retrosplenial temporal network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_smh	"Average correlation between ""none"" network and sensorimotor hand network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_smm	"Average correlation between ""none"" network and sensorimotor mouth network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_sa	"Average correlation between ""none"" network and salience network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_vta	"Average correlation between ""none"" network and ventral attention network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_n_ngd_vs	"Average correlation between ""none"" network and visual network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_ad	Average correlation between retrosplenial temporal network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_cgc	Average correlation between retrosplenial temporal network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_ca	Average correlation between retrosplenial temporal network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_dt	Average correlation between retrosplenial temporal network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_dla	Average correlation between retrosplenial temporal network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_fo	Average correlation between retrosplenial temporal network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_n	"Average correlation between retrosplenial temporal network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_rspltp	Average correlation between retrosplenial temporal network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_smh	Average correlation between retrosplenial temporal network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_smm	Average correlation between retrosplenial temporal network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_sa	Average correlation between retrosplenial temporal network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_vta	Average correlation between retrosplenial temporal network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_rspltp_ngd_vs	Average correlation between retrosplenial temporal network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_ad	Average correlation between sensorimotor hand network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_cgc	Average correlation between sensorimotor hand network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_ca	Average correlation between sensorimotor hand network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_dt	Average correlation between sensorimotor hand network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_dla	Average correlation between sensorimotor hand network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_fo	Average correlation between sensorimotor hand network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_n	"Average correlation between sensorimotor hand network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_rspltp	Average correlation between sensorimotor hand network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_smh	Average correlation between sensorimotor hand network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_smm	Average correlation between sensorimotor hand network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_sa	Average correlation between sensorimotor hand network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_vta	Average correlation between sensorimotor hand network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smh_ngd_vs	Average correlation between sensorimotor hand network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_ad	Average correlation between sensorimotor mouth network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_cgc	Average correlation between sensorimotor mouth network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_ca	Average correlation between sensorimotor mouth network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_dt	Average correlation between sensorimotor mouth network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_dla	Average correlation between sensorimotor mouth network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_fo	Average correlation between sensorimotor mouth network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_n	"Average correlation between sensorimotor mouth network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_rspltp	Average correlation between sensorimotor mouth network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_smh	Average correlation between sensorimotor mouth network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_smm	Average correlation between sensorimotor mouth network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_sa	Average correlation between sensorimotor mouth network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_vta	Average correlation between sensorimotor mouth network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_smm_ngd_vs	Average correlation between sensorimotor mouth network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_ad	Average correlation between salience network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_cgc	Average correlation between salience network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_ca	Average correlation between salience network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_dt	Average correlation between salience network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_dla	Average correlation between salience network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_fo	Average correlation between salience network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_n	"Average correlation between salience network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_rspltp	Average correlation between salience network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_smh	Average correlation between salience network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_smm	Average correlation between salience network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_sa	Average correlation between salience network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_vta	Average correlation between salience network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_sa_ngd_vs	Average correlation between salience network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_ad	Average correlation between ventral attention network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_cgc	Average correlation between ventral attention network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_ca	Average correlation between ventral attention network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_dt	Average correlation between ventral attention network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_dla	Average correlation between ventral attention network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_fo	Average correlation between ventral attention network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_n	"Average correlation between ventral attention network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_rspltp	Average correlation between ventral attention network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_smh	Average correlation between ventral attention network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_smm	Average correlation between ventral attention network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_sa	Average correlation between ventral attention network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_vta	Average correlation between ventral attention network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vta_ngd_vs	Average correlation between ventral attention network and visual network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_ad	Average correlation between visual network and auditory network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_cgc	Average correlation between visual network and cingulo-opercular network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_ca	Average correlation between visual network and cingulo-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_dt	Average correlation between visual network and default network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_dla	Average correlation between visual network and dorsal attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_fo	Average correlation between visual network and fronto-parietal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_n	"Average correlation between visual network and ""none"" network"
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_rspltp	Average correlation between visual network and retrosplenial temporal network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_smh	Average correlation between visual network and sensorimotor hand network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_smm	Average correlation between visual network and sensorimotor mouth network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_sa	Average correlation between visual network and salience network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_vta	Average correlation between visual network and ventral attention network
+MRI_T_roi	abcd_betnet02	rsfmri_c_ngd_vs_ngd_vs	Average correlation between visual network and visual network
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_banksstslh	Temporal variance in APARC ROI left-bankssts
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_cdaclatelh	Temporal variance in APARC ROI left-caudalanteriorcingulate
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_cdmdflh	Temporal variance in APARC ROI left-caudalmiddlefrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_cuneuslh	Temporal variance in APARC ROI left-cuneus
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_entorhinallh	Temporal variance in APARC ROI left-entorhinal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_fflh	Temporal variance in APARC ROI left-fusiform
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_ifpalh	Temporal variance in APARC ROI left-inferiorparietal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_iftlh	Temporal variance in APARC ROI left-inferiorTemporal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_ihclatelh	Temporal variance in APARC ROI left-isthmuscingulate
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_loccipitallh	Temporal variance in APARC ROI left-lateraloccipital
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_loboflh	Temporal variance in APARC ROI left-lateralorbitofrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_linguallh	Temporal variance in APARC ROI left-lingual
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_moboflh	Temporal variance in APARC ROI left-medialorbitofrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_mdtlh	Temporal variance in APARC ROI left-middleTemporal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_parahpallh	Temporal variance in APARC ROI left-parahippocampal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_paracentrallh	Temporal variance in APARC ROI left-paracentral
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_parsopllh	Temporal variance in APARC ROI left-parsopercularis
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_parsobalislh	Temporal variance in APARC ROI left-parsorbitalis
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_parstularislh	Temporal variance in APARC ROI left-parstriangularis
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_pericclh	Temporal variance in APARC ROI left-pericalcarine
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_postcentrallh	Temporal variance in APARC ROI left-postcentral
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_psclatelh	Temporal variance in APARC ROI left-posteriorcingulate
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_precentrallh	Temporal variance in APARC ROI left-precentral
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_precuneuslh	Temporal variance in APARC ROI left-precuneus
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_rlaclatelh	Temporal variance in APARC ROI left-rostralanteriorcingulate
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_rlmdflh	Temporal variance in APARC ROI left-rostralmiddlefrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_suflh	Temporal variance in APARC ROI left-superiorfrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_spetallh	Temporal variance in APARC ROI left-superiorparietal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_sutlh	Temporal variance in APARC ROI left-superiorTemporal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_smlh	Temporal variance in APARC ROI left-supramarginal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_fpolelh	Temporal variance in APARC ROI left-frontalpole
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_tpolelh	Temporal variance in APARC ROI left-Temporalpole
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_tvtlh	Temporal variance in APARC ROI left-transverseTemporal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_insulalh	Temporal variance in APARC ROI left-insula
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_banksstsrh	Temporal variance in APARC ROI right-bankssts
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_cdaclaterh	Temporal variance in APARC ROI right-caudalanteriorcingulate
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_cdmdfrh	Temporal variance in APARC ROI right-caudalmiddlefrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_cuneusrh	Temporal variance in APARC ROI right-cuneus
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_entorhinalrh	Temporal variance in APARC ROI right-entorhinal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_ffrh	Temporal variance in APARC ROI right-fusiform
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_ifparh	Temporal variance in APARC ROI right-inferiorparietal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_iftrh	Temporal variance in APARC ROI right-inferiorTemporal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_ihclaterh	Temporal variance in APARC ROI right-isthmuscingulate
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_loccipitalrh	Temporal variance in APARC ROI right-lateraloccipital
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_lobofrh	Temporal variance in APARC ROI right-lateralorbitofrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_lingualrh	Temporal variance in APARC ROI right-lingual
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_mobofrh	Temporal variance in APARC ROI right-medialorbitofrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_mdtrh	Temporal variance in APARC ROI right-middleTemporal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_parahpalrh	Temporal variance in APARC ROI right-parahippocampal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_paracentralrh	Temporal variance in APARC ROI right-paracentral
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_parsoplrh	Temporal variance in APARC ROI right-parsopercularis
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_parsobalisrh	Temporal variance in APARC ROI right-parsorbitalis
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_parstularisrh	Temporal variance in APARC ROI right-parstriangularis
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_periccrh	Temporal variance in APARC ROI right-pericalcarine
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_postcentralrh	Temporal variance in APARC ROI right-postcentral
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_psclaterh	Temporal variance in APARC ROI right-posteriorcingulate
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_precentralrh	Temporal variance in APARC ROI right-precentral
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_precuneusrh	Temporal variance in APARC ROI right-precuneus
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_rlaclaterh	Temporal variance in APARC ROI right-rostralanteriorcingulate
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_rlmdfrh	Temporal variance in APARC ROI right-rostralmiddlefrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_sufrh	Temporal variance in APARC ROI right-superiorfrontal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_spetalrh	Temporal variance in APARC ROI right-superiorparietal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_sutrh	Temporal variance in APARC ROI right-superiorTemporal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_smrh	Temporal variance in APARC ROI right-supramarginal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_fpolerh	Temporal variance in APARC ROI right-frontalpole
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_tpolerh	Temporal variance in APARC ROI right-Temporalpole
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_tvtrh	Temporal variance in APARC ROI right-transverseTemporal
+MRI_T_roi	abcd_mrirstv02	rsfmri_var_cdk_insularh	Temporal variance in APARC ROI right-insula

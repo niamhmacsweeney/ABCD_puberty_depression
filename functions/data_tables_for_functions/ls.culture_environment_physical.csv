@@ -1,0 +1,111 @@
+Category	File.name	Field.name	Description
+Culture_and_Environment	abcd_sscep01	src_subject_id	Subject ID how it's defined in lab/project
+Culture_and_Environment	abcd_sscep01	interview_date	Date on which the interview/genetic test/sampling/imaging/biospecimen was completed. MM/DD/YYYY
+Culture_and_Environment	abcd_sscep01	interview_age	Age in months at the time of the interview/test/sampling/imaging.
+Culture_and_Environment	abcd_sscep01	gender	Sex of the subject
+Culture_and_Environment	abcd_sscep01	eventname	The event name for which the data was collected
+Culture_and_Environment	abcd_sscep01	meim_p_ss_exp	"MEIM-R Exploration Subscale, Mean: (meim_1_p + meim_4_p + meim_5_p)/3; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscep01	meim_p_ss_exp_nm	"MEIM-R Exploration Subscale, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	meim_p_ss_exp_nt	"MEIM-R Exploration Subscale, Mean: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	meim_p_ss_com	"MEIM-R Commitment and Attachment Subscale, Mean: (meim_2_p + meim_3_p + meim_6_p)/3; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscep01	meim_p_ss_com_nm	"MEIM-R Commitment and Attachment Subscale, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	meim_p_ss_com_nt	"MEIM-R Commitment and Attachment Subscale, Mean: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	meim_p_ss_total	MEIM-R Overall Mean: (meim_1_p + meim_2_p + meim_3_p + meim_4_p + meim_5_p + [meim_6_p)/6; Validation: minimum of 5 items answered
+Culture_and_Environment	abcd_sscep01	meim_p_ss_total_nm	MEIM-R Overall Mean: Number Missing Answers
+Culture_and_Environment	abcd_sscep01	meim_p_ss_total_nt	MEIM-R Overall Mean: Number Total Questions
+Culture_and_Environment	abcd_sscep01	via_p_ss_hc	"VIA Heritage Culture Subscale, Mean: (vancouver_q2_p +  vancouver_q4_p + vancouver_q6_p + vancouver_q8_p + vancouver_q10_p + vancouver_q12_p + vancouver_q14_p + vancouver_q16_p)/8; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscep01	via_p_ss_hc_nm	"VIA Heritage Culture Subscale, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	via_p_ss_hc_nt	"VIA Heritage Culture Subscale, Mean: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	via_p_ss_amer	"VIA American ""Mainstream"" Culture Subscale, Mean: (vancouver_q3_p + vancouver_q7_p + vancouver_q5_p + vancouver_q9_p + vancouver_q11_p + vancouver_q13_p + vancouver_q15_p + vancouver_q17_p)/8; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscep01	via_p_ss_amer_nm	"VIA American ""Mainstream"" Culture Subscale, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	via_p_ss_amer_nt	"VIA American ""Mainstream"" Culture Subscale, Mean: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	nsc_p_ss_mean_3_items	"Neighborhood Safety Protocol: Mean of Parent Report, (neighborhood1r_p + neighborhood2r_p + neighborhood3r_p)/3; Validation: No minimum"
+Culture_and_Environment	abcd_sscep01	nsc_p_ss_mean_3_items_nm	"Neighborhood Safety Protocol, Mean of Parent Report: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	nsc_p_ss_mean_3_items_nt	"Neighborhood Safety Protocol, Mean of Parent Report: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	fes_p_ss_fc	Conflict subscale from the Family Environment Scale Sum of Parent Report (RAW Score): fam_enviro1_p + fam_enviro2r_p + fam_enviro3_p + fam_enviro4r_p + fam_enviro5_p + fam_enviro6_p + fam_enviro7r_p + fam_enviro8_p + fam_enviro9r_p; Validation: Minimum of five items answered
+Culture_and_Environment	abcd_sscep01	fes_p_ss_fc_na	Conflict subscale from the Family Environment Scale Sum of Parent Report Number Answered
+Culture_and_Environment	abcd_sscep01	fes_p_ss_fc_pr	Conflict subscale from the Family Environment Scale Sum of Parent Report Prorated Score (Based on minimum of five items answered)
+Culture_and_Environment	abcd_sscep01	fes_p_ss_fc_nm	"Conflict subscale from the Family Environment Scale, Sum of Parent Report: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	fes_p_ss_fc_nt	"Conflict subscale from the Family Environment Scale, Sum of Parent Report: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_fs	"MACVS Family Support Subscale, Mean: (mex_american2_p +  mex_american7_p +  mex_american12_p +  mex_american16_p + [mex_american21_p +  mex_american26_p)/6; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_fs_nm	"MACVS Family Support Subscale, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_fs_nt	"MACVS Family Support Subscale, Mean: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_fo	"MACVS Family Obligation Subscale, Mean: (mex_american3_p +  mex_american8_p +  mex_american13_p +  mex_american17_p + mex_american22_p)/5; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_fo_nm	"MACVS Family Obligation Subscale, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_fo_nt	"MACVS Family Obligation Subscale, Mean: Number Total"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_isr	"MACVS Independence & Self-Reliance Subscale, Mean: (mex_american5_p +  mex_american10_p +  mex_american14_p +  mex_american19_p +  mex_american24_p)/5; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_isr_nm	"MACVS Independence & Self-Reliance Subscale, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_isr_nt	"MACVS Independence & Self-Reliance Subscale, Mean: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_fr	"MACVS Family as Referent Subscale, Mean: (mex_american4_p + mex_american9_p +  mex_american18_p + mex_american23_p +  mex_american27_p)/5; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_fr_nm	"MACVS Family as Referent Subscale, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_fr_nt	"MACVS Family as Referent Subscale, Mean: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_r	"MACVS Religion Subscale, Mean: (mex_american1_p +  mex_american6_p +  mex_american11_p +  mex_american15_p +  mex_american20_p + mex_american25_p) + mex_american28_p)/7; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_r_nm	"MACVS Religion Subscale, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	macv_p_ss_r_nt	"MACVS Religion Subscale, Mean: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	psb_p_ss_mean	Prosocial Behavior Subscale Mean of Parent Report on Youth: (prosocial_q1_p + prosocial_q2_p + prosocial_q3_p)/3; Validation: Minimum of two items answered
+Culture_and_Environment	abcd_sscep01	psb_p_ss_mean_nm	"Prosocial Behavior Subscale, Mean of Parent Report on Youth: Number Missing Answers"
+Culture_and_Environment	abcd_sscep01	psb_p_ss_mean_nt	"Prosocial Behavior Subscale, Mean of Parent report on Youth: Number Total Questions"
+Culture_and_Environment	abcd_sscep01	psb_p_ss_answered	"Prosocial Behavior Subscale, Mean of Parent Report on Youth: Number Answered"
+Culture_and_Environment	abcd_sscey01	pmq_y_ss_mean	Parental Monitoring: Mean (parent_monitor_q1_y + parent_monitor_q2_y + parent_monitor_q3_y + parent_monitor_q4_y parent_monitor_q5_y)/5; Validation: no minimum number of answers
+Culture_and_Environment	abcd_sscey01	pmq_y_ss_mean_nm	"Parental Monitoring, Mean: Number Missing Answers"
+Culture_and_Environment	abcd_sscey01	pmq_y_ss_mean_nt	"Parental Monitoring, Mean: Number Total Questions"
+Culture_and_Environment	abcd_sscey01	fes_y_ss_fc	Conflict Subscale from the Family Environment Scale Sum of Youth Report (RAW Score): fes_youth_q1 + fes_youth_q2 + fes_youth_q3 + fes_youth_q4 + fes_youth_q5 + fes_youth_q6 + fes_youth_q7 + fes_youth_q8 + fes_youth_q9; Validation: Minimum of five items answered
+Culture_and_Environment	abcd_sscey01	fes_y_ss_fc_nm	"Conflict Subscale from the Family Environment Scale, Sum of Youth Report: Number Missing Answers"
+Culture_and_Environment	abcd_sscey01	fes_y_ss_fc_nt	"Conflict Subscale from the Family Environment Scale, Sum of Youth Report: Number Total Questions"
+Culture_and_Environment	abcd_sscey01	fes_y_ss_fc_na	"Conflict Subscale from the Family Environment Scale, Sum of Youth Report: Number Answered"
+Culture_and_Environment	abcd_sscey01	fes_y_ss_fc_pr	"Conflict Subscale from the Family Environment Scale, Sum of Youth Report: Prorated Score (Based on minimum of five items answered): [fes_y_ss_fc]*[fes_y_ss_fc_nt] /[fes_y_ss_fc_na]"
+Culture_and_Environment	abcd_sscey01	psb_y_ss_mean	Prosocial Behavior Subscale Mean of Youth Self Report: (prosocial_q1_y + prosocial_q2_y +  prosocial_q3_y)/3; Validation:Minimum of two items answered
+Culture_and_Environment	abcd_sscey01	psb_y_ss_answered	"Prosocial Behavior Subscale, Mean of Youth Self Report: Number Answered"
+Culture_and_Environment	abcd_sscey01	psb_y_ss_mean_nm	"Prosocial Behavior Subscale, Mean of Youth Self Report: Number Missing Answers"
+Culture_and_Environment	abcd_sscey01	psb_y_ss_mean_nt	"Prosocial Behavior Subscale, Mean of Youth Self Report: Number Total Questions"
+Culture_and_Environment	abcd_sscey01	crpbi_y_ss_parent	"CRPBI - Acceptance Subscale Mean of Report by Parent Completing Protocol by youth: (crpbi_parent1_y +  crpbi_parent2_y + crpbi_parent3_y], crpbi_parent4_y + crpbi_parent5_y)/5; Validation: Minimum of 4 items answered"
+Culture_and_Environment	abcd_sscey01	crpbi_y_ss_parent_nm	"CRPBI - Acceptance Subscale, Mean of Report by Parent Completing Protocol by youth: Number Missing Answers"
+Culture_and_Environment	abcd_sscey01	crpbi_y_ss_parent_nt	"CRPBI - Acceptance Subscale, Mean of Report by Parent Completing Protocol by youth: Number Total Questions"
+Culture_and_Environment	abcd_sscey01	crpbi_y_ss_caregiver	CRPBI - Acceptance Subscale Mean of Report by Secondary Caregiver by youth: (crpbi_caregiver12_y + crpbi_caregiver13_y + crpbi_caregiver14_y + crpbi_caregiver15_y + crpbi_caregiver16_y)/5; Validation: Minimum of four items answered
+Culture_and_Environment	abcd_sscey01	crpbi_y_ss_caregiver_nm	"CRPBI - Acceptance Subscale, Mean of Report by Secondary Caregiver by youth: Number Missing Answers"
+Culture_and_Environment	abcd_sscey01	crpbi_y_ss_caregiver_nt	"CRPBI - Acceptance Subscale, Mean of Report by Secondary Caregiver by youth: Number Total Questions"
+Culture_and_Environment	abcd_sscey01	srpf_y_ss_ses	"SRPF School Environment Subscale, Sum: school_2_y + school_3_y + school_4_y + school_5_y + school_6_y + school_7_y; Validation: Minimum of five items answered"
+Culture_and_Environment	abcd_sscey01	srpf_y_ss_ses_nm	"SRPF School Environment Subscale, Sum: Number Missing Answers"
+Culture_and_Environment	abcd_sscey01	srpf_y_ss_ses_nt	"SRPF School Environment Subscale, Sum: Number Total Questions"
+Culture_and_Environment	abcd_sscey01	srpf_y_ss_iiss	"SRPF School Involvement Subscale, Sum: school_8_y + school_9_y + school_10_y + school_12_y; Validation: Minimum of three items answered"
+Culture_and_Environment	abcd_sscey01	srpf_y_ss_iiss_nm	"SRPF School Involvement Subscale, Sum: Number Missing Answers"
+Culture_and_Environment	abcd_sscey01	srpf_y_ss_iiss_nt	"SRPF School Involvement Subscale, Sum: Number Total Questions"
+Culture_and_Environment	abcd_sscey01	srpf_y_ss_dfs	"SRPF School Disengagement Subscale, Sum: school_15_y + school_17_y; Validation: All items must be answered"
+Culture_and_Environment	abcd_sscey01	srpf_y_ss_dfs_nm	"SRPF School Disengagement Subscale, Sum: Number Missing Answers"
+Culture_and_Environment	abcd_sscey01	srpf_y_ss_dfs_nt	"SRPF School Disengagement Subscale, Sum: Number Total Questions"
+Culture_and_Environment	abcd_sscey01	wps_ss_sum	"WPS SumSum[wps_q1_y. wps_q2_y. wps_q3_y,wps_q4_y, wps_q5_y, wps_q6_y]Validation: Minimum of 4 items answered"
+Culture_and_Environment	abcd_sscey01	wps_ss_sum_nm	WPSNumber Missing Answers
+Culture_and_Environment	abcd_sscey01	wps_ss_sum_nt	WPSNumber Total Questions
+Culture_and_Environment	abcd_sscey01	dim_y_ss_mean	"Discrimination Measure mean(dim_matrix_q1,dim_matrix_q2,dim_matrix_q3,dim_matrix_q4,dim_matrix_q5,dim_matrix_q6,dim_matrix_q7); Only add if value 1 - 5; Validation: Minimum of four items must be answered"
+Culture_and_Environment	abcd_sscey01	dim_y_ss_mean_nm	Discrimination Measure mean: Number Missing Answers
+Culture_and_Environment	abcd_sscey01	dim_y_ss_mean_nt	Discrimination Measure mean: Number Total Questions
+Physical_Health	abcd_ssphp01	sds_p_ss_dims	Disorders of Initiating and Maintaining Sleep (DIMS) SUM:  sleepdisturb1_p +  sleepdisturb2_p + sleepdisturb3_p + sleepdisturb4_p + sleepdisturb5_p + sleepdisturb10_p + sleepdisturb11_p;  Validation: All items must be answered
+Physical_Health	abcd_ssphp01	sds_p_ss_dims_nm	DIMS:  Number Missing Answers
+Physical_Health	abcd_ssphp01	sds_p_ss_dims_nt	DIMS:  Number Total Questions
+Physical_Health	abcd_ssphp01	sds_p_ss_sbd	Sleep Breathing disorders (SBD):  SUM sleepdisturb13_p +  sleepdisturb14_p + sleepdisturb15_p; Validation: All items must be answered
+Physical_Health	abcd_ssphp01	sds_p_ss_sbd_nm	SBD:  Number Missing Answers
+Physical_Health	abcd_ssphp01	sds_p_ss_sbd_nt	SBD:  Number Total Questions
+Physical_Health	abcd_ssphp01	sds_p_ss_da	Disorder of Arousal (DA) SUM: sleepdisturb17_p +  sleepdisturb20_p + sleepdisturb21_p;  Validation: All items must be answered
+Physical_Health	abcd_ssphp01	sds_p_ss_da_nm	DA:  Number Missing Answers
+Physical_Health	abcd_ssphp01	sds_p_ss_da_nt	DA:  Number Total Questions
+Physical_Health	abcd_ssphp01	sds_p_ss_swtd	Sleep-Wake transition Disorders (SWTD) SUM: sleepdisturb6_p + sleepdisturb7_p + sleepdisturb8_p + sleepdisturb12_p +  sleepdisturb18_p + sleepdisturb19_p; Validation: All items must be answered
+Physical_Health	abcd_ssphp01	sds_p_ss_swtd_nm	SWTD:  Number Missing Answers
+Physical_Health	abcd_ssphp01	sds_p_ss_swtd_nt	SWTD:  Number Total Questions
+Physical_Health	abcd_ssphp01	sds_p_ss_does	Disorders of Excessive Somnolence (DOES) SUM:  sleepdisturb22_p + sleepdisturb23_p +  sleepdisturb24_p +  sleepdisturb25_p + sleepdisturb26_p; Validation: All items must be answered
+Physical_Health	abcd_ssphp01	sds_p_ss_does_nm	DOES:  Number Missing Answers
+Physical_Health	abcd_ssphp01	sds_p_ss_does_nt	DOES:  Number Total Questions
+Physical_Health	abcd_ssphp01	sds_p_ss_shy	Sleep Hyperhydrosis (SHY) SUM: sleepdisturb9_p + sleepdisturb16_p; Validation: All items must be answered
+Physical_Health	abcd_ssphp01	sds_p_ss_shy_nm	SHY:  Number Missing Answers
+Physical_Health	abcd_ssphp01	sds_p_ss_shy_nt	SHY:  Number Total Questions
+Physical_Health	abcd_ssphp01	sds_p_ss_total	Total Score (Sum of 6 Factors): sds_p_ss_dims + sds_p_ss_sbd + sds_p_ss_da + sds_p_ss_swtd + sds_p_ss_does + sds_p_ss_shy; Validation: All items must be answered
+Physical_Health	abcd_ssphp01	sds_p_ss_total_nm	Total Score:  Number Missing Answers
+Physical_Health	abcd_ssphp01	sds_p_ss_total_nt	Total Score:  Number Total Questions
+Physical_Health	abcd_ssphp01	pds_p_ss_male_category	Pubertal Developmental Scale Parent: Male Category pds_p_m_cat_sum (sum_p_m) = pds_bdyhair_y + pds_m4_p + pds_m5_p; 1 - prepuberty sum_p_m = 3; 2 - early puberty sum_p_m >= 4 and <= 5; 3 - mid puberty sum_p_m >= 6 and <= 8; 4 - late puberty sum_p_m >= 9 and <= 11; 5 - post puberty sum_p_m = 12; Validation: All items must be answered
+Physical_Health	abcd_ssphp01	pds_p_ss_male_cat_nm	Pubertal Developmental Scale Parent: Male Category Number Missing Answers
+Physical_Health	abcd_ssphp01	pds_p_ss_male_cat_nt	Pubertal Developmental Scale Parent: Male Category Number Total Questions
+Physical_Health	abcd_ssphp01	pds_p_ss_female_category	"Pubertal Developmental Scale Parent: Female Category: pds_p_m_cat_sum (sum_p_f) = pds_2_p + pds_f4_p;  1 - prepuberty - sum_p_f =  2 and pds_f5_p = 1,   2 - early puberty - sum_p_f = 3 and pds_f5_p = 1,   3 - mid puberty -   sum_p_f >= 3  and pds_f5_p = 1,  4 - late puberty -   sum_p_f  <= 7 and pds_f5_p = 4,   5 - post puberty -  sum_p_f =    8 and pds_f5_p = 4; Validation: All items must be answered"
+Physical_Health	abcd_ssphp01	pds_p_ss_female_cat_nm	Pubertal Developmental Scale Parent: Female Category Number Missing Answers
+Physical_Health	abcd_ssphp01	pds_p_ss_female_cat_nt	Pubertal Developmental Scale Parent: Female Category Number Total Questions
+Physical_Health	abcd_ssphp01	cna_p_ss_sum	Mind Diet Score: sum(cna_1_p:cna_14_p). Validation: All items must be answered
+Physical_Health	abcd_ssphp01	cna_p_ss_sum_nm	Mind Diet Sum: Number Missing Questions
+Physical_Health	abcd_ssphp01	cna_p_ss_sum_nt	Mind Diet Score: Number Total Questions

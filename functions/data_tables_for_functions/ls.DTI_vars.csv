@@ -1,0 +1,326 @@
+Category	File.name	Field.name	Description
+MRI_T_roi	abcd_dti_p101	src_subject_id	Subject ID how it's defined in lab/project
+MRI_T_roi	abcd_dti_p101	interview_date	Date on which the interview/genetic test/sampling/imaging/biospecimen was completed. MM/DD/YYYY
+MRI_T_roi	abcd_dti_p101	interview_age	Age in months at the time of the interview/test/sampling/imaging.
+MRI_T_roi	abcd_dti_p101	sex	Sex of the subject
+MRI_T_roi	abcd_dti_p101	eventname	The event name for which the data was collected
+MRI_QC	abcd_mrfindings01	mrif_score	Report Score
+MRI_QC	abcd_mrfindings01	mrif_hydrocephalus	Hydrocephalus?
+MRI_QC	abcd_mrfindings01	mrif_herniation	Herniation?
+MRI_QC	freesqc01	fsqc_qc	QC score
+MRI_QC	mriqcrp102	iqc_t1_ok_ser	T1: Number of series that are complete and passed QC (ignoring PC)
+MRI_QC	dmriqc01	dmri_dti_postqc_visitid	Visit name
+MRI_QC	dmriqc01	dmri_dti_postqc_containertype	Container type
+MRI_QC	dmriqc01	dmri_dti_postqc_stype	Series type
+MRI_QC	dmriqc01	dmri_dti_postqc_nrev	Number of reviews
+MRI_QC	dmriqc01	dmri_dti_postqc_revdisp	Disparity between reviewers
+MRI_QC	dmriqc01	dmri_dti_postqc_qc	Overall QC score
+MRI_QC	dmriqc01	dmri_dti_postqc_quregt1	Registration error score (0=good registration, 1=mild rotation or translation, 2=moderate rotation or translation, 3=severe rotation or translation)
+MRI_QC	dmriqc01	dmri_dti_postqc_qub0warp	Residual distortion score (0=no distortion, 1=mild distortion, 2=moderate distortion, 3=severe distortion)
+MRI_QC	dmriqc01	dmri_dti_postqc_quimgqual	Image quality score (0=good image quality, 1=mild artifact, 2=moderate artifact, 3=severe artifact)
+MRI_QC	dmriqc01	dmri_dti_postqc_qucutoff	Cutoff score (0=no cutoff, 1=mild cutoff, 2=moderate cutoff, 3=severe cutoff)
+MRI_QC	dmriqc01	dmri_dti_postqc_qufseg	Segmentation score (0=good segmentation; 1=mild segmentation patchiness; 2=moderate segmentation patchiness or mislocation; 3=segmentation missing, severely patchy, or severely mislocated)
+MRI_QC	mriqcrp102	iqc_dmri_total_ser	dMRI: Total number received
+MRI_QC	mriqcrp102	iqc_dmri_total_passpc	dMRI: Number that passed protocol compliance
+MRI_QC	mriqcrp102	iqc_dmri_total_passqc	dMRI: Number that passed visual quality control (QC)
+MRI_QC	mriqcrp102	iqc_dmri_good_ser	dMRI: Number that passed protocol compliance and QC
+MRI_QC	mriqcrp102	iqc_dmri_ok_ser	dMRI: Number of series that are complete and passed QC (ignoring PC)
+MRI_QC	mriqcrp102	iqc_dmri_bad_ser	dMRI: Number that failed either protocol compliance or QC
+MRI_QC	mriqcrp102	iqc_dmri_ser_pc_issues	dMRI: Number with protocol compliance issues
+MRI_QC	mriqcrp102	iqc_dmri_ser_qcs	dMRI: Number with QC issues
+MRI_QC	mriqcrp102	iqc_dmri_ser_incomp	dMRI: Number of series missing files at DAIC
+MRI_QC	mriqcrp102	iqc_dmri_fm_missing	dMRI FM: number of field maps missing
+MRI_QC	mriqcrp102	iqc_dmri_fm_wronglocus	dMRI FM: Number of field maps not acquired immediately prior to dMRI
+MRI_QC	mriqcrp102	iqc_dmri_fm_invalid	dMRI FM: number of invalid field maps
+MRI_QC	mriqcrp102	iqc_dmri_fm_pc_issues	dMRI FM: Number with protocol compliance issues
+MRI_QC	mriqcrp102	iqc_dmri_fm_qcs	dMRI FM: Number with QC issues
+MRI_QC	mriqcrp102	iqc_dmri_fm_incomp	dMRI FM: Number of series missing files at DAIC
+MRI_QC	mriqcrp102	iqc_dmri_dis_qc	dMRI: Number with distortion artifact
+MRI_QC	mriqcrp102	iqc_dmri_dco_qc	dMRI: Number with dorsal cut-off
+MRI_QC	mriqcrp102	iqc_dmri_fa_qc	dMRI: Number with fractional anisotropy map issues
+MRI_QC	mriqcrp102	iqc_dmri_gh_qc	dMRI: Number with ghosting
+MRI_QC	mriqcrp102	iqc_dmri_ht_qc	dMRI: Number with head tilt
+MRI_QC	mriqcrp102	iqc_dmri_hb_qc	dMRI: Number with horizontal banding
+MRI_QC	mriqcrp102	iqc_dmri_mo_qc	dMRI: Number with motion artifact
+MRI_QC	mriqcrp102	iqc_dmri_rf_qc	dMRI: Number with radio frequency artifact
+MRI_QC	mriqcrp102	iqc_dmri_sd_qc	dMRI: Number with signal dropout
+MRI_QC	mriqcrp102	iqc_dmri_si_qc	dMRI: Number with signal inhomogeneity
+MRI_QC	mriqcrp102	iqc_dmri_sus_qc	dMRI: Number with susceptibility artifact
+MRI_QC	mriqcrp102	iqc_dmri_vco_qc	dMRI: Number with ventral cut-off
+MRI_QC	mriqcrp102	iqc_dmri_wr_qc	dMRI: Number with wrapping
+MRI_QC	mriqcrp102	iqc_dmri_slice_qc	dMRI: Number with slice interleaving issues
+MRI_QC	mriqcrp102	iqc_dmri_dark_qc	dMRI: Number with dark slice artifact
+MRI_QC	mriqcrp102	iqc_dmri_moire_qc	dMRI: Number with moire artifact
+MRI_QC	mriqcrp102	iqc_dmri_recon_qc	dMRI: Number with reconstruction error
+MRI_QC	mriqcrp102	iqc_dmri_miss_qc	dMRI: Number with missing p-files
+MRI_QC	mriqcrp102	iqc_dmri_other_qc	dMRI: Number with other QC issue
+MRI_QC	mriqcrp102	iqc_dmri_fm_dis_qc	dMRI FM: Number with distortion artifact
+MRI_QC	mriqcrp102	iqc_dmri_fm_dco_qc	dMRI FM: Number with dorsal cut-off
+MRI_QC	mriqcrp102	iqc_dmri_fm_fa_qc	dMRI FM: Number with fractional anisotropy map issues
+MRI_QC	mriqcrp102	iqc_dmri_fm_gh_qc	dMRI FM: Number with ghosting
+MRI_QC	mriqcrp102	iqc_dmri_fm_ht_qc	dMRI FM: Number with head tilt
+MRI_QC	mriqcrp102	iqc_dmri_fm_hb_qc	dMRI FM: Number with horizontal banding
+MRI_QC	mriqcrp102	iqc_dmri_fm_mo_qc	dMRI FM: Number with motion artifact
+MRI_QC	mriqcrp102	iqc_dmri_fm_rf_qc	dMRI FM: Number with radio frequency artifact
+MRI_QC	mriqcrp102	iqc_dmri_fm_sd_qc	dMRI FM: Number with signal dropout
+MRI_QC	mriqcrp102	iqc_dmri_fm_si_qc	dMRI FM: Number with signal inhomogeneity
+MRI_QC	mriqcrp102	iqc_dmri_fm_sus_qc	dMRI FM: Number with susceptibility artifact
+MRI_QC	mriqcrp102	iqc_dmri_fm_vco_qc	dMRI FM: Number with ventral cut-off
+MRI_QC	mriqcrp102	iqc_dmri_fm_wr_qc	dMRI FM: Number with wrapping
+MRI_QC	mriqcrp102	iqc_dmri_fm_slice_qc	dMRI FM: Number with slice interleaving issues
+MRI_QC	mriqcrp102	iqc_dmri_fm_dark_qc	dMRI FM: Number with dark slice artifact
+MRI_QC	mriqcrp102	iqc_dmri_fm_moire_qc	dMRI FM: Number with moire artifact
+MRI_QC	mriqcrp102	iqc_dmri_fm_recon_qc	dMRI FM: Number with reconstruction error
+MRI_QC	mriqcrp102	iqc_dmri_fm_miss_qc	dMRI FM: Number with missing p-files
+MRI_QC	mriqcrp102	iqc_dmri_fm_other_qc	dMRI FM: Number with other QC issue
+MRI_QC	mriqcrp102	iqc_dmri_all_voxvol	dMRI: Mean volume of single voxel averaged across all scans (mm^3)
+MRI_QC	mriqcrp102	iqc_dmri_ok_voxvol	dMRI: Mean volume of single voxel averaged across all OK scans (mm^3)
+MRI_QC	mriqcrp102	iqc_dmri_all_brainvol	dMRI: Mean volume of brain mask averaged across all scans (mm^3)
+MRI_QC	mriqcrp102	iqc_dmri_ok_brainvol	dMRI: Mean volume of brain mask averaged across all OK scans (mm^3)
+MRI_QC	mriqcrp102	iqc_dmri_all_brain_mean	dMRI: Mean intensity within brain mask averaged across all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_brain_mean	dMRI: Mean intensity within brain mask averaged across all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_brain_std	dMRI: Standard deviation of intensities within brain mask averaged across all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_brain_std	dMRI: Standard deviation of intensities within brain mask averaged across all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_nreps	dMRI: Total number of repetitions for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_nreps	dMRI: Total number of repetitions for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_tr	dMRI: Repetition time for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_tr	dMRI: Repetition time for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_mean_motion	dMRI: Mean framewise displacement in mm for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_mean_motion	dMRI: Mean framewise displacement in mm for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_mean_motion_nody	dMRI: Mean framewise displacement in mm for all scans without y-displacement
+MRI_QC	mriqcrp102	iqc_dmri_ok_mean_motion_nody	dMRI: Mean framewise displacement in mm for all OK scans without y-displacement
+MRI_QC	mriqcrp102	iqc_dmri_all_nbad_frame_slices	dMRI: Total number of censored slices in all frames for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_nbad_frame_slices	dMRI: Total number of censored slices in all frames for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_nbad_frames	dMRI: Total number of slices with at least 1 censored frame in all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_nbad_frames	dMRI: Total number of slices with at least 1 censored frame in all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_nbad_slices	dMRI: Total number of frames with at least 1 censored slice in all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_nbad_slices	dMRI: Total number of frames with at least 1 censored slice in all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_fa_mean	dMRI: Mean fractional anisotropy within brain mask for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_fa_mean	dMRI: Mean fractional anisotropy within brain mask for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_fa_median	dMRI: Median fractional anisotropy within brain mask for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_fa_median	dMRI: Median fractional anisotropy within brain mask for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_fa_std	dMRI: Standard deviation of fractional anisotropy within brain mask for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_fa_std	dMRI: Standard deviation of fractional anisotropy within brain mask for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_md_mean	dMRI: Mean mean diffusivity within brain mask for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_md_mean	dMRI: Mean mean diffusivity within brain mask for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_md_median	dMRI: Median mean diffusivity within brain mask for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_md_median	dMRI: Median mean diffusivity within brain mask for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_md_std	dMRI: Standard deviation of mean diffusivity within brain mask for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_md_std	dMRI: Standard deviation of mean diffusivity within brain mask for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_b0_mean	dMRI: Mean intensity in b=0 image for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_b0_mean	dMRI: Mean intensity in b=0 image for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_b0_median	dMRI: Median intensity in b=0 image for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_b0_median	dMRI: Median intensity in b=0 image for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_b0_std	dMRI: Standard deviation of intensity in b=0 image for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_b0_std	dMRI: Standard deviation of intensity in b=0 image for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_dterr_mean	dMRI: Mean residual error of diffusion tensor fit for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_dterr_mean	dMRI: Mean residual error of diffusion tensor fit for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_dterr_median	dMRI: Median residual error of diffusion tensor fit for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_dterr_median	dMRI: Median residual error of diffusion tensor fit for all OK scans
+MRI_QC	mriqcrp102	iqc_dmri_all_dterr_std	dMRI: Standard deviation of residual error of diffusion tensor fit for all scans
+MRI_QC	mriqcrp102	iqc_dmri_ok_dterr_std	dMRI: Standard deviation of residual error of diffusion tensor fit for all OK scans
+MRI_T_roi	abcd_dti_p101	dmri_dti_meanmotion	Average famewise displacement in mm
+MRI_T_roi	abcd_dti_p101	dmri_dti_meantrans	Average framewise translation in mm
+MRI_T_roi	abcd_dti_p101	dmri_dti_meanrot	Average framewise rotation in radians
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_fxrh	Average fractional anisotropy within DTI atlas tract right fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_fxlh	Average fractional anisotropy within DTI atlas tract left fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_cgcrh	Average fractional anisotropy within DTI atlas tract right cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_cgclh	Average fractional anisotropy within DTI atlas tract left cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_cghrh	Average fractional anisotropy within DTI atlas tract right parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_cghlh	Average fractional anisotropy within DTI atlas tract left parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_cstrh	Average fractional anisotropy within DTI atlas tract right corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_cstlh	Average fractional anisotropy within DTI atlas tract left corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_atrrh	Average fractional anisotropy within DTI atlas tract right anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_atrlh	Average fractional anisotropy within DTI atlas tract left anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_uncrh	Average fractional anisotropy within DTI atlas tract right uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_unclh	Average fractional anisotropy within DTI atlas tract left uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_ilfrh	Average fractional anisotropy within DTI atlas tract right inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_ilflh	Average fractional anisotropy within DTI atlas tract left inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_iforh	Average fractional anisotropy within DTI atlas tract right inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_ifolh	Average fractional anisotropy within DTI atlas tract left inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_fmaj	Average fractional anisotropy within DTI atlas tract foreceps major
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_fmin	Average fractional anisotropy within DTI atlas tract foreceps minor
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_cc	Average fractional anisotropy within DTI atlas tract corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_slfrh	Average fractional anisotropy within DTI atlas tract right superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_slflh	Average fractional anisotropy within DTI atlas tract left superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_tslfrh	Average fractional anisotropy within DTI atlas tract right  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_tslflh	Average fractional anisotropy within DTI atlas tract left  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_pslfrh	Average fractional anisotropy within DTI atlas tract right parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_pslflh	Average fractional anisotropy within DTI atlas tract left parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_scsrh	Average fractional anisotropy within DTI atlas tract right superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_scslh	Average fractional anisotropy within DTI atlas tract left superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_fscsrh	Average fractional anisotropy within DTI atlas tract right superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_fscslh	Average fractional anisotropy within DTI atlas tract left superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_pscsrh	Average fractional anisotropy within DTI atlas tract right superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_pscslh	Average fractional anisotropy within DTI atlas tract left superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_sifcrh	Average fractional anisotropy within DTI atlas tract right striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_sifclh	Average fractional anisotropy within DTI atlas tract left striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_ifsfcrh	Average fractional anisotropy within DTI atlas tract right inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_ifsfclh	Average fractional anisotropy within DTI atlas tract left inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_fxcutrh	Average fractional anisotropy within DTI atlas tract right fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_fxcutlh	Average fractional anisotropy within DTI atlas tract left fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtifa_fiberat_allfibers	Average fractional anisotropy within all DTI atlas tract fibers
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_fxrh	Mean diffusivity within DTI atlas tract right fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_fxlh	Mean diffusivity within DTI atlas tract left fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_cgcrh	Mean diffusivity within DTI atlas tract right cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_cgclh	Mean diffusivity within DTI atlas tract left cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_cghrh	Mean diffusivity within DTI atlas tract right parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_cghlh	Mean diffusivity within DTI atlas tract left parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_cstrh	Mean diffusivity within DTI atlas tract right corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_cstlh	Mean diffusivity within DTI atlas tract left corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_atrrh	Mean diffusivity within DTI atlas tract right anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_atrlh	Mean diffusivity within DTI atlas tract left anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_uncrh	Mean diffusivity within DTI atlas tract right uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_unclh	Mean diffusivity within DTI atlas tract left uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_ilfrh	Mean diffusivity within DTI atlas tract right inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_ilflh	Mean diffusivity within DTI atlas tract left inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_iforh	Mean diffusivity within DTI atlas tract right inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_ifolh	Mean diffusivity within DTI atlas tract left inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_fmaj	Mean diffusivity within DTI atlas tract foreceps major
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_fmin	Mean diffusivity within DTI atlas tract foreceps minor
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_cc	Mean diffusivity within DTI atlas tract corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_slfrh	Mean diffusivity within DTI atlas tract right superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_slflh	Mean diffusivity within DTI atlas tract left superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_tslfrh	Mean diffusivity within DTI atlas tract right  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_tslflh	Mean diffusivity within DTI atlas tract left  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_pslfrh	Mean diffusivity within DTI atlas tract right parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_pslflh	Mean diffusivity within DTI atlas tract left parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_scsrh	Mean diffusivity within DTI atlas tract right superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_scslh	Mean diffusivity within DTI atlas tract left superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_fscsrh	Mean diffusivity within DTI atlas tract right superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_fscslh	Mean diffusivity within DTI atlas tract left superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_pscsrh	Mean diffusivity within DTI atlas tract right superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_pscslh	Mean diffusivity within DTI atlas tract left superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_sifcrh	Mean diffusivity within DTI atlas tract right striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_sifclh	Mean diffusivity within DTI atlas tract left striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_ifsfcrh	Mean diffusivity within DTI atlas tract right inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_ifsfclh	Mean diffusivity within DTI atlas tract left inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_fxcutrh	Mean diffusivity within DTI atlas tract right fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_fxcutlh	Mean diffusivity within DTI atlas tract left fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtimd_fiberat_allfibers	Mean diffusivity within all DTI atlas tract fibers
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_fxrh	Average longitudinal diffusion coefficient within DTI atlas tract right fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_fxlh	Average longitudinal diffusion coefficient within DTI atlas tract left fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_cgcrh	Average longitudinal diffusion coefficient within DTI atlas tract right cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_cgclh	Average longitudinal diffusion coefficient within DTI atlas tract left cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_cghrh	Average longitudinal diffusion coefficient within DTI atlas tract right parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_cghlh	Average longitudinal diffusion coefficient within DTI atlas tract left parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_cstrh	Average longitudinal diffusion coefficient within DTI atlas tract right corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_cstlh	Average longitudinal diffusion coefficient within DTI atlas tract left corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_atrrh	Average longitudinal diffusion coefficient within DTI atlas tract right anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_atrlh	Average longitudinal diffusion coefficient within DTI atlas tract left anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_uncrh	Average longitudinal diffusion coefficient within DTI atlas tract right uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_unclh	Average longitudinal diffusion coefficient within DTI atlas tract left uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_ilfrh	Average longitudinal diffusion coefficient within DTI atlas tract right inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_ilflh	Average longitudinal diffusion coefficient within DTI atlas tract left inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_iforh	Average longitudinal diffusion coefficient within DTI atlas tract right inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_ifolh	Average longitudinal diffusion coefficient within DTI atlas tract left inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_fmaj	Average longitudinal diffusion coefficient within DTI atlas tract foreceps major
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_fmin	Average longitudinal diffusion coefficient within DTI atlas tract foreceps minor
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_cc	Average longitudinal diffusion coefficient within DTI atlas tract corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_slfrh	Average longitudinal diffusion coefficient within DTI atlas tract right superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_slflh	Average longitudinal diffusion coefficient within DTI atlas tract left superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_tslfrh	Average longitudinal diffusion coefficient within DTI atlas tract right  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_tslflh	Average longitudinal diffusion coefficient within DTI atlas tract left  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_pslfrh	Average longitudinal diffusion coefficient within DTI atlas tract right parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_pslflh	Average longitudinal diffusion coefficient within DTI atlas tract left parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_scsrh	Average longitudinal diffusion coefficient within DTI atlas tract right superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_scslh	Average longitudinal diffusion coefficient within DTI atlas tract left superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_fscsrh	Average longitudinal diffusion coefficient within DTI atlas tract right superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_fscslh	Average longitudinal diffusion coefficient within DTI atlas tract left superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_pscsrh	Average longitudinal diffusion coefficient within DTI atlas tract right superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_pscslh	Average longitudinal diffusion coefficient within DTI atlas tract left superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_sifcrh	Average longitudinal diffusion coefficient within DTI atlas tract right striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_sifclh	Average longitudinal diffusion coefficient within DTI atlas tract left striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_ifsfcrh	Average longitudinal diffusion coefficient within DTI atlas tract right inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_ifsfclh	Average longitudinal diffusion coefficient within DTI atlas tract left inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_fxcutrh	Average longitudinal diffusion coefficient within DTI atlas tract right fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_fxcutlh	Average longitudinal diffusion coefficient within DTI atlas tract left fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_allfibers	Average longitudinal diffusion coefficient within all DTI atlas tract fibers
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_allfccrh	Average longitudinal diffusion coefficient within right hemisphere DTI atlas tract fibers without corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_allfocclh	Average longitudinal diffusion coefficient within left hemisphere DTI atlas tract fibers without corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_allfibrh	Average longitudinal diffusion coefficient within right hemisphere DTI atlas tract fibers
+MRI_T_roi	abcd_dti_p101	dmri_dtild_fiberat_allfiblh	Average longitudinal diffusion coefficient within left hemisphere DTI atlas tract fibers
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_fxrh	Average transverse diffusion coefficient within DTI atlas tract right fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_fxlh	Average transverse diffusion coefficient within DTI atlas tract left fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_cgcrh	Average transverse diffusion coefficient within DTI atlas tract right cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_cgclh	Average transverse diffusion coefficient within DTI atlas tract left cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_cghrh	Average transverse diffusion coefficient within DTI atlas tract right parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_cghlh	Average transverse diffusion coefficient within DTI atlas tract left parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_cstrh	Average transverse diffusion coefficient within DTI atlas tract right corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_cstlh	Average transverse diffusion coefficient within DTI atlas tract left corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_atrrh	Average transverse diffusion coefficient within DTI atlas tract right anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_atrlh	Average transverse diffusion coefficient within DTI atlas tract left anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_uncrh	Average transverse diffusion coefficient within DTI atlas tract right uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_unclh	Average transverse diffusion coefficient within DTI atlas tract left uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_ilfrh	Average transverse diffusion coefficient within DTI atlas tract right inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_ilflh	Average transverse diffusion coefficient within DTI atlas tract left inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_iforh	Average transverse diffusion coefficient within DTI atlas tract right inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_ifolh	Average transverse diffusion coefficient within DTI atlas tract left inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_fmaj	Average transverse diffusion coefficient within DTI atlas tract foreceps major
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_fmin	Average transverse diffusion coefficient within DTI atlas tract foreceps minor
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_cc	Average transverse diffusion coefficient within DTI atlas tract corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_slfrh	Average transverse diffusion coefficient within DTI atlas tract right superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_slflh	Average transverse diffusion coefficient within DTI atlas tract left superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_tslfrh	Average transverse diffusion coefficient within DTI atlas tract right  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_tslflh	Average transverse diffusion coefficient within DTI atlas tract left  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_pslfrh	Average transverse diffusion coefficient within DTI atlas tract right parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_pslflh	Average transverse diffusion coefficient within DTI atlas tract left parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_scsrh	Average transverse diffusion coefficient within DTI atlas tract right superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_scslh	Average transverse diffusion coefficient within DTI atlas tract left superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_fscsrh	Average transverse diffusion coefficient within DTI atlas tract right superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_fscslh	Average transverse diffusion coefficient within DTI atlas tract left superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_pscsrh	Average transverse diffusion coefficient within DTI atlas tract right superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_pscslh	Average transverse diffusion coefficient within DTI atlas tract left superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_sifcrh	Average transverse diffusion coefficient within DTI atlas tract right striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_sifclh	Average transverse diffusion coefficient within DTI atlas tract left striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_ifsfcrh	Average transverse diffusion coefficient within DTI atlas tract right inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_ifsfclh	Average transverse diffusion coefficient within DTI atlas tract left inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_fxcutrh	Average transverse diffusion coefficient within DTI atlas tract right fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_fxcutlh	Average transverse diffusion coefficient within DTI atlas tract left fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_allfibers	Average transverse diffusion coefficient within all DTI atlas tract fibers
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_allfccrh	Average transverse diffusion coefficient within right hemisphere DTI atlas tract fibers without corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_allfcclh	Average transverse diffusion coefficient within left hemisphere DTI atlas tract fibers without corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_allfibrh	Average transverse diffusion coefficient within right hemisphere DTI atlas tract fibers
+MRI_T_roi	abcd_dti_p101	dmri_dtitd_fiberat_allfiblh	Average transverse diffusion coefficient within left hemisphere DTI atlas tract fibers
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_fxrh	Fiber tract volume in mm^3 of DTI atlas tract right fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_fxlh	Fiber tract volume in mm^3 of DTI atlas tract left fornix
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_cgcrh	Fiber tract volume in mm^3 of DTI atlas tract right cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_cgclh	Fiber tract volume in mm^3 of DTI atlas tract left cingulate cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_cghrh	Fiber tract volume in mm^3 of DTI atlas tract right parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_cghlh	Fiber tract volume in mm^3 of DTI atlas tract left parahippocampal cingulum
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_cstrh	Fiber tract volume in mm^3 of DTI atlas tract right corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_cstlh	Fiber tract volume in mm^3 of DTI atlas tract left corticospinal/pyramidal
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_atrrh	Fiber tract volume in mm^3 of DTI atlas tract right anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_atrlh	Fiber tract volume in mm^3 of DTI atlas tract left anterior thalamic radiations
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_uncrh	Fiber tract volume in mm^3 of DTI atlas tract right uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_unclh	Fiber tract volume in mm^3 of DTI atlas tract left uncinate
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_ilfrh	Fiber tract volume in mm^3 of DTI atlas tract right inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_ilflh	Fiber tract volume in mm^3 of DTI atlas tract left inferior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_iforh	Fiber tract volume in mm^3 of DTI atlas tract right inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_ifolh	Fiber tract volume in mm^3 of DTI atlas tract left inferior-fronto-occipital fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_fmaj	Fiber tract volume in mm^3 of DTI atlas tract foreceps major
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_fmin	Fiber tract volume in mm^3 of DTI atlas tract foreceps minor
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_cc	Fiber tract volume in mm^3 of DTI atlas tract corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_slfrh	Fiber tract volume in mm^3 of DTI atlas tract right superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_slflh	Fiber tract volume in mm^3 of DTI atlas tract left superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_tslfrh	Fiber tract volume in mm^3 of DTI atlas tract right  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_tslflh	Fiber tract volume in mm^3 of DTI atlas tract left  temporal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_pslfrh	Fiber tract volume in mm^3 of DTI atlas tract right parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_pslflh	Fiber tract volume in mm^3 of DTI atlas tract left parietal superior longitudinal fasiculus
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_scsrh	Fiber tract volume in mm^3 of DTI atlas tract right superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_scslh	Fiber tract volume in mm^3 of DTI atlas tract left superior corticostriate
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_fscsrh	Fiber tract volume in mm^3 of DTI atlas tract right superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_fscslh	Fiber tract volume in mm^3 of DTI atlas tract left superior corticostriate-frontal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_pscsrh	Fiber tract volume in mm^3 of DTI atlas tract right superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_pscslh	Fiber tract volume in mm^3 of DTI atlas tract left superior corticostriate-parietal cortex only
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_sifcrh	Fiber tract volume in mm^3 of DTI atlas tract right striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_sifclh	Fiber tract volume in mm^3 of DTI atlas tract left striatal inferior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_ifsfcrh	Fiber tract volume in mm^3 of DTI atlas tract right inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_ifsfclh	Fiber tract volume in mm^3 of DTI atlas tract left inferior frontal superior frontal cortex
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_fxcutrh	Fiber tract volume in mm^3 of DTI atlas tract right fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_fxcutlh	Fiber tract volume in mm^3 of DTI atlas tract left fornix, excluding fimbria
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_allfibers	Fiber tract volume in mm^3 of all DTI atlas tract fiber tracts
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_allfccrh	Fiber tract volume in mm^3 of right hemisphere DTI atlas tract fiber tracts without corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_allfcclh	Fiber tract volume in mm^3 of left hemisphere DTI atlas tract fiber tracts without corpus callosum
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_allfibrh	Fiber tract volume in mm^3 of right hemisphere DTI atlas tract fiber tracts
+MRI_T_roi	abcd_dti_p101	dmri_dtivol_fiberat_allfiblh	Fiber tract volume in mm^3 of left hemisphere DTI atlas tract fiber tracts

@@ -1,0 +1,25 @@
+short_name,description,category
+meim_p_ss_total,Parent: Multi-group ethnic identity (total scale),cultural and social environment
+via_p_ss_hc,Parent: Vancouver index of acculturation (heritage culture),cultural and social environment
+via_p_ss_amer,Parent: Vancouver index of acculturation (American 'mainstream' culture),cultural and social environment
+nsc_p_ss_mean_3_items,Parent: Neighbourhood safety,cultural and social environment
+fes_p_ss_fc_pr,Parent: Family conflict,family environment
+macv_p_ss_fs,Parent: Mexican American Cultural Values Scale (family support),cultural and social environment
+macv_p_ss_fo,Parent: Mexican American Cultural Values Scale (family obligation),cultural and social environment
+macv_p_ss_isr,Parent: Mexican American Cultural Values Scale (independence and self-reliance),cultural and social environment
+macv_p_ss_fr,Parent: Mexican American Cultural Values Scale (family as referent),cultural and social environment
+macv_p_ss_r,Parent: Mexican American Cultural Values Scale (religion),cultural and social environment
+psb_p_ss_mean,Parent: Prosocial behaviour,family environment
+pmq_y_ss_mean,Child: Parent monitoring,family environment
+fes_y_ss_fc_pr,Child: Family conflicet,family environment
+psb_y_ss_mean,Child: Prosocial behaviour,family environment
+crpbi_y_ss_parent,Child: acceptance by parent,family environment
+crpbi_y_ss_caregiver,Child: acceptance by secondary caregiver,family environment
+srpf_y_ss_ses,Child: School risk and protective factors (school environment),cultural and social environment
+srpf_y_ss_iiss,Child: School risk and protective factors (school involvement),cultural and social environment
+srpf_y_ss_dfs,Child: School risk and protective factors (school disengagement),cultural and social environment
+sds_p_ss_total,Parent: Sleep Disturbance Scale (total scale),physical health
+pds_p_ss_male_category,Parent: Pubertal development scale (male),physical health
+pds_p_ss_female_category,Parent: Pubertal development scale (female),physical health
+household_income,Household income, Sociodemographic status
+fam_highest_edu,Family highest education, Sociodemographic status
