@@ -12,6 +12,9 @@ knitr::opts_chunk$set(echo = FALSE)
 The purpose of this script is to generate a summary depression ratings from the CBCL. This script is adapted from "PREP.Questionnaires.R" by X.Shen 
 
 #### SETUP
+
+Load libraries needed and set working directory
+
 Load libraries needed and set working directory
 ```{r, load libraries, data, set wd}
 
@@ -63,4 +66,3 @@ targetdat=questn.dat
 targetdat.clean=targetdat
 
 ```
-

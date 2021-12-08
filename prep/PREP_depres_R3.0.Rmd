@@ -348,12 +348,13 @@ In targetdat.clean (all columns below are life-time measures):
  - KSADS.MDD.p: MDD diagnosis based on caregiver report
  - KSADS.Dep_symptoms_sum_ever.y: no. of depressive symptoms reported based on child report
  - KSADS.Dep_symptoms_sum_ever.p: no. of depressive symptoms reported based on caregiver report
- - KSADS.Depressive_symptoms_ever.y: DSM-V depressive symptoms reported by children
- - KSADS.Depressive_symptoms_ever.p: DSM-V depressive symptoms reported by caregivers
+ - KSADS.Depressive_symptoms_ever.y: Oridnal Measure: DSM-V depressive symptoms reported by children
+ - KSADS.Depressive_symptoms_ever.p: Ordinal Measure: DSM-V depressive symptoms reported by caregivers
  
  -----------------END OF SHEN'S SCRIPT---------------------
  
- Inspect new column outputs. Check to see levels within DS severity for youth and parent.
+ Inspect new column outputs. Check to see levels within DS severity for youth and parent (KSADS.Depressive_symptoms_ever.p)
+ 
  They are coded as follows: 0=none, 1=mild, 2=moderate 3=severe. 
  
  Export clean variables for use in models, as outlined in Outputs.  

@@ -1,0 +1,381 @@
+Category	File.name	Field.name	Description
+MRI_T_roi	abcd_mrisdp101	src_subject_id	'''Subject ID how it''''s defined in lab/project'''
+MRI_T_roi	abcd_mrisdp101	interview_age	Age in months at the time of the interview/test/sampling/imaging.
+MRI_T_roi	abcd_mrisdp101	interview_date	Date on which the interview/genetic test/sampling/imaging/biospecimen was completed. MM/DD/YYYY
+MRI_T_roi	abcd_mrisdp101	sex	Sex of the subject
+MRI_QC	abcd_mrfindings01	mrif_score	Report Score
+MRI_QC	abcd_mrfindings01	mrif_hydrocephalus	Hydrocephalus?
+MRI_QC	abcd_mrfindings01	mrif_herniation	Herniation?
+MRI_QC	freesqc01	fsqc_container_type	Container type
+MRI_QC	freesqc01	mexamtp	series type
+MRI_QC	freesqc01	fsqc_nrev	Number of reviews
+MRI_QC	freesqc01	fsqc_revdisp	Number of reviews with disparity
+MRI_QC	freesqc01	fsqc_qc	QC score
+MRI_QC	freesqc01	fsqc_qu_motion	Motion score
+MRI_QC	freesqc01	fsqc_qu_pialover	Pial overestimation score
+MRI_QC	freesqc01	fsqc_qu_wmunder	White matter underestimation score
+MRI_QC	freesqc01	fsqc_qu_inhomogeneity	Inhomogeneity score
+MRI_QC	freesqc01	fsqc_qu_artifact	Artifact score
+MRI_QC	mriqcrp102	iqc_t1_1_suid	T1 #1: Study instance UID
+MRI_QC	mriqcrp102	iqc_t1_1_seuid	T1 #1: Series instance UID
+MRI_QC	mriqcrp102	iqc_t1_1_studydate	T1 #1: Study date
+MRI_QC	mriqcrp102	iqc_t1_1_seriestime	T1 #1: Series time
+MRI_QC	mriqcrp102	iqc_t1_1_qc_score	T1 #1: QC score of 1 (pass) or 0 (fail)
+MRI_QC	mriqcrp102	iqc_t1_1_pc_score	T1 #1: Protocol compliance score of 1 (pass) or 0 (fail)
+MRI_QC	mriqcrp102	iqc_t1_1_complete	T1 #1: DAIC received correct number of files for this series (1=pass, 0=fail)
+MRI_QC	mriqcrp102	iqc_t1_1_voxvol	T1 #1: Volume of single voxel (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_1_brainvol	T1 #1: Volume of brain mask (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_1_brain_mean	T1 #1: Mean intensity within brain mask
+MRI_QC	mriqcrp102	iqc_t1_1_brain_std	T1 #1: Standard deviation of intensities within brain mask
+MRI_QC	mriqcrp102	iqc_t1_2_suid	T1 #2: Study instance UID
+MRI_QC	mriqcrp102	iqc_t1_2_seuid	T1 #2: Series instance UID
+MRI_QC	mriqcrp102	iqc_t1_2_studydate	T1 #2: Study date
+MRI_QC	mriqcrp102	iqc_t1_2_seriestime	T1 #2: Series time
+MRI_QC	mriqcrp102	iqc_t1_2_qc_score	T1 #2: QC score of 1 (pass) or 0 (fail)
+MRI_QC	mriqcrp102	iqc_t1_2_pc_score	T1 #2: Protocol compliance score of 1 (pass) or 0 (fail)
+MRI_QC	mriqcrp102	iqc_t1_2_complete	T1 #2: DAIC received correct number of files for this series (1=pass,  0=fail)
+MRI_QC	mriqcrp102	iqc_t1_2_voxvol	T1 #2: Volume of single voxel (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_2_brainvol	T1 #2: Volume of brain mask (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_2_brain_mean	T1 #2: Mean intensity within brain mask
+MRI_QC	mriqcrp102	iqc_t1_2_brain_std	T1 #2: Standard deviation of intensities within brain mask
+MRI_QC	mriqcrp102	iqc_t1_3_suid	T1 #3: Study instance UID
+MRI_QC	mriqcrp102	iqc_t1_3_seuid	T1 #3: Series instance UID
+MRI_QC	mriqcrp102	iqc_t1_3_studydate	T1 #3: Study date
+MRI_QC	mriqcrp102	iqc_t1_3_seriestime	T1 #3: Series time
+MRI_QC	mriqcrp102	iqc_t1_3_qc_score	T1 #3: QC score of 1 (pass) or 0 (fail)
+MRI_QC	mriqcrp102	iqc_t1_3_pc_score	T1 #3: Protocol compliance score of 1 (pass) or 0 (fail)
+MRI_QC	mriqcrp102	iqc_t1_3_complete	T1 #3: DAIC received correct number of files for this series (1=pass,  0=fail)
+MRI_QC	mriqcrp102	iqc_t1_3_voxvol	T1 #3: Volume of single voxel (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_3_brainvol	T1 #3: Volume of brain mask (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_3_brain_mean	T1 #3: Mean intensity within brain mask
+MRI_QC	mriqcrp102	iqc_t1_3_brain_std	T1 #3: Standard deviation of intensities within brain mask
+MRI_QC	mriqcrp102	iqc_t1_total_ser	T1: Total number received
+MRI_QC	mriqcrp102	iqc_t1_total_passpc	T1: Number that passed protocol compliance
+MRI_QC	mriqcrp102	iqc_t1_total_passqc	T1: Number that passed visual quality control (QC)
+MRI_QC	mriqcrp102	iqc_t1_good_ser	T1: Number that passed protocol compliance and QC
+MRI_QC	mriqcrp102	iqc_t1_ok_ser	T1: Number of series that are complete and passed QC (ignoring PC)
+MRI_QC	mriqcrp102	iqc_t1_bad_ser	T1: Number that failed either protocol compliance or QC
+MRI_QC	mriqcrp102	iqc_t1_ser_pc_issues	T1: Number with protocol compliance issues
+MRI_QC	mriqcrp102	iqc_t1_ser_qcs	T1: Number with QC issues
+MRI_QC	mriqcrp102	iqc_t1_ser_incomp	T1: Number of series missing files at DAIC
+MRI_QC	mriqcrp102	iqc_t1_dis_qc	T1: Number with distortion artifact
+MRI_QC	mriqcrp102	iqc_t1_dco_qc	T1: Number with dorsal cut-off
+MRI_QC	mriqcrp102	iqc_t1_fa_qc	T1: Number with fractional anisotropy map issues
+MRI_QC	mriqcrp102	iqc_t1_gh_qc	T1: Number with ghosting
+MRI_QC	mriqcrp102	iqc_t1_ht_qc	T1: Number with head tilt
+MRI_QC	mriqcrp102	iqc_t1_hb_qc	T1: Number with horizontal banding
+MRI_QC	mriqcrp102	iqc_t1_mo_qc	T1: Number with motion artifact
+MRI_QC	mriqcrp102	iqc_t1_rf_qc	T1: Number with radio frequency artifact
+MRI_QC	mriqcrp102	iqc_t1_sd_qc	T1: Number with signal dropout
+MRI_QC	mriqcrp102	iqc_t1_si_qc	T1: Number with signal inhomogeneity
+MRI_QC	mriqcrp102	iqc_t1_sus_qc	T1: Number with susceptibility artifact
+MRI_QC	mriqcrp102	iqc_t1_vco_qc	T1: Number with ventral cut-off
+MRI_QC	mriqcrp102	iqc_t1_wr_qc	T1: Number with wrapping
+MRI_QC	mriqcrp102	iqc_t1_slice_qc	T1: Number with slice interleaving issues
+MRI_QC	mriqcrp102	iqc_t1_dark_qc	T1: Number with dark slice artifact
+MRI_QC	mriqcrp102	iqc_t1_moire_qc	T1: Number with moire artifact
+MRI_QC	mriqcrp102	iqc_t1_recon_qc	T1: Number with reconstruction error
+MRI_QC	mriqcrp102	iqc_t1_miss_qc	T1: Number with missing p-files
+MRI_QC	mriqcrp102	iqc_t1_other_qc	T1: Number with other QC issue
+MRI_QC	mriqcrp102	iqc_t1_all_voxvol	T1: Mean volume of single voxel averaged across all scans (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_ok_voxvol	T1: Mean volume of single voxel averaged across all OK scans (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_all_brainvol	T1: Mean volume of brain mask averaged across all scans (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_ok_brainvol	T1: Mean volume of brain mask averaged across all OK scans (mm^3)
+MRI_QC	mriqcrp102	iqc_t1_all_brain_mean	T1: Mean intensity within brain mask averaged across all scans
+MRI_QC	mriqcrp102	iqc_t1_ok_brain_mean	T1: Mean intensity within brain mask averaged across all OK scans
+MRI_QC	mriqcrp102	iqc_t1_all_brain_std	T1: Standard deviation of intensities within brain mask averaged across all scans
+MRI_QC	mriqcrp102	iqc_t1_ok_brain_std	T1: Standard deviation of intensities within brain mask averaged across all OK scans
+MRI_T_roi	abcd_smrip201	smri_vol_scs_intracranialv	Volume in mm^3 of ASEG ROI intracranialvolume
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_banksstslh	Cortical thickness in mm of APARC ROI lh-Banks of Superior Temporal Sulcus
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_cdacatelh	Cortical thickness in mm of APARC ROI lh-caudalanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_cdmdfrlh	Cortical thickness in mm of APARC ROI lh-caudalmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_cuneuslh	Cortical thickness in mm of APARC ROI lh-cuneus
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_ehinallh	Cortical thickness in mm of APARC ROI lh-entorhinal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_fusiformlh	Cortical thickness in mm of APARC ROI lh-fusiform
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_ifpllh	Cortical thickness in mm of APARC ROI lh-inferiorparietal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_iftmlh	Cortical thickness in mm of APARC ROI lh-inferiortemporal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_ihcatelh	Cortical thickness in mm of APARC ROI lh-isthmuscingulate
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_locclh	Cortical thickness in mm of APARC ROI lh-lateraloccipital
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_lobfrlh	Cortical thickness in mm of APARC ROI lh-lateralorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_linguallh	Cortical thickness in mm of APARC ROI lh-lingual
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_mobfrlh	Cortical thickness in mm of APARC ROI lh-medialorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_mdtmlh	Cortical thickness in mm of APARC ROI lh-middletemporal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_parahpallh	Cortical thickness in mm of APARC ROI lh-parahippocampal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_paracnlh	Cortical thickness in mm of APARC ROI lh-paracentral
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_parsopclh	Cortical thickness in mm of APARC ROI lh-parsopercularis
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_parsobislh	Cortical thickness in mm of APARC ROI lh-parsorbitalis
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_parstgrislh	Cortical thickness in mm of APARC ROI lh-parstriangularis
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_pericclh	Cortical thickness in mm of APARC ROI lh-pericalcarine
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_postcnlh	Cortical thickness in mm of APARC ROI lh-postcentral
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_ptcatelh	Cortical thickness in mm of APARC ROI lh-posteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_precnlh	Cortical thickness in mm of APARC ROI lh-precentral
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_pclh	Cortical thickness in mm of APARC ROI lh-precuneus
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_rracatelh	Cortical thickness in mm of APARC ROI lh-rostralanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_rrmdfrlh	Cortical thickness in mm of APARC ROI lh-rostralmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_sufrlh	Cortical thickness in mm of APARC ROI lh-superiorfrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_supllh	Cortical thickness in mm of APARC ROI lh-superiorparietal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_sutmlh	Cortical thickness in mm of APARC ROI lh-superiortemporal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_smlh	Cortical thickness in mm of APARC ROI lh-supramarginal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_frpolelh	Cortical thickness in mm of APARC ROI lh-frontalpole
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_tmpolelh	Cortical thickness in mm of APARC ROI lh-temporalpole
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_trvtmlh	Cortical thickness in mm of APARC ROI lh-transversetemporal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_insulalh	Cortical thickness in mm of APARC ROI lh-insula
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_banksstsrh	Cortical thickness in mm of APARC ROI rh-Banks of Superior Temporal Sulcus
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_cdacaterh	Cortical thickness in mm of APARC ROI rh-caudalanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_cdmdfrrh	Cortical thickness in mm of APARC ROI rh-caudalmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_cuneusrh	Cortical thickness in mm of APARC ROI rh-cuneus
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_ehinalrh	Cortical thickness in mm of APARC ROI rh-entorhinal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_fusiformrh	Cortical thickness in mm of APARC ROI rh-fusiform
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_ifplrh	Cortical thickness in mm of APARC ROI rh-inferiorparietal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_iftmrh	Cortical thickness in mm of APARC ROI rh-inferiortemporal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_ihcaterh	Cortical thickness in mm of APARC ROI rh-isthmuscingulate
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_loccrh	Cortical thickness in mm of APARC ROI rh-lateraloccipital
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_lobfrrh	Cortical thickness in mm of APARC ROI rh-lateralorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_lingualrh	Cortical thickness in mm of APARC ROI rh-lingual
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_mobfrrh	Cortical thickness in mm of APARC ROI rh-medialorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_mdtmrh	Cortical thickness in mm of APARC ROI rh-middletemporal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_parahpalrh	Cortical thickness in mm of APARC ROI rh-parahippocampal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_paracnrh	Cortical thickness in mm of APARC ROI rh-paracentral
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_parsopcrh	Cortical thickness in mm of APARC ROI rh-parsopercularis
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_parsobisrh	Cortical thickness in mm of APARC ROI rh-parsorbitalis
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_parstgrisrh	Cortical thickness in mm of APARC ROI rh-parstriangularis
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_periccrh	Cortical thickness in mm of APARC ROI rh-pericalcarine
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_postcnrh	Cortical thickness in mm of APARC ROI rh-postcentral
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_ptcaterh	Cortical thickness in mm of APARC ROI rh-posteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_precnrh	Cortical thickness in mm of APARC ROI rh-precentral
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_pcrh	Cortical thickness in mm of APARC ROI rh-precuneus
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_rracaterh	Cortical thickness in mm of APARC ROI rh-rostralanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_rrmdfrrh	Cortical thickness in mm of APARC ROI rh-rostralmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_sufrrh	Cortical thickness in mm of APARC ROI rh-superiorfrontal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_suplrh	Cortical thickness in mm of APARC ROI rh-superiorparietal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_sutmrh	Cortical thickness in mm of APARC ROI rh-superiortemporal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_smrh	Cortical thickness in mm of APARC ROI rh-supramarginal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_frpolerh	Cortical thickness in mm of APARC ROI rh-frontalpole
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_tmpolerh	Cortical thickness in mm of APARC ROI rh-temporalpole
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_trvtmrh	Cortical thickness in mm of APARC ROI rh-transversetemporal
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_insularh	Cortical thickness in mm of APARC ROI rh-insula
+MRI_T_roi	abcd_smrip101	smri_thick_cdk_mean	Mean cortical thickness in mm for whole brain
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_banksstslh	Cortical sulcal depth in mm of APARC ROI lh-Banks of Superior Temporal Sulcus
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_cdacatelh	Cortical sulcal depth in mm of APARC ROI lh-caudalanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_cdmdfrlh	Cortical sulcal depth in mm of APARC ROI lh-caudalmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_cuneuslh	Cortical sulcal depth in mm of APARC ROI lh-cuneus
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_ehinallh	Cortical sulcal depth in mm of APARC ROI lh-entorhinal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_fusiformlh	Cortical sulcal depth in mm of APARC ROI lh-fusiform
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_ifpllh	Cortical sulcal depth in mm of APARC ROI lh-inferiorparietal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_iftmlh	Cortical sulcal depth in mm of APARC ROI lh-inferiortemporal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_ihcatelh	Cortical sulcal depth in mm of APARC ROI lh-isthmuscingulate
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_locclh	Cortical sulcal depth in mm of APARC ROI lh-lateraloccipital
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_lobfrlh	Cortical sulcal depth in mm of APARC ROI lh-lateralorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_linguallh	Cortical sulcal depth in mm of APARC ROI lh-lingual
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_mobfrlh	Cortical sulcal depth in mm of APARC ROI lh-medialorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_mdtmlh	Cortical sulcal depth in mm of APARC ROI lh-middletemporal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_parahpallh	Cortical sulcal depth in mm of APARC ROI lh-parahippocampal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_paracnlh	Cortical sulcal depth in mm of APARC ROI lh-paracentral
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_parsopclh	Cortical sulcal depth in mm of APARC ROI lh-parsopercularis
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_parsobislh	Cortical sulcal depth in mm of APARC ROI lh-parsorbitalis
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_parstgrislh	Cortical sulcal depth in mm of APARC ROI lh-parstriangularis
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_pericclh	Cortical sulcal depth in mm of APARC ROI lh-pericalcarine
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_postcnlh	Cortical sulcal depth in mm of APARC ROI lh-postcentral
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_ptcatelh	Cortical sulcal depth in mm of APARC ROI lh-posteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_precnlh	Cortical sulcal depth in mm of APARC ROI lh-precentral
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_pclh	Cortical sulcal depth in mm of APARC ROI lh-precuneus
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_rracatelh	Cortical sulcal depth in mm of APARC ROI lh-rostralanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_rrmdfrlh	Cortical sulcal depth in mm of APARC ROI lh-rostralmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_sufrlh	Cortical sulcal depth in mm of APARC ROI lh-superiorfrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_supllh	Cortical sulcal depth in mm of APARC ROI lh-superiorparietal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_sutmlh	Cortical sulcal depth in mm of APARC ROI lh-superiortemporal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_smlh	Cortical sulcal depth in mm of APARC ROI lh-supramarginal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_frpolelh	Cortical sulcal depth in mm of APARC ROI lh-frontalpole
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_tmpolelh	Cortical sulcal depth in mm of APARC ROI lh-temporalpole
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_trvtmlh	Cortical sulcal depth in mm of APARC ROI lh-transversetemporal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_insulalh	Cortical sulcal depth in mm of APARC ROI lh-insula
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_banksstsrh	Cortical sulcal depth in mm of APARC ROI rh-Banks of Superior Temporal Sulcus
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_cdacaterh	Cortical sulcal depth in mm of APARC ROI rh-caudalanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_cdmdfrrh	Cortical sulcal depth in mm of APARC ROI rh-caudalmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_cuneusrh	Cortical sulcal depth in mm of APARC ROI rh-cuneus
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_ehinalrh	Cortical sulcal depth in mm of APARC ROI rh-entorhinal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_fusiformrh	Cortical sulcal depth in mm of APARC ROI rh-fusiform
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_ifplrh	Cortical sulcal depth in mm of APARC ROI rh-inferiorparietal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_iftmrh	Cortical sulcal depth in mm of APARC ROI rh-inferiortemporal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_ihcaterh	Cortical sulcal depth in mm of APARC ROI rh-isthmuscingulate
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_loccrh	Cortical sulcal depth in mm of APARC ROI rh-lateraloccipital
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_lobfrrh	Cortical sulcal depth in mm of APARC ROI rh-lateralorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_lingualrh	Cortical sulcal depth in mm of APARC ROI rh-lingual
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_mobfrrh	Cortical sulcal depth in mm of APARC ROI rh-medialorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_mdtmrh	Cortical sulcal depth in mm of APARC ROI rh-middletemporal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_parahpalrh	Cortical sulcal depth in mm of APARC ROI rh-parahippocampal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_paracnrh	Cortical sulcal depth in mm of APARC ROI rh-paracentral
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_parsopcrh	Cortical sulcal depth in mm of APARC ROI rh-parsopercularis
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_parsobisrh	Cortical sulcal depth in mm of APARC ROI rh-parsorbitalis
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_parstgrisrh	Cortical sulcal depth in mm of APARC ROI rh-parstriangularis
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_periccrh	Cortical sulcal depth in mm of APARC ROI rh-pericalcarine
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_postcnrh	Cortical sulcal depth in mm of APARC ROI rh-postcentral
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_ptcaterh	Cortical sulcal depth in mm of APARC ROI rh-posteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_precnrh	Cortical sulcal depth in mm of APARC ROI rh-precentral
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_pcrh	Cortical sulcal depth in mm of APARC ROI rh-precuneus
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_rracaterh	Cortical sulcal depth in mm of APARC ROI rh-rostralanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_rrmdfrrh	Cortical sulcal depth in mm of APARC ROI rh-rostralmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_sufrrh	Cortical sulcal depth in mm of APARC ROI rh-superiorfrontal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_suplrh	Cortical sulcal depth in mm of APARC ROI rh-superiorparietal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_sutmrh	Cortical sulcal depth in mm of APARC ROI rh-superiortemporal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_smrh	Cortical sulcal depth in mm of APARC ROI rh-supramarginal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_frpolerh	Cortical sulcal depth in mm of APARC ROI rh-frontalpole
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_tmpolerh	Cortical sulcal depth in mm of APARC ROI rh-temporalpole
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_trvtmrh	Cortical sulcal depth in mm of APARC ROI rh-transversetemporal
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_insularh	Cortical sulcal depth in mm of APARC ROI rh-insula
+MRI_T_roi	abcd_smrip101	smri_sulc_cdk_mean	Mean Cortical Sulcal Depth in mm for whole brain
+MRI_T_roi	abcd_smrip101	smri_area_cdk_banksstslh	Cortical area in mm^2 of APARC ROI lh-Banks of Superior Temporal Sulcus
+MRI_T_roi	abcd_smrip101	smri_area_cdk_cdacatelh	Cortical area in mm^2 of APARC ROI lh-caudalanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_area_cdk_cdmdfrlh	Cortical area in mm^2 of APARC ROI lh-caudalmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_cuneuslh	Cortical area in mm^2 of APARC ROI lh-cuneus
+MRI_T_roi	abcd_smrip101	smri_area_cdk_ehinallh	Cortical area in mm^2 of APARC ROI lh-entorhinal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_fusiformlh	Cortical area in mm^2 of APARC ROI lh-fusiform
+MRI_T_roi	abcd_smrip101	smri_area_cdk_ifpllh	Cortical area in mm^2 of APARC ROI lh-inferiorparietal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_iftmlh	Cortical area in mm^2 of APARC ROI lh-inferiortemporal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_ihcatelh	Cortical area in mm^2 of APARC ROI lh-isthmuscingulate
+MRI_T_roi	abcd_smrip101	smri_area_cdk_locclh	Cortical area in mm^2 of APARC ROI lh-lateraloccipital
+MRI_T_roi	abcd_smrip101	smri_area_cdk_lobfrlh	Cortical area in mm^2 of APARC ROI lh-lateralorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_linguallh	Cortical area in mm^2 of APARC ROI lh-lingual
+MRI_T_roi	abcd_smrip101	smri_area_cdk_mobfrlh	Cortical area in mm^2 of APARC ROI lh-medialorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_mdtmlh	Cortical area in mm^2 of APARC ROI lh-middletemporal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_parahpallh	Cortical area in mm^2 of APARC ROI lh-parahippocampal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_paracnlh	Cortical area in mm^2 of APARC ROI lh-paracentral
+MRI_T_roi	abcd_smrip101	smri_area_cdk_parsopclh	Cortical area in mm^2 of APARC ROI lh-parsopercularis
+MRI_T_roi	abcd_smrip101	smri_area_cdk_parsobislh	Cortical area in mm^2 of APARC ROI lh-parsorbitalis
+MRI_T_roi	abcd_smrip101	smri_area_cdk_parstgrislh	Cortical area in mm^2 of APARC ROI lh-parstriangularis
+MRI_T_roi	abcd_smrip101	smri_area_cdk_pericclh	Cortical area in mm^2 of APARC ROI lh-pericalcarine
+MRI_T_roi	abcd_smrip101	smri_area_cdk_postcnlh	Cortical area in mm^2 of APARC ROI lh-postcentral
+MRI_T_roi	abcd_smrip101	smri_area_cdk_ptcatelh	Cortical area in mm^2 of APARC ROI lh-posteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_area_cdk_precnlh	Cortical area in mm^2 of APARC ROI lh-precentral
+MRI_T_roi	abcd_smrip101	smri_area_cdk_pclh	Cortical area in mm^2 of APARC ROI lh-precuneus
+MRI_T_roi	abcd_smrip101	smri_area_cdk_rracatelh	Cortical area in mm^2 of APARC ROI lh-rostralanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_area_cdk_rrmdfrlh	Cortical area in mm^2 of APARC ROI lh-rostralmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_sufrlh	Cortical area in mm^2 of APARC ROI lh-superiorfrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_supllh	Cortical area in mm^2 of APARC ROI lh-superiorparietal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_sutmlh	Cortical area in mm^2 of APARC ROI lh-superiortemporal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_smlh	Cortical area in mm^2 of APARC ROI lh-supramarginal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_frpolelh	Cortical area in mm^2 of APARC ROI lh-frontalpole
+MRI_T_roi	abcd_smrip101	smri_area_cdk_tmpolelh	Cortical area in mm^2 of APARC ROI lh-temporalpole
+MRI_T_roi	abcd_smrip101	smri_area_cdk_trvtmlh	Cortical area in mm^2 of APARC ROI lh-transversetemporal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_insulalh	Cortical area in mm^2 of APARC ROI lh-insula
+MRI_T_roi	abcd_smrip101	smri_area_cdk_banksstsrh	Cortical area in mm^2 of APARC ROI rh-Banks of Superior Temporal Sulcus
+MRI_T_roi	abcd_smrip101	smri_area_cdk_cdacaterh	Cortical area in mm^2 of APARC ROI rh-caudalanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_area_cdk_cdmdfrrh	Cortical area in mm^2 of APARC ROI rh-caudalmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_cuneusrh	Cortical area in mm^2 of APARC ROI rh-cuneus
+MRI_T_roi	abcd_smrip101	smri_area_cdk_ehinalrh	Cortical area in mm^2 of APARC ROI rh-entorhinal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_fusiformrh	Cortical area in mm^2 of APARC ROI rh-fusiform
+MRI_T_roi	abcd_smrip101	smri_area_cdk_ifplrh	Cortical area in mm^2 of APARC ROI rh-inferiorparietal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_iftmrh	Cortical area in mm^2 of APARC ROI rh-inferiortemporal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_ihcaterh	Cortical area in mm^2 of APARC ROI rh-isthmuscingulate
+MRI_T_roi	abcd_smrip101	smri_area_cdk_loccrh	Cortical area in mm^2 of APARC ROI rh-lateraloccipital
+MRI_T_roi	abcd_smrip101	smri_area_cdk_lobfrrh	Cortical area in mm^2 of APARC ROI rh-lateralorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_lingualrh	Cortical area in mm^2 of APARC ROI rh-lingual
+MRI_T_roi	abcd_smrip101	smri_area_cdk_mobfrrh	Cortical area in mm^2 of APARC ROI rh-medialorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_mdtmrh	Cortical area in mm^2 of APARC ROI rh-middletemporal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_parahpalrh	Cortical area in mm^2 of APARC ROI rh-parahippocampal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_paracnrh	Cortical area in mm^2 of APARC ROI rh-paracentral
+MRI_T_roi	abcd_smrip101	smri_area_cdk_parsopcrh	Cortical area in mm^2 of APARC ROI rh-parsopercularis
+MRI_T_roi	abcd_smrip101	smri_area_cdk_parsobisrh	Cortical area in mm^2 of APARC ROI rh-parsorbitalis
+MRI_T_roi	abcd_smrip101	smri_area_cdk_parstgrisrh	Cortical area in mm^2 of APARC ROI rh-parstriangularis
+MRI_T_roi	abcd_smrip101	smri_area_cdk_periccrh	Cortical area in mm^2 of APARC ROI rh-pericalcarine
+MRI_T_roi	abcd_smrip101	smri_area_cdk_postcnrh	Cortical area in mm^2 of APARC ROI rh-postcentral
+MRI_T_roi	abcd_smrip101	smri_area_cdk_ptcaterh	Cortical area in mm^2 of APARC ROI rh-posteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_area_cdk_precnrh	Cortical area in mm^2 of APARC ROI rh-precentral
+MRI_T_roi	abcd_smrip101	smri_area_cdk_pcrh	Cortical area in mm^2 of APARC ROI rh-precuneus
+MRI_T_roi	abcd_smrip101	smri_area_cdk_rracaterh	Cortical area in mm^2 of APARC ROI rh-rostralanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_area_cdk_rrmdfrrh	Cortical area in mm^2 of APARC ROI rh-rostralmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_sufrrh	Cortical area in mm^2 of APARC ROI rh-superiorfrontal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_suplrh	Cortical area in mm^2 of APARC ROI rh-superiorparietal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_sutmrh	Cortical area in mm^2 of APARC ROI rh-superiortemporal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_smrh	Cortical area in mm^2 of APARC ROI rh-supramarginal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_frpolerh	Cortical area in mm^2 of APARC ROI rh-frontalpole
+MRI_T_roi	abcd_smrip101	smri_area_cdk_tmpolerh	Cortical area in mm^2 of APARC ROI rh-temporalpole
+MRI_T_roi	abcd_smrip101	smri_area_cdk_trvtmrh	Cortical area in mm^2 of APARC ROI rh-transversetemporal
+MRI_T_roi	abcd_smrip101	smri_area_cdk_insularh	Cortical area in mm^2 of APARC ROI rh-insula
+MRI_T_roi	abcd_smrip101	smri_area_cdk_total	Total whole brain cortical area in mm^2
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_banksstslh	Cortical volume in mm^3 of APARC ROI lh-Banks of Superior Temporal Sulcus
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_cdacatelh	Cortical volume in mm^3 of APARC ROI lh-caudalanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_cdmdfrlh	Cortical volume in mm^3 of APARC ROI lh-caudalmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_cuneuslh	Cortical volume in mm^3 of APARC ROI lh-cuneus
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_ehinallh	Cortical volume in mm^3 of APARC ROI lh-entorhinal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_fusiformlh	Cortical volume in mm^3 of APARC ROI lh-fusiform
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_ifpllh	Cortical volume in mm^3 of APARC ROI lh-inferiorparietal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_iftmlh	Cortical volume in mm^3 of APARC ROI lh-inferiortemporal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_ihcatelh	Cortical volume in mm^3 of APARC ROI lh-isthmuscingulate
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_locclh	Cortical volume in mm^3 of APARC ROI lh-lateraloccipital
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_lobfrlh	Cortical volume in mm^3 of APARC ROI lh-lateralorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_linguallh	Cortical volume in mm^3 of APARC ROI lh-lingual
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_mobfrlh	Cortical volume in mm^3 of APARC ROI lh-medialorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_mdtmlh	Cortical volume in mm^3 of APARC ROI lh-middletemporal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_parahpallh	Cortical volume in mm^3 of APARC ROI lh-parahippocampal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_paracnlh	Cortical volume in mm^3 of APARC ROI lh-paracentral
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_parsopclh	Cortical volume in mm^3 of APARC ROI lh-parsopercularis
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_parsobislh	Cortical volume in mm^3 of APARC ROI lh-parsorbitalis
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_parstgrislh	Cortical volume in mm^3 of APARC ROI lh-parstriangularis
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_pericclh	Cortical volume in mm^3 of APARC ROI lh-pericalcarine
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_postcnlh	Cortical volume in mm^3 of APARC ROI lh-postcentral
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_ptcatelh	Cortical volume in mm^3 of APARC ROI lh-posteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_precnlh	Cortical volume in mm^3 of APARC ROI lh-precentral
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_pclh	Cortical volume in mm^3 of APARC ROI lh-precuneus
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_rracatelh	Cortical volume in mm^3 of APARC ROI lh-rostralanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_rrmdfrlh	Cortical volume in mm^3 of APARC ROI lh-rostralmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_sufrlh	Cortical volume in mm^3 of APARC ROI lh-superiorfrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_supllh	Cortical volume in mm^3 of APARC ROI lh-superiorparietal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_sutmlh	Cortical volume in mm^3 of APARC ROI lh-superiortemporal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_smlh	Cortical volume in mm^3 of APARC ROI lh-supramarginal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_frpolelh	Cortical volume in mm^3 of APARC ROI lh-frontalpole
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_tmpolelh	Cortical volume in mm^3 of APARC ROI lh-temporalpole
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_trvtmlh	Cortical volume in mm^3 of APARC ROI lh-transversetemporal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_insulalh	Cortical volume in mm^3 of APARC ROI lh-insula
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_banksstsrh	Cortical volume in mm^3 of APARC ROI rh-Banks of Superior Temporal Sulcus
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_cdacaterh	Cortical volume in mm^3 of APARC ROI rh-caudalanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_cdmdfrrh	Cortical volume in mm^3 of APARC ROI rh-caudalmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_cuneusrh	Cortical volume in mm^3 of APARC ROI rh-cuneus
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_ehinalrh	Cortical volume in mm^3 of APARC ROI rh-entorhinal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_fusiformrh	Cortical volume in mm^3 of APARC ROI rh-fusiform
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_ifplrh	Cortical volume in mm^3 of APARC ROI rh-inferiorparietal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_iftmrh	Cortical volume in mm^3 of APARC ROI rh-inferiortemporal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_ihcaterh	Cortical volume in mm^3 of APARC ROI rh-isthmuscingulate
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_loccrh	Cortical volume in mm^3 of APARC ROI rh-lateraloccipital
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_lobfrrh	Cortical volume in mm^3 of APARC ROI rh-lateralorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_lingualrh	Cortical volume in mm^3 of APARC ROI rh-lingual
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_mobfrrh	Cortical volume in mm^3 of APARC ROI rh-medialorbitofrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_mdtmrh	Cortical volume in mm^3 of APARC ROI rh-middletemporal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_parahpalrh	Cortical volume in mm^3 of APARC ROI rh-parahippocampal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_paracnrh	Cortical volume in mm^3 of APARC ROI rh-paracentral
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_parsopcrh	Cortical volume in mm^3 of APARC ROI rh-parsopercularis
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_parsobisrh	Cortical volume in mm^3 of APARC ROI rh-parsorbitalis
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_parstgrisrh	Cortical volume in mm^3 of APARC ROI rh-parstriangularis
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_periccrh	Cortical volume in mm^3 of APARC ROI rh-pericalcarine
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_postcnrh	Cortical volume in mm^3 of APARC ROI rh-postcentral
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_ptcaterh	Cortical volume in mm^3 of APARC ROI rh-posteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_precnrh	Cortical volume in mm^3 of APARC ROI rh-precentral
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_pcrh	Cortical volume in mm^3 of APARC ROI rh-precuneus
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_rracaterh	Cortical volume in mm^3 of APARC ROI rh-rostralanteriorcingulate
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_rrmdfrrh	Cortical volume in mm^3 of APARC ROI rh-rostralmiddlefrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_sufrrh	Cortical volume in mm^3 of APARC ROI rh-superiorfrontal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_suplrh	Cortical volume in mm^3 of APARC ROI rh-superiorparietal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_sutmrh	Cortical volume in mm^3 of APARC ROI rh-superiortemporal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_smrh	Cortical volume in mm^3 of APARC ROI rh-supramarginal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_frpolerh	Cortical volume in mm^3 of APARC ROI rh-frontalpole
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_tmpolerh	Cortical volume in mm^3 of APARC ROI rh-temporalpole
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_trvtmrh	Cortical volume in mm^3 of APARC ROI rh-transversetemporal
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_insularh	Cortical volume in mm^3 of APARC ROI rh-insula
+MRI_T_roi	abcd_smrip101	smri_vol_cdk_total	Total whole brain cortical volume in mm^3
+MRI_T_roi	abcd_smrip201	smri_vol_scs_tplh	Volume in mm^3 of ASEG ROI left-thalamus-proper
+MRI_T_roi	abcd_smrip201	smri_vol_scs_caudatelh	Volume in mm^3 of ASEG ROI left-caudate
+MRI_T_roi	abcd_smrip201	smri_vol_scs_putamenlh	Volume in mm^3 of ASEG ROI left-putamen
+MRI_T_roi	abcd_smrip201	smri_vol_scs_pallidumlh	Volume in mm^3 of ASEG ROI left-pallidum
+MRI_T_roi	abcd_smrip201	smri_vol_scs_bstem	Volume in mm^3 of ASEG ROI brain-stem
+MRI_T_roi	abcd_smrip201	smri_vol_scs_hpuslh	Volume in mm^3 of ASEG ROI left-hippocampus
+MRI_T_roi	abcd_smrip201	smri_vol_scs_amygdalalh	Volume in mm^3 of ASEG ROI left-amygdala
+MRI_T_roi	abcd_smrip201	smri_vol_scs_aal	Volume in mm^3 of ASEG ROI left-accumbens-area
+MRI_T_roi	abcd_smrip201	smri_vol_scs_tprh	Volume in mm^3 of ASEG ROI right-thalamus-proper
+MRI_T_roi	abcd_smrip201	smri_vol_scs_caudaterh	Volume in mm^3 of ASEG ROI right-caudate
+MRI_T_roi	abcd_smrip201	smri_vol_scs_putamenrh	Volume in mm^3 of ASEG ROI right-putamen
+MRI_T_roi	abcd_smrip201	smri_vol_scs_pallidumrh	Volume in mm^3 of ASEG ROI right-pallidum
+MRI_T_roi	abcd_smrip201	smri_vol_scs_hpusrh	Volume in mm^3 of ASEG ROI right-hippocampus
+MRI_T_roi	abcd_smrip201	smri_vol_scs_amygdalarh	Volume in mm^3 of ASEG ROI right-amygdala
+MRI_T_roi	abcd_smrip201	smri_vol_scs_aar	Volume in mm^3 of ASEG ROI right-accumbens area
+MRI_T_roi	abcd_smrip201	smri_vol_scs_wholeb	Volume in mm^3 of ASEG ROI wholebrain
+MRI_T_roi	abcd_smrip201	smri_vol_scs_csf	Volume in mm^3 of ASEG ROI csf
