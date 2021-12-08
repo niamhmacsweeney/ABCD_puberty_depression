@@ -1,5 +1,5 @@
 ---
-title: "ANALY_pilot_females"
+title: "ANALY_pilot_pt_brain_females"
 author: "Niamh MacSweeney"  Credit to X. Shen for function templates. 
 date: "30/8/2021"
 output: html_document
@@ -9,10 +9,10 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-\#ABCD Pilot Analysis Script - Pubertal timing ~ Brain Structure -> Females
+\#ABCD Pilot Analysis Script - Pubertal timing \~ Brain Structure -\> Females
 
 \#Introduction
 
@@ -36,9 +36,9 @@ Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/pub
 
 ------------------------------------------------------------------------
 
-####Workflow 1. Setup: Load data, merge to create master dataframe, keep unrelated participants only 2. Pilot prep: Get subsample of 10% of unrelated sample (N= 9,775). Split into males and females. 3. Set up lme function using Shen's template script
+#### Workflow 1. Setup: Load data, merge to create master dataframe, keep unrelated participants only 2. Pilot prep: Get subsample of 10% of unrelated sample (N= 9,775). Split into males and females. 3. Set up lme function using Shen's template script
 
-####STEP 1: SETUP Load libraries and set wd
+#### STEP 1: SETUP Load libraries and set wd
 
 ```{r, load libraries, set wd}
 
@@ -95,11 +95,11 @@ df <- hormones %>%
 #Remove duplicate columns after merge (i.e, for sex, eventname and age_years)
 #This is not the most efficient way of doing thing but will do for now. 
 df <- df %>% 
-  select(-age_years.y, -eventname.x, -eventname.y, -sex.x, -sex.y)
+  dplyr::select(-age_years.x, -eventname.x, -eventname.y, -sex.x, -sex.y)
 
 #rename year variable
 df <- df  %>% 
-  rename(age_years = age_years.x)
+  dplyr::rename(age_years = age_years.y)
 
 #check col names
 colnames(df)
@@ -111,56 +111,90 @@ Check variable classifcation
 ```{r, variable classification}
 
 covs_str <- df %>% 
-  select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
+  dplyr::select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
   str()
 ```
 
 Reduce to unrelated sample only Before N=11766, After N=9,775
 
-```{r, get unrelated sample}
+```{r, get unrelated sample using randomisation approach}
 
-df <- df[!duplicated(df$rel_family_id),]
+#Assign random number to each family ID. Set random 
+
+df$random <- NA #generate new column of NAs
+unrel_df <- data.frame() #make new df
+
+#iterate through family IDs using for loop (this will take a few minutes)
+# set.seed(2507) #to make sure random sample is the same random sample each time
+unique_fam_id <- unique(df$rel_family_id)
+for (i in unique_fam_id[1:length(unique_fam_id)]){
+  
+  set.seed(2507)
+  
+  #subset each family and assign random number to each individual within each family
+  df$random[df$rel_family_id == i] <- sample(nrow(df[df$rel_family_id == i,]),nrow(df[df$rel_family_id == i,]), replace= FALSE)
+  
+  #select individual with highest number for unrelated dataframe
+  unrel_individual <- df[df$rel_family_id == i,][which.max(df$random[df$rel_family_id == i]),]
+    
+  #append unrelated individual to unrelated dataframe
+  unrel_df <- rbind(unrel_df, unrel_individual)
+  
+}
+
+# i <- 8781 #for trouble shooting. 
+nrow(unrel_df) #check that N= 9775
+length(unique(unrel_df$rel_family_id)) #check that no. of unique IDs is correct. 
+
+#Check that set.seed worked so that we get the same IDs each timescript is run
+
+test_set_seed <- unrel_df$src_subject_id #make new vector of un_rel individual ids
+
+#the rerun df$random lines + for loop, without clearing global environment
+#check if new participant id list matches test_set_seed
+
+all(unrel_df$src_subject_id == test_set_seed) #it worked! 
+
 ```
 
-Get sample demographics:
-MAge = 9.90, SD= 0.62
+Get sample demographics: MAge = 9.90, SD= 0.62
+
 ```{r, sample demographics}
 
-df %>% 
-  select(age_years, sex) %>% 
+unrel_df %>% 
+  dplyr::select(age_years, sex) %>% 
   summary() 
 
 #also want SD. Note: need na.rm=T otherwise returns NA. 
-sd(df$age_years, na.rm=T) #SD = 0.617
+sd(unrel_df$age_years, na.rm=T) #SD = 0.617
 
 ```
 
-####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=978 Get females only
+#### STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=978 Get females only
 
 ```{r, generate subsample, get females only}
 
 set.seed(2507) #set seed for reproducibility
-df <- df %>% 
+unrel_df <- unrel_df %>% 
   sample_frac(size = 0.1, replace = FALSE)
 
 #check males and females breakdown F= 456, M=522
-df %>% 
+unrel_df %>% 
   dplyr::count(sex)
 
-#Get female sample only 
-df <- df %>% 
+#Get female sample only; F: N= 456
+unrel_df <- unrel_df %>% 
   filter(sex == "F")
 
 ```
 
-####STEP 3: Model set up We are using X.Shen's reg_phewasStyle_withCI.R function to run the linear models.
+#### STEP 3: Model set up We are using X.Shen's reg_phewasStyle_withCI.R function to run the linear models.
 
-We need to change dataframe from "df" to "targetdata" for function setup. 
-We need to change "src_subject_id" to "f.eid" so that function will run.
+We need to change dataframe from "df" to "targetdata" for function setup. We need to change "src_subject_id" to "f.eid" so that function will run.
 
 ```{r, colnames}
 
-targetdata <- df #change object name
+targetdata <- unrel_df #change object name
 
 colnames(targetdata)[1]='f.eid'
 colnames(targetdata) #check it worked
@@ -195,8 +229,7 @@ targetdata_longformat <- long_format(targetdata,cols_nonimg,cols_img)
 
 ```
 
-Define functions
-Note: this Phewas function includes confidence intervals as an inference criteria output. This will appear as "run model" in the Functions section.
+Define functions Note: this Phewas function includes confidence intervals as an inference criteria output. This will appear as "run model" in the Functions section.
 
 ```{r, Phewas function, with CI}
 
@@ -313,7 +346,7 @@ result.females.PT_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata,
 result.females.PT_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
 
 #Save as R.Data file
-save(result.females.PT_brain.bulk,result.females.PT_brain.region.covWholeB,file='../results/PT_females_brain_pilot_analysis_withCI.RData')
+save(result.females.PT_brain.bulk,result.females.PT_brain.region.covWholeB,file='../results/PT_females_brain_pilot_analysis.RData')
 
 #add TRUE column if nominal p value < 0.005 for pilot ROIs
 
@@ -326,25 +359,32 @@ result.females.PT_brain.region.covWholeB$Sig <- as.numeric((as.character(result.
 #Save results as .csv files
 
 #global results
-write.csv(result.females.PT_brain.bulk, file = "../results/tables/pilot_analy_females.PT_brain.bulk.csv")
+write.csv(result.females.PT_brain.bulk, file = "../results/tables/pilot_analy_females_PT_brain_global.csv")
 
 #regional results 
 write.csv(result.females.PT_brain.region.covWholeB, file = "../results/tables/pilot_analy_females.PT_brain.regional.csv")
 
 ```
 
-STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value =\< 0.005
+#### STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value =\< 0.005
+
+Only regional measures met criteria to be classified as an ROI.
 
 ```{r, make tables}
 
+ROI_PT_brain_females_regional_results <- result.females.PT_brain.region.covWholeB   %>% 
+  filter(p.value <0.005)
 
-ROI_PT_brain_females_regional_results <- result.females.PT_brain.region.covWholeB %>% 
-  filter(p.value <0.005) %>% 
-  select(-dependent, -factor) %>% 
-  #mutate(as.numeric(ROI_females_regional)) %>% 
-  #mutate_if(is.numeric, ~round(., 4)) %>% 
-  arrange(p.value)
-
+# #want to get unique brain measures across PT measures
+# tmp = ROI_PT_brain_females_regional_results
+# 
+# #create new column with brain measure only (i.e, not metric or FS name)
+#   tmp$brainstructure = sub(".*RC\\.|.*EG\\.|.*fa_|.*md_", "", tmp$dependent) 
+# 
+#   tmp %>% 
+#   count(brainstructure) #count number of brain measures (ROIs) total
+# unique(tmp$brainstructure) #get unique brain measures 
+ 
 
 #Save as R.Data file
 save(ROI_PT_brain_females_regional_results,file='../results/ROIs_PT_females_brain_pilot_analysis_withCI.RData')

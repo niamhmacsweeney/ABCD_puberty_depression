@@ -22,6 +22,8 @@ This sub-sample will be split into males and females and the script will be run 
 
 We will be using an un-related sample of participants for our analysis. The pilot analysis will use a basic model, outlined below.
 
+Please note that in this script, brain structure is set as the dependent variable due to the treatment of hemisphere mixed effects. However, in the RR, our hypotheses state that depression is the dependent or outcome variable. As this analysis is cross-sectional, the Y and X terms are statistically  interchangeable so Y ~ X = depression ~ brain = brain ~ depression. For our later mediation models, the order of the terms is important so depression will be the dependent or outcome variable. See RR manuscript for further details on mediation model set up. 
+
 \#\#\#Required Inputs
 
 Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data
@@ -44,21 +46,23 @@ Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/pub
 
 ```{r, load libraries, set wd}
 
+
 library(tidyr)
+library(plyr) #load before dplyr
 library(dplyr)
+library(nlme)
 library(tidyverse)
 library(psych)
 library(ggplot2)
 library(readr)
 library(pbapply)
-library(nlme)
 library(gridExtra)
 library(sandwich)
 library(stringr)
 library(kableExtra)
-library(epiDisplay)
+#library(epiDisplay)
 library(gmodels)
-library(plyr)
+
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
 ```
@@ -116,9 +120,9 @@ Check variable classifcation
 
 ```{r, variable classification}
 
-#covs_str <- df %>% 
-#  select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
-#  str()
+covs_str <- df %>% 
+ select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
+  str()
 ```
 
 Reduce to unrelated sample only Before N=11878, After N=9,856
@@ -127,20 +131,37 @@ We are going to randomise which family member is included in the study
 
 ```{r, get unrelated sample using randomisation approach}
 
+```{r, get unrelated sample using randomisation approach}
+
+#We are going to randomise which family member is included in the study 
+
+
 #Assign random number to each family ID. Set random 
 
 df$random <- NA #generate new column of NAs
 unrel_df <- data.frame() #make new df
 
 #iterate through family IDs using for loop (this will take a few minutes)
+
 set.seed(2507) #to make sure random sample is the same random sample each time
 for (i in unique(df$rel_family_id)){
+
+# set.seed(2507) #to make sure random sample is the same random sample each time
+unique_fam_id <- unique(df$rel_family_id)
+for (i in unique_fam_id[1:length(unique_fam_id)]){
+  
+  set.seed(2507)
+
   
   #subset each family and assign random number to each individual within each family
   df$random[df$rel_family_id == i] <- sample(nrow(df[df$rel_family_id == i,]),nrow(df[df$rel_family_id == i,]), replace= FALSE)
   
   #select individual with highest number for unrelated dataframe
   unrel_individual <- df[which.max(df$random[df$rel_family_id == i]),] 
+
+  unrel_individual <- df[df$rel_family_id == i,][which.max(df$random[df$rel_family_id == i]),]
+    
+
   #append unrelated individual to unrelated dataframe
   unrel_df <- rbind(unrel_df, unrel_individual)
   
@@ -148,9 +169,23 @@ for (i in unique(df$rel_family_id)){
 
 nrow(unrel_df) #check that N= 9856
 
+# i <- 8781 #for trouble shooting. 
+nrow(unrel_df) #check that N= 9856
+length(unique(unrel_df$rel_family_id)) #check that no. of unique IDs is correct. 
+
+#Check that set.seed worked so that we get the same IDs each timescript is run
+
+test_set_seed <- unrel_df$src_subject_id #make new vector of un_rel individual ids
+
+#the rerun df$random lines + for loop, without clearing global environment
+#check if new participant id list matches test_set_seed
+
+all(unrel_df$src_subject_id == test_set_seed) #it worked! 
+
+
 ```
 
-Get sample demographics 
+Get sample demographics: Age = 9.90 years; SD = 0.62
 ```{r, sample demographics}
 
 unrel_df %>% 
@@ -271,6 +306,11 @@ Define functions
 **Note: 30/11/21 - had to update the "select" function in reg_phewasStyle_withCI.R function to specify that it was dplyr::select as it wasn't working propertly. 
 
 ```{r, Phewas function}
+**Note: 30/11/21 - had to update the "select" function in reg_phewasStyle_withCI.R function to specify that it was dplyr::select as it wasn't working properly. 
+
+
+```{r,  Phewas function}
+
 
 source('../functions/reg_phewasStyle_withCI.R')
 
@@ -281,11 +321,13 @@ Define global variables
 ```{r, global vars}
 targetdata=targetdata
 dat_long=targetdata_longformat
+
 ```
 
 Set up dependent variables (brain measures: cortical(APARC files); subcortical(ASEG files); whitematter(dti)
 
 ```{r, set up DVs}
+
 ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|dtifa\\_|dtimd\\_|\\.ASEG\\.',colnames(dat_long))]
 ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.',colnames(targetdata))]
 ls.dep.all=c(ls.dep.fs.long,ls.dep.fs.short)
@@ -343,6 +385,7 @@ ls.models$model.est=''
 ls.models$model.est[grep('hemi',ls.models$covs)]='lme'
 ls.models$model.est[ls.models$model.est=='']='glm'
 
+
 ```
 
 Divide models into bulk measures and individual regions
@@ -352,6 +395,7 @@ Bulk (global) measures
 ```{r, bulk measures}
 ls.model.bulk=ls.models[grep('mean|total|allfibers',ls.models$dependent),]
 ls.model.bulk$p_batch=1
+
 ```
 
 Individual regions
@@ -379,11 +423,17 @@ ls.model.region.covWholeB=ls.model.region
 ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)]=
       paste0(ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)],'+ICV_ASEG')
 
+
 ```
 
 #### STEP 5: Run Models
 
 ```{r, run models}
+#troubleshooting function
+# ls.models <- ls.model.bulk
+# dat_short=targetdata
+# dat_long=dat_long
+# correctByFactor = TRUE
 
 #Global (bulk) models
 result.females.dep_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
@@ -394,7 +444,7 @@ result.females.dep_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWho
 #Save as R.Data file
 save(result.females.dep_brain.bulk,result.females.dep_brain.region.covWholeB,file='../results/females_dep_brain_pilot_analysis_no_MDD.RData')
 
-#add TRUE column if nominal p value < 0.005 for pilot ROIs
+#add TRUE column if nominal p value < 0.05 for pilot ROIs
 
 #global results
 result.females.dep_brain.bulk$Sig <- as.numeric((as.character(result.females.dep_brain.bulk[,"p.value"]))) < 0.05
@@ -412,7 +462,7 @@ write.csv(result.females.dep_brain.region.covWholeB, file = "../results/tables/p
 
 ```
 
-STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value < 0.005
+STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value < 0.05
 
 ```{r, make tables}
 
@@ -420,23 +470,45 @@ ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWho
   filter(p.value <0.05)
 
 
+  filter(p.value <0.05) %>% 
+  select(-dependent, -factor) %>% 
+  #mutate(as.numeric(ROI_females_regional)) %>% 
+  #mutate_if(is.numeric, ~round(., 4)) %>% 
+  arrange(p.value)
+
+
+  filter(p.value <0.05)
+
 #save as R.data
 save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_analysis_no_MDD.RData')
 
 #save as .csv
 write.csv(ROI_dep_brain_females_regional_results, file = "../results/tables/ROIs_dep_brain_females_no_MDD.csv")
 
+#save as Kable Table 
+
+ROI_table <- ROI_dep_brain_females_regional_results %>%
+       kable(digits=4, format = "html",
+      caption = "Females: Depressive symptoms-brain structure models and associated statistics with significant ROI associations") %>%
+               kable_styling(font_size = 15,
+                             position = "left",
+                             full_width = F) #%>%
+      #save_kable(file = "../figs/female_ROIs_PT_brain_pilot_analysis.png")
+
 str(ROI_dep_brain_females_regional_results) #check variable chars
 
-# ROI_males_regional %>% 
-#        kable(digits=4, format = "html",
-#        caption = "Female ROIs (PT~Regional Brain Measures)") %>% 
-#                kable_styling(font_size = 15,
-#                              position = "left",
-#                              full_width = F) #%>% 
-#       #save_kable(file = "../figs/female_ROIs_PT_brain_pilot_analysis.png")
 
 ```
 
+
 ############## End of Script ##################
+=======
+Make demographic table for paper - where we have a breakdown of the MDD and DS categories for each sex
+
+```{r, demographic table}
+
+
+```
+
+
 
