@@ -12,37 +12,37 @@ editor_options:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-\#ABCD Pilot Analysis Script - Depression ~ Brain Structure -> Females
+\#ABCD Pilot Analysis Script - Depression \~ Brain Structure -\> Females
 
 \#Introduction
 
-The purpose of this script is to run the pilot analysis (DR~BS) for the Puberty RR. For this analysis, we will be using a random sub-sample of 10% (N= ~1,000) to generate ROIs for the depression ~ brain structure association.
+The purpose of this script is to run the pilot analysis (DR\~BS) for the Puberty RR. For this analysis, we will be using a random sub-sample of 10% (N= \~1,000) to generate ROIs for the depression \~ brain structure association.
 
 This sub-sample will be split into males and females and the script will be run independently for each.
 
 We will be using an un-related sample of participants for our analysis. The pilot analysis will use a basic model, outlined below.
 
-Please note that in this script, brain structure is set as the dependent variable due to the treatment of hemisphere mixed effects. However, in the RR, our hypotheses state that depression is the dependent or outcome variable. As this analysis is cross-sectional, the Y and X terms are statistically  interchangeable so Y ~ X = depression ~ brain = brain ~ depression. For our later mediation models, the order of the terms is important so depression will be the dependent or outcome variable. See RR manuscript for further details on mediation model set up. 
+Please note that in this script, brain structure is set as the dependent variable due to the treatment of hemisphere mixed effects. However, in the RR, our hypotheses state that depression is the dependent or outcome variable. As this analysis is cross-sectional, the Y and X terms are statistically interchangeable so Y \~ X = depression \~ brain = brain \~ depression. For our later mediation models, the order of the terms is important so depression will be the dependent or outcome variable. See RR manuscript for further details on mediation model set up.
 
-\#\#\#Required Inputs
+Required Inputs
 
 Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data
 
-\#\#\#\#Independent Variable Depression Rating (Parent report): dep_measures_cleaned_R3.0.rds
+Independent Variable Depression Rating (Parent report): dep_measures_cleaned_R3.0.rds
 
-\#\#\#\#Dependent Variable Brain structure: cortical_cleaned_R3.0.rds + subcort_cleaned_R3.O.rds + dti_cleaned_R3.0.rds
+Dependent Variable Brain structure: cortical_cleaned_R3.0.rds + subcort_cleaned_R3.O.rds + dti_cleaned_R3.0.rds
 
-\#\#\#\#Covariates Covariates: covariates_cleaned_R3.0.rds
+Covariates Covariates: covariates_cleaned_R3.0.rds
 
 ------------------------------------------------------------------------
 
-####Workflow 
+####Workflow
 
-1. Setup: Load data, merge to create master dataframe, keep unrelated participants only 
-2. Pilot prep: Get subsample of 10% of unrelated sample (N= 9,775). Split into males and females. 
-3. Set up glm/lme function using Shen's template script
+1.  Setup: Load data, merge to create master dataframe, keep unrelated participants only
+2.  Pilot prep: Get subsample of 10% of unrelated sample (N= 9,775). Split into males and females.
+3.  Set up glm/lme function using Shen's template script
 
-####STEP 1: SETUP Load libraries and set wd
+#####STEP 1: SETUP Load libraries and set wd
 
 ```{r, load libraries, set wd}
 
@@ -73,14 +73,14 @@ Note on depression variables:
 
 As noted in Mental Health release notes for 4.0, the ABCD Team spotted inaccuracies in the algorithm used to derive the MDD diagnosis. For this reason, we have decided to not use the MDD diagnosis as a depression rating measure in the pilot analysis. Instead, we will use the ordinal measure of DS only (KSADS.Depressive_symptoms_ever).
 
-The following measures are all available in the dep_measures_cleaned.rds file but we will only focus on the KSADS.Depressive_symptoms_ever.p for the pilot analysis. 
+The following measures are all available in the dep_measures_cleaned.rds file but we will only focus on the KSADS.Depressive_symptoms_ever.p for the pilot analysis.
 
-- KSADS.MDD.y: MDD diagnosis based on child report
-- KSADS.MDD.p: MDD diagnosis based on caregiver report
-- KSADS.Dep_symptoms_sum_ever.y: no. of depressive symptoms reported based on child report
-- KSADS.Dep_symptoms_sum_ever.p: no. of depressive symptoms reported based on caregiver report
-- KSADS.Depressive_symptoms_ever.y: DSM-V depressive symptoms reported by children
-- KSADS.Depressive_symptoms_ever.p: DSM-V depressive symptoms reported by caregivers
+-   KSADS.MDD.y: MDD diagnosis based on child report
+-   KSADS.MDD.p: MDD diagnosis based on caregiver report
+-   KSADS.Dep_symptoms_sum_ever.y: no. of depressive symptoms reported based on child report
+-   KSADS.Dep_symptoms_sum_ever.p: no. of depressive symptoms reported based on caregiver report
+-   KSADS.Depressive_symptoms_ever.y: DSM-V depressive symptoms reported by children
+-   KSADS.Depressive_symptoms_ever.p: DSM-V depressive symptoms reported by caregivers
 
 ```{r,load data}
 
@@ -127,9 +127,7 @@ covs_str <- df %>%
 
 Reduce to unrelated sample only Before N=11878, After N=9,856
 
-We are going to randomise which family member is included in the study 
-
-```{r, get unrelated sample using randomisation approach}
+We are going to randomise which family member is included in the study
 
 ```{r, get unrelated sample using randomisation approach}
 
@@ -143,8 +141,6 @@ unrel_df <- data.frame() #make new df
 
 #iterate through family IDs using for loop (this will take a few minutes)
 
-set.seed(2507) #to make sure random sample is the same random sample each time
-for (i in unique(df$rel_family_id)){
 
 # set.seed(2507) #to make sure random sample is the same random sample each time
 unique_fam_id <- unique(df$rel_family_id)
@@ -182,15 +178,16 @@ test_set_seed <- unrel_df$src_subject_id #make new vector of un_rel individual i
 
 all(unrel_df$src_subject_id == test_set_seed) #it worked! 
 
-
 ```
 
 Get sample demographics: Age = 9.90 years; SD = 0.62
+
 ```{r, sample demographics}
 
 unrel_df %>% 
   dplyr::select(age_years, sex) %>% 
   summary()
+
 #get sd
 sd(unrel_df$age_years)
 #get mean
@@ -203,7 +200,7 @@ unrel_females <- unrel_df %>% #N= 4673
 
 ```
 
-####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=986 Get females only
+#####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=986 Get females only
 
 ```{r, generate subsample, get females only}
 
@@ -224,7 +221,9 @@ targetdata <- targetdata %>%
   filter(sex == "F")
 
 ```
-Make demographics table for MDD/DS breakdown 
+
+Make demographics table for MDD/DS breakdown
+
 ```{r, MDD/DS demographics table}
 
 ####TOTAL FEMALE UNRELATED SAMPLE
@@ -263,7 +262,7 @@ ddply(targetdata,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years
 
 ```
 
-####STEP 3: Model set up We are using X.Shen's phewasStyle_withCI.R function to run the linear models.
+\#\#\#\#STEP 3: Model set up We are using X.Shen's phewasStyle_withCI.R function to run the linear models.
 
 We need to change "src_subject_id" to "f.eid" so that function will run.
 
@@ -303,14 +302,9 @@ targetdata_longformat <- long_format(targetdata,cols_nonimg,cols_img)
 
 Define functions
 
-**Note: 30/11/21 - had to update the "select" function in reg_phewasStyle_withCI.R function to specify that it was dplyr::select as it wasn't working propertly. 
+\*\*Note: 30/11/21 - had to update the "select" function in reg_phewasStyle_withCI.R function to specify that it was dplyr::select as it wasn't working properly.
 
 ```{r, Phewas function}
-**Note: 30/11/21 - had to update the "select" function in reg_phewasStyle_withCI.R function to specify that it was dplyr::select as it wasn't working properly. 
-
-
-```{r,  Phewas function}
-
 
 source('../functions/reg_phewasStyle_withCI.R')
 
@@ -342,10 +336,9 @@ ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
 Set up Independent Variables (or factors) (depression measures)
 
-  Depression symptom severity = (ordinal measure:none, mild, moderate, severe (rated 0-3, respectively)) 
-                              = KSADS.Depressive_symptoms_ever
-  
-**Note: We are no longer using MDD diagnosis = KSADS.MDD (1=yes, 0= no, binary) due to possible errors in the KSADS MDD diagnosis algorithm flagged by the ABCD team in 4.0 release notes (November 2021)
+Depression symptom severity = (ordinal measure:none, mild, moderate, severe (rated 0-3, respectively)) = KSADS.Depressive_symptoms_ever
+
+\*\*Note: We are no longer using MDD diagnosis = KSADS.MDD (1=yes, 0= no, binary) due to possible errors in the KSADS MDD diagnosis algorithm flagged by the ABCD team in 4.0 release notes (November 2021)
 
 ```{r, set up IVs}
 
@@ -462,7 +455,7 @@ write.csv(result.females.dep_brain.region.covWholeB, file = "../results/tables/p
 
 ```
 
-STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value < 0.05
+STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value \< 0.05
 
 ```{r, make tables}
 
@@ -470,14 +463,11 @@ ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWho
   filter(p.value <0.05)
 
 
-  filter(p.value <0.05) %>% 
-  select(-dependent, -factor) %>% 
-  #mutate(as.numeric(ROI_females_regional)) %>% 
-  #mutate_if(is.numeric, ~round(., 4)) %>% 
-  arrange(p.value)
-
-
-  filter(p.value <0.05)
+  # filter(p.value <0.05) %>% 
+  # select(-dependent, -factor) %>% 
+  # #mutate(as.numeric(ROI_females_regional)) %>% 
+  # #mutate_if(is.numeric, ~round(., 4)) %>% 
+  # arrange(p.value)
 
 #save as R.data
 save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_analysis_no_MDD.RData')
@@ -500,15 +490,11 @@ str(ROI_dep_brain_females_regional_results) #check variable chars
 
 ```
 
+# \#\#\#\#\#\#\#\#\#\#\#\#\#\# End of Script \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
 
-############## End of Script ##################
-=======
 Make demographic table for paper - where we have a breakdown of the MDD and DS categories for each sex
 
 ```{r, demographic table}
 
 
 ```
-
-
-
