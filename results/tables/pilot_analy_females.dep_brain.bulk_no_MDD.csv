@@ -1,9 +1,0 @@
-"","mod_name","beta","std","t.value","p.value","CI.Lower_95CI","CI.Upper_95CI","dependent","factor","p.corrected","Sig"
-"1","bl.thk.APARC.mean~KSADS.Depressive_symptoms_ever.p", 0.021277553,0.04128795, 0.51534534,0.6065717,-0.05964534, 0.10220045,"bl.thk.APARC.mean","KSADS.Depressive_symptoms_ever.p",0.6932248,FALSE
-"2","bl.sulc.APARC.mean~KSADS.Depressive_symptoms_ever.p",-0.025267341,0.04588084,-0.55071659,0.5821087,-0.11519214, 0.06465746,"bl.sulc.APARC.mean","KSADS.Depressive_symptoms_ever.p",0.6932248,FALSE
-"3","bl.sa.APARC.total~KSADS.Depressive_symptoms_ever.p", 0.004062966,0.04570473, 0.08889597,0.9292052,-0.08551666, 0.09364259,"bl.sa.APARC.total","KSADS.Depressive_symptoms_ever.p",0.9292052,FALSE
-"4","bl.vol.APARC.total~KSADS.Depressive_symptoms_ever.p", 0.027672164,0.04599838, 0.60158998,0.5477583,-0.06248300, 0.11782733,"bl.vol.APARC.total","KSADS.Depressive_symptoms_ever.p",0.6932248,FALSE
-"5","bl.dtifa_allfibers~KSADS.Depressive_symptoms_ever.p",-0.055407225,0.04011592,-1.38117795,0.1679569,-0.13403298, 0.02321853,"bl.dtifa_allfibers","KSADS.Depressive_symptoms_ever.p",0.6718276,FALSE
-"6","bl.dtifa_allfibers_excl_outl~KSADS.Depressive_symptoms_ever.p",-0.055407225,0.04011592,-1.38117795,0.1679569,-0.13403298, 0.02321853,"bl.dtifa_allfibers_excl_outl","KSADS.Depressive_symptoms_ever.p",0.6718276,FALSE
-"7","bl.dtimd_allfibers~KSADS.Depressive_symptoms_ever.p", 0.027636115,0.04461257, 0.61946928,0.5359423,-0.05980291, 0.11507514,"bl.dtimd_allfibers","KSADS.Depressive_symptoms_ever.p",0.6932248,FALSE
-"8","bl.dtimd_allfibers_excl_outl~KSADS.Depressive_symptoms_ever.p", 0.027636115,0.04461257, 0.61946928,0.5359423,-0.05980291, 0.11507514,"bl.dtimd_allfibers_excl_outl","KSADS.Depressive_symptoms_ever.p",0.6932248,FALSE

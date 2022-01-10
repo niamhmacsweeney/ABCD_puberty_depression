@@ -1,9 +1,0 @@
-"","mod_name","beta","std","t.value","p.value","CI.Lower_95CI","CI.Upper_95CI","dependent","factor","p.corrected","Sig"
-"1","thk.APARC.mobfr~KSADS.Depressive_symptoms_ever.p", 0.08713756,0.03970420, 2.194669,0.02875309, 0.0090860810, 0.1651890303,"thk.APARC.mobfr","KSADS.Depressive_symptoms_ever.p",0.4345209,TRUE
-"2","sulc.APARC.ihcate~KSADS.Depressive_symptoms_ever.p",-0.07864509,0.03968197,-1.981885,0.04816607,-0.1566528666,-0.0006373199,"sulc.APARC.ihcate","KSADS.Depressive_symptoms_ever.p",0.4249110,TRUE
-"3","sulc.APARC.lingual~KSADS.Depressive_symptoms_ever.p", 0.08907313,0.04261098, 2.090380,0.03720519, 0.0053074260, 0.1728388339,"sulc.APARC.lingual","KSADS.Depressive_symptoms_ever.p",0.4249110,TRUE
-"4","sulc.APARC.sufr~KSADS.Depressive_symptoms_ever.p",-0.07912425,0.03883869,-2.037253,0.04227268,-0.1554742899,-0.0027742172,"sulc.APARC.sufr","KSADS.Depressive_symptoms_ever.p",0.4249110,TRUE
-"5","vol.APARC.parsopc~KSADS.Depressive_symptoms_ever.p", 0.08279105,0.03577149, 2.314442,0.02114173, 0.0124705880, 0.1531115093,"vol.APARC.parsopc","KSADS.Depressive_symptoms_ever.p",0.7188188,TRUE
-"6","dtifa_fxcut~KSADS.Depressive_symptoms_ever.p",-0.09173615,0.04203516,-2.182367,0.02967847,-0.1743800248,-0.0090922803,"dtifa_fxcut","KSADS.Depressive_symptoms_ever.p",0.2297003,TRUE
-"7","bl.dtifa_fmin~KSADS.Depressive_symptoms_ever.p",-0.09010085,0.03960760,-2.274837,0.02345790,-0.1677303137,-0.0124713787,"bl.dtifa_fmin","KSADS.Depressive_symptoms_ever.p",0.2297003,TRUE
-"8","bl.dtifa_cc~KSADS.Depressive_symptoms_ever.p",-0.08066306,0.03801009,-2.122149,0.03445505,-0.1551614658,-0.0061646516,"bl.dtifa_cc","KSADS.Depressive_symptoms_ever.p",0.2297003,TRUE
