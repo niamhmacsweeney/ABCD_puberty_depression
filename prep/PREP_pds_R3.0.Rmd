@@ -1,8 +1,10 @@
 ---
 title: "PREP_pds.Rmd"
 author: "Niamh MacSweeney"
-date: 19/07/2021
-output: html_document
+date: "19/07/2021"
+output:
+  pdf_document: default
+  html_document: default
 ---
 #### Introduction
 
