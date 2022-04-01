@@ -3,33 +3,40 @@ title: "PREP_CBCL_R4.0"
 Date: 16/03/22
 Author: Niamh MacSweeney
 output: github_document
-
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ### Introduction
 
-The purpose of this script is to generate depression severity measure (continuous variable) from the Child Behaviour Checklist (CBCL) using ABCD Release 4.0 to prepare a final, clean, sample for use in models.
+The purpose of this script is to generate depression severity measure (DSM5 scale, continuous measure) from the Child Behaviour Checklist (CBCL) using ABCD Release 4.0 to prepare a final, clean, sample for use in models for MacSweeney et al.'s Puberty RR.
 
-Script workflow:
-1. Setup: load data, tidy, reduce to year 3 wave, and get sample size
-2. Step 1: Inspect data. 
+We will create the following dataframes:
 
-Resources:
+1.  CBCL_dep_y0 at baseline (we will use this in the pilot data analysis)
+2.  CBCL_dep_y1 at Year 1 (will need to remove those with depression at Year 1 from the main analysis due to our hypothesed mediation)
+3.  CBCL_dep_y3 at Year 3 (this data will be used as the primary outcome in the main analysis)
 
-- Please consult this guide for an overview of the DSM scales: https://aseba.org/wp-content/uploads/DSM-Oriented-Guide-for-the-ASEBA.pdf
+###Script workflow:
+
+1.  Setup: load data, tidy, get sample sizes for each timepoint/wave.
+2.  Step 1: Inspect data.
+
+###Resources:
+
+-   Please consult this guide for an overview of the DSM scales: <https://aseba.org/wp-content/uploads/DSM-Oriented-Guide-for-the-ASEBA.pdf>
 
 A note on T-scores from the ASEBA guide:
 
-"Normalized T scores are standard scores that are based on the percentiles occupied by raw scale scores in the distribution of scores obtained by individuals in the relevant nor- mative sample. Consequently, the T score obtained by an individual tells us approximately how high (in terms of a percentile) the individual’s scale score is, compared to the scores obtained by individuals in the relevant normative sample"
+"Normalized T scores are standard scores that are based on the percentiles occupied by raw scale scores in the distribution of scores obtained by individuals in the relevant normative sample. Consequently, the T score obtained by an individual tells us approximately how high (in terms of a percentile) the individual's scale score is, compared to the scores obtained by individuals in the relevant normative sample"
 
 Because substantial percentages of individuals in the normative samples obtained very low scores on the DSM-oriented and syndrome scales (e.g., scores of 0 or 1), the T score assignments start at 50, which represents the 50th percentile of scores in a normative sample. In other words, all raw scale scores that were in the lowest 50 percent of the distribution are assigned a T score of 50.
 
 However, for statistical analyses, raw scale scores are often preferable, because they reflect all the variation that actually occurs in scores obtained by the individuals whose data are being analyzed. T scores, by contrast, lump together some raw scale scores, such as the different low scores that are given a T score of 50"
 
-SETUP Load libraries needed and set working directory
+###SETUP Load libraries needed and set working directory
 
 ```{r, libraries}
 
@@ -56,43 +63,56 @@ LOAD DATA, REDUCE VARIABLES, CREATE DATAFRAME
 
 Variables of interest: short names (as per NDA data dictionary)
 
-- DSM-5 dpression scale (T-Score) — i.e., standarised score: cbcl_scr_dsm5_depress_t
-
--CBCL 
-
-
-
+-   DSM-5 depression scale (raw score): cbcl_scr_dsm5_depress_r (outcome of interest)
+-   Withdrawn Depressed Syndrome Scale: cbcl_scr_syn_withdep_r (look at correlation with DSM score)
 
 ```{r, load data and tidy}
-
 cbcl <-rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/Mental_Health/abcd_cbcls01.rds")
 
 head(cbcl, n=10) #first few observations
 str(cbcl)  #types of variables
 names(cbcl) #List variables in dataframe
 
-#reduce to baseline data only, N= 6251
-cbcl <- cbcl %>% 
-  filter(eventname == "3_year_follow_up_y_arm_1")
+#Check how sample sizes for each wave of imaging data. 
+CBCL_sample_siz_tbl <- cbcl %>%
+  group_by(eventname) %>% 
+  summarise(no_rows = length(eventname))
+print(CBCL_sample_siz_tbl)
 
 #extract all variables containing "dep" for depression variables
 
 cbcl_dep <- cbcl %>% 
-  select(src_subject_id,interview_date, interview_age, sex, eventname, contains("dep"))
+  select(src_subject_id, interview_date, interview_age, sex, eventname, contains("dep"))
 
 colnames(cbcl_dep) #check correct columns have been extracted
  
-summary(cbcl$cbcl_scr_dsm5_depress_r)
+summary(cbcl$cbcl_scr_dsm5_depress_r) #get summary
+```
+
+Let's plot depression measures to look at distribution
+```{r, plot distribution, fig.show="hold", out.width="50%}
+
 
 dsm_dep_plot <- cbcl_dep %>% 
   ggplot(aes(x = cbcl_scr_dsm5_depress_r)) +
   geom_histogram(bins = 15,
                 colour = "skyblue4",
                  fill = "skyblue3") +
-  labs(title = "CBCL Depression", x = "CBCL_withdrawn_Depression (raw score)") +
+  facet_grid(eventname ~ ., scales = "free") + #this will show dist for all waves
+  labs(title = "CBCL DSM-5 Depression", x = "CBCL_DSM5_Depression (raw score)") +
   scale_x_continuous(breaks=seq(0, 20, 3), limits = c(0,20))
-  
-print(dsm_dep_plot)
+print(dsm_dep_plot) #distributions all look v similar
+
+
 plot(cbcl_dep$cbcl_scr_syn_withdep_r)
 
 ```
+
+```{r, generate cut off score}
+
+```
+
+```{r, generate separate dataframes for each timepoint}
+
+```
+
