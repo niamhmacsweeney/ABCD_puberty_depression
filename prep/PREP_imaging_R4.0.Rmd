@@ -278,7 +278,7 @@ Using fractional anisotropy and mean diffusivity as measures of white matter mic
 
 Note that we are using the inner shell DTI measures for this analysis (abcd_dti_p101.rds) instead of Full shell DTI measures (abcd_dmdtifp101.rds). Both measures are available in ABCD. We have conducted sensitivity analysis between the two measures and we found very similiar effects sizes across inner shell and full shell for DTI. 
 
-There is some research suggesting that Full shell is more appropriate for developmental samples (e.g., https://www.sciencedirect.com/science/article/pii/S1878929320300360). However, given the results of the sensitivity analysis, for the present study (i.e., NMacSweeney et al.'s RR), we will stick to inner shell. 
+There is some research suggesting that Full shell is more appropriate for developmental samples (e.g., https://www.sciencedirect.com/science/article/pii/S1878929320300360). However, given the results of the sensitivity analysis, for the present study (i.e., MacSweeney et al.'s RR), we will stick to inner shell. 
 
 ```{r, load DTI measures}
 dti <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_dti_p101.rds")
