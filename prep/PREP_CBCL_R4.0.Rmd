@@ -53,6 +53,7 @@ library(jtools)
 library(readr)
 library(gridExtra)
 library(cowplot)
+library(ggpubr)
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
 getwd()
@@ -85,14 +86,23 @@ cbcl_dep <- cbcl %>%
   select(src_subject_id, interview_date, interview_age, sex, eventname, contains("dep"))
 
 colnames(cbcl_dep) #check correct columns have been extracted
+str(cbcl_dep) #check variable types -- change intg. values to numeric for plotting purposes
+
+cbcl$cbcl_scr_dsm5_depress_r <- as.numeric(cbcl$cbcl_scr_dsm5_depress_r)
+cbcl$cbcl_scr_syn_withdep_r <- as.numeric(cbcl$cbcl_scr_syn_withdep_r)
  
 summary(cbcl$cbcl_scr_dsm5_depress_r) #get summary
+summary(cbcl$cbcl_scr_syn_withdep_r) 
+
+
 ```
 
 Let's plot depression measures to look at distribution
+
+Looking at the graphs, it seems there are a lot of "0" values in each timepoint. For count data like this, we will need to use poisson regression in our analysis models (or negative binomial regression or zero-inflated regression if the poisson regression models are "over dispersed").
 ```{r, plot distribution, fig.show="hold", out.width="50%}
 
-
+### DSM Depression ####
 dsm_dep_plot <- cbcl_dep %>% 
   ggplot(aes(x = cbcl_scr_dsm5_depress_r)) +
   geom_histogram(bins = 15,
@@ -103,12 +113,54 @@ dsm_dep_plot <- cbcl_dep %>%
   scale_x_continuous(breaks=seq(0, 20, 3), limits = c(0,20))
 print(dsm_dep_plot) #distributions all look v similar
 
+#### Withdrawn Depressed  ####
 
-plot(cbcl_dep$cbcl_scr_syn_withdep_r)
+with_dep_plot <- cbcl_dep %>% 
+  ggplot(aes(x = cbcl_scr_syn_withdep_r)) +
+  geom_histogram(bins = 15,
+                colour = "darkorange4",
+                 fill = "darkorange3") +
+  facet_grid(eventname ~ ., scales = "free") + #show dist for each timepoint separately
+  labs(title = "CBCL Withdrawn Depressed Syndrome ", x = "CBCL_with_Depress (raw score)") +
+  scale_x_continuous(breaks=seq(0, 20, 3), limits = c(0,20))
+print(with_dep_plot) #distributions all look v similar
+
 
 ```
 
+#### Correlation between two depression measures in CBCL
+
+They are very highly correlated, as expected. r = 0.73
+```{r, check correlation}
+
+#define plot
+cbcl_dep_corr <- ggplot(data = cbcl_dep,
+                       mapping = aes(x = cbcl_scr_dsm5_depress_r , y = cbcl_scr_syn_withdep_r))
+
+#plot
+cbcl_dep_corr +
+  geom_point(alpha = 0.7, size=2, color = "#00AFBB" ) +
+  labs(title = "CBCL DSM Depression and CBCL Withdrawn-Depressed Relationship",
+       y= "CBCL Withrawn-Depressed",
+       x = "CBCL DSM Depression") +
+  geom_smooth(method = "lm") +
+  stat_cor(method = "pearson", label.x = 1.5, label.y =  25)
+
+print(cbcl_dep_corr)
+
+```
+
+###Check correlation between Depression severity measure from KSADS (used in original draft of RR) for reviewer response letter. We need to use the CBCL measure since our outcome variable in the mediation analysis is at Year 3, and KSADS is not available at this time. 
+
+```{r, check correlation between KSADS Dep Severity and CBCL DSM Depression}
+
+
+```
+
+For the purpose of this project, we want to exclude people with "clinically significant symptoms" at year 1
 ```{r, generate cut off score}
+
+
 
 ```
 
