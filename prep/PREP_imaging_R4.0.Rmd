@@ -147,6 +147,7 @@ Note: APARC = cortical parcellation in Free Surfer syntax
 
 colnames(t1)=gsub('smri_','',colnames(t1))
 colnames(t1)=gsub('_cdk_','.APARC.',colnames(t1)) 
+colnames(t1)=gsub('_scs_','.ASEG.',colnames(t1)) 
 colnames(t1)=gsub('thick.','thk.',colnames(t1))
 colnames(t1)=gsub('area.','sa.',colnames(t1))
 
@@ -154,13 +155,11 @@ colnames(t1)=gsub('area.','sa.',colnames(t1))
 
 \#Intracranial Volume\#
 
-We will use intracranial volume (ICV) as a covariate in our regional measure models but not in our global measure models. ABCD have derived a measure of ICV that we will use but we will rename it so that it aligns with the naming system used in our function scripts. 
-
-Note: ASEG is the freesurfer parcellation syntax to indicate a subcortical measure (we are assigning this here so that it can be used later in models if needed)
+We will use intracranial volume (ICV) as a covariate in our regional measure models but not in our global measure models. ABCD have derived a measure of ICV that we will use but we will rename it to just "ICV". 
 
 ```{r, change ICV variable name}
 
-t1$ICV_ASEG = t1$vol.ASEG.intracranialv
+t1$ICV = t1$vol.ASEG.intracranialv
 t1=t1[,!grepl('vol.ASEG.intracranialv',colnames(t1))]
 
 ```
@@ -177,7 +176,7 @@ colnames(t1) #check it worked
 
 ```
 
-We will remove total and mean measures for each hemisphere (i.e., rh and lh) as we are not interestd in these for the purposes of the present analysis.
+We will remove total and mean measures for each hemisphere (i.e., rh and lh) as we are not interested in these for the purposes of the present analysis.
 
 This will leave us with cortical metrics (vol, sa, sulcal depth and thickness) for individual regions.
 
@@ -194,13 +193,13 @@ Note: we are selecting our imaging columns that contain "APARC" as these are the
 ### Baseline ###
 cortical_y0 <- t1 %>% 
   filter(eventname == "baseline_year_1_arm_1") %>% #reduce to baseline; N= 11760
-  select("src_subject_id", contains("APARC")) #selecting cols contains "APARC" = 277 variables in df
+  select("src_subject_id", contains("APARC"), "ICV") #selecting cols contains "APARC" = 278 variables in df and also ICV
    
 
 ### Year 2 ###
 cortical_y2 <- t1 %>%  
   filter(eventname == "2_year_follow_up_y_arm_1") %>% #reduce to Year 2 only --- N= 7827
-  select("src_subject_id", contains("APARC")) #select cols containing "APARC" = 277 vars
+  select("src_subject_id", contains("APARC"), "ICV") #select cols containing "APARC" = 278 vars
 
 ```
 
@@ -377,36 +376,12 @@ dti_y2_dist
 ```
 \#\#\#\#Subcortical volume measures (before QC, N =11,736)
 
-We will select the subcortical regions that overlap with ENIGMA and add in the ventral diencephalon. Note that we are only looking at subcortical volume.
+We will select the subcortical regions that overlap with ENIGMA and add in the ventral diencephalon. Note that we are only looking at subcortical volume (not thicnkess, surface area or sulcal depth)
 
-```{r, load in subcortical measures}
-subcort <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_smrip10201.rds")
-```
+We have already renamed and tidied to T1 file above so we can load this in from our global environment and then select the subcortical variables and ICV. 
+```{r, make subcortical df from t1}
 
-We will rename the variables so that they are consistent with the function script we will use later in our analysis (i.e., subcortical structures have "ASEG" in variable name instead of "scs")
-
-```{r, tidy up variable names}
-colnames(subcort)=gsub('smri_','',colnames(subcort))
-colnames(subcort)=gsub('_scs_','.ASEG.',colnames(subcort)) #replace scs with ASEG for consistency with Freesurfer and works with function script naming system
-```
-
-Create Intracranial volume measure
-
-Note: in the original/raw ABCD data, the ICV variable name = smri_vol_scs_intracranialv Here, after changes to variable names, the ICV variable = vol.ASEG.intracranialv, which we rename to ICV_ASEG (for the purposes of naming system in function script)
-
-```{r, create ICV and remove wholeb, csf}
-subcort$ICV_ASEG =subcort$vol.ASEG.intracranialv #create ICV variable that matches function naming system. 
-subcort=subcort[,!grepl('vol.ASEG.intracranialv',colnames(subcort))] #remove old variable
-
-```
-
-```{r, further tidy of column names}
-
-colnames(subcort)[grep('l$|lh$',colnames(subcort))]=paste0('lh.',gsub('l$|lh$','',colnames(subcort)))[grep('l$|lh$',colnames(subcort))]
-colnames(subcort)[grep('r$|rh$',colnames(subcort))]=paste0('rh.',gsub('r$|rh$','',colnames(subcort)))[grep('r$|rh$',colnames(subcort))]
-colnames(subcort)[grep('^vol.',colnames(subcort))]=paste0('bl.',colnames(subcort))[grep('^vol.',colnames(subcort))]
-
-colnames(subcort) #check column names
+subcort <- t1 
 
 ```
 
@@ -417,14 +392,14 @@ Create separate dataframes for Baseline and Year 2.
 ###Baseline####
 subcort_y0 <- subcort %>% 
 filter(eventname == "baseline_year_1_arm_1") %>% #reduce to baseline --- N = 11,760
-.[,grep("subject|vol.ASEG.", colnames(.))] %>%   #select smri vol data
-.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|subcortical",colnames(.))] #select relevant columns 
+.[,grep("subject|vol.ASEG.|ICV", colnames(.))] %>%   #select smri vol data
+.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|subcortical|ICV",colnames(.))] #select relevant columns 
 
 ###Year 2 ####
 subcort_y2 <- subcort %>% 
 filter(eventname == "2_year_follow_up_y_arm_1") %>% #reduce to  --- N = 7827
-.[,grep("subject|vol.ASEG.", colnames(.))] %>%   #select smri vol data
-.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|subcortical",colnames(.))] #select relevant columns
+.[,grep("subject|vol.ASEG.|ICV", colnames(.))] %>%   #select smri vol data
+.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|subcortical|ICV",colnames(.))] #select relevant columns
 
 
 ```
