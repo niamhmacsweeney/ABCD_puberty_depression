@@ -66,8 +66,16 @@ covs <-rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.d
 #import dti for additional DTI motion covariates 
 dti <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_dti_p101.rds")
 
+#import t1 to get ICV (Intracranial volume) measure 
+#Note:
+  # we have extracted this in the imaging qc but we will pull out again here
+  #for our main analysis we will need Year 2 ICV measure (we won't load data this at present)
+t1 <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_smrip10201.rds")
+
 #import MRI info for scanner manufacturer ID
 mri_info <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_mri01.rds")
+
+
 ```
 
 See the following data dictionary pages for further info on variables below:
@@ -100,6 +108,14 @@ family <- family %>%
 dti <- dti %>% 
   select(src_subject_id, eventname, sex, dmri_dti_meanmotion, dmri_dti_meanrot, dmri_dti_meantrans)
 
+#extract ICV from t1 dataframe
+ICV <-  t1  %>% 
+  select(src_subject_id, eventname, sex, smri_vol_scs_intracranialv)
+
+  #rename ICV variable so naming consistent with imaging prep script
+  ICV <- ICV %>% 
+    rename(ICV = smri_vol_scs_intracranialv)
+
 #extract MRI info
 mri_info <- mri_info %>% 
   select(src_subject_id, eventname, sex, mri_info_visitid, mri_info_manufacturersmn, mri_info_deviceserialnumber, mri_info_magneticfieldstrength, mri_info_studydate)
@@ -114,7 +130,7 @@ covs_all <- covs %>%
   left_join(y=site, by= c("src_subject_id","eventname","sex")) #merge covs and site
 
 covs_all <- covs_all %>% 
-  left_join(y=dti, by= c("src_subject_id","eventname","sex")) #merge with dti
+  left_join(y=dti, by= c("src_subject_id","eventname","sex")) #merge with dti motion
 
 covs_all <- covs_all %>% 
   left_join(y=family, by= c("src_subject_id","eventname","sex")) #merge with family
@@ -122,13 +138,16 @@ covs_all <- covs_all %>%
 covs_all <- covs_all %>% 
   left_join(y=mri_info, by= c("src_subject_id","eventname","sex")) #merge with mri info
 
+covs_all <- covs_all %>% 
+  left_join(y=ICV, by= c("src_subject_id","eventname","sex")) #merge with ICV
+
 ```
 ##INSPECT DATA
 
 ```{r, tidy up variables}
 
 #change age to years instead of months 
-temp <- covs_all %>%
+covs_all <- covs_all %>%
   mutate(
     age_years = interview_age/12 
   )
@@ -158,29 +177,10 @@ covs_y0 <- covs_all %>%
 covs_y1 <- covs_all %>% 
   filter(eventname=="1_year_follow_up_y_arm_1") #N=11,235
 
-
-colnames(covs_y0) #check new variable exists
-
-#Let's reduce variables to those we need 
-#Note: removing age in months, extra race, education (high.educ = high.educ.bl) and income vars.
-
-covs <- covs %>% 
-  select(-age, -female, -race.4level,  -high.educ.bl, - household.income)
-
-#Let's reorder variables so that order is consistent with table above
-
-# Age, BMI, race/ethnicity, family income, site, motion,hemisphere (for bilateral brain measures),
-#parent depressive symptoms (fieldname: asr_scr_depress_r )
-
-covs <- covs %>% 
-  relocate("src_subject_id", "eventname", "sex", "age_years", "bmi", "race.6level", "demo_comb_income_p",  "abcd_site", "high.educ", "fsqc_qu_motion", "asr_scr_depress_r", "rel_family_id")
-
 ```
 ##Quality control covariates
 
 We will get a summary of each covariate and check for number of NAs. These will be removed when running the linear models later.  
-
-We will use the "rel_family_id" later to reduce sample to unrelated participants only. 
 
 ##Core Covariates
 
@@ -189,8 +189,8 @@ We will use the "rel_family_id" later to reduce sample to unrelated participants
 
 #Note: Additional imaging covariates motion, hemisphere and ICV will be added later from PREP.imaging file when building models. 
 
-#Age --- looks good, no NAs
-summary(covs$age_years)
+#Age --- looks good, NAs = 2
+summary(covs_y0$age_years) 
 
 #BMI --- NAs = 94
 summary(covs$bmi)
