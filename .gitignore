@@ -25,12 +25,9 @@ venv
 node_modules
 .sass-cache
 
-#Ignoring specific folders due to data sensitivity or unpublished results. 
+#Ignoring specific folders due to data sensitivity
 **/data/
 **/docs/
 **/template_scripts/
-**/figs/
-**/results/
-
 
 
