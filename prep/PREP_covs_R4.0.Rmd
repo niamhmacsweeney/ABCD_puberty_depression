@@ -66,16 +66,8 @@ covs <-rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.d
 #import dti for additional DTI motion covariates 
 dti <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_dti_p101.rds")
 
-#import t1 to get ICV (Intracranial volume) measure 
-#Note:
-  # we have extracted this in the imaging qc but we will pull out again here
-  #for our main analysis we will need Year 2 ICV measure (we won't load data this at present)
-t1 <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_smrip10201.rds")
-
 #import MRI info for scanner manufacturer ID
 mri_info <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_mri01.rds")
-
-
 ```
 
 See the following data dictionary pages for further info on variables below:
@@ -89,12 +81,12 @@ MRI info: https://nda.nih.gov/data_structure.html?short_name=abcd_mri01
 ```{r, reduce to variables of interest}
 #rename variables so consistent across scripts and more intuitive
 covs <- covs %>% 
-  rename(eventname = event_name, sex = sex_at_birth, bmi = anthro_bmi_calc)
+  rename(eventname = event_name, sex = sex_at_birth, bmi = anthro_bmi_calc, household_income = household.income)
 colnames(covs)
 
-#extract bmi and race, parent depression rating from covs df
+#extract bmi and race, household income, parent depression rating from covs df
 covs <- covs %>% 
-  select(src_subject_id, eventname, sex, bmi, race.6level, asr_scr_depress_r)
+  select(src_subject_id, eventname, sex, bmi, household_income, race.6level, asr_scr_depress_r)
 
 #extract site id (this give site for each event name) and subject id 
 site <- site %>% 
@@ -108,17 +100,24 @@ family <- family %>%
 dti <- dti %>% 
   select(src_subject_id, eventname, sex, dmri_dti_meanmotion, dmri_dti_meanrot, dmri_dti_meantrans)
 
-#extract ICV from t1 dataframe
-ICV <-  t1  %>% 
-  select(src_subject_id, eventname, sex, smri_vol_scs_intracranialv)
-
-  #rename ICV variable so naming consistent with imaging prep script
-  ICV <- ICV %>% 
-    rename(ICV = smri_vol_scs_intracranialv)
-
 #extract MRI info
+#rename MRI info vars 
+
 mri_info <- mri_info %>% 
-  select(src_subject_id, eventname, sex, mri_info_visitid, mri_info_manufacturersmn, mri_info_deviceserialnumber, mri_info_magneticfieldstrength, mri_info_studydate)
+  rename(scanner_id = mri_info_deviceserialnumber)
+
+mri_info <- mri_info %>% 
+  select(src_subject_id, eventname, sex, mri_info_visitid, scanner_id, mri_info_studydate)
+```
+Let's explore family ID structure 
+
+```{r, family ID}
+
+family_id_tbl <- family %>%
+  group_by(eventname) %>% 
+  summarise(no_rows = length(family))
+print(family_id_tbl)
+
 ```
 
 ##MERGE DATAFRAMES
@@ -130,16 +129,13 @@ covs_all <- covs %>%
   left_join(y=site, by= c("src_subject_id","eventname","sex")) #merge covs and site
 
 covs_all <- covs_all %>% 
-  left_join(y=dti, by= c("src_subject_id","eventname","sex")) #merge with dti motion
+  left_join(y=dti, by= c("src_subject_id","eventname","sex")) #merge with dti
 
 covs_all <- covs_all %>% 
   left_join(y=family, by= c("src_subject_id","eventname","sex")) #merge with family
                      
 covs_all <- covs_all %>% 
   left_join(y=mri_info, by= c("src_subject_id","eventname","sex")) #merge with mri info
-
-covs_all <- covs_all %>% 
-  left_join(y=ICV, by= c("src_subject_id","eventname","sex")) #merge with ICV
 
 ```
 ##INSPECT DATA
@@ -154,70 +150,95 @@ covs_all <- covs_all %>%
 
 #check number of scanner ids: There are 30 different scanners used across 21 sites 
 scanner_id_tbl <- covs_all %>%
-  group_by(mri_info_deviceserialnumber) %>% 
-  summarise(no_rows = length(mri_info_deviceserialnumber))
+  group_by(scanner_id) %>% 
+  summarise(no_rows = length(scanner_id))
 print(scanner_id_tbl)
+
+#inspect what household income info is available per wave
+income <- covs_all %>% 
+  select(household_income, eventname)
+
+income_tbl <- covs_all %>%
+  group_by(eventname) %>% 
+   summarise(no_rows = length(household_income))
+print(income_tbl)
+
+
 
 ```
 
-###MAKE SEPARATE DATAFRAMES PER TIMEPOINT:
+###MAKE SEPARATE DATAFRAMES for pilot and main analysis :
 
 1. Baseline (Pilot analysis)
 
-2. Year 1 (Main analysis - non imaging covs)
+2. Year 1, 2, 3 (Main analysis)
 
-3. Year 2 (Main analysis - imaging covs)
 
-```{r, make separate DFs per timepoint}
-#### Baseline #####
-covs_y0 <- covs_all %>% 
-  filter(eventname=="baseline_year_1_arm_1") #N=11,878
-  
-#### Year 1 ######
-covs_y1 <- covs_all %>% 
-  filter(eventname=="1_year_follow_up_y_arm_1") #N=11,235
-
-```
 ##Quality control covariates
 
 We will get a summary of each covariate and check for number of NAs. These will be removed when running the linear models later.  
 
-##Core Covariates
+# PILOT ANALYSIS: Core Covariates (Basic Model)
 
-```{r, QC covs}
+- Fixed: age, ethnicity, family, hemisphere
+- Random: scanner
+
+Note: Hemisphere will be added in later in the analysis script. 
+
+```{r, BASELINE DF and QC}
+#### Baseline #####
+covs_pilot <- covs_all %>% 
+  filter(eventname=="baseline_year_1_arm_1") #N=11,878
+
 ### Core covariates for basic model ###
 
-#Note: Additional imaging covariates motion, hemisphere and ICV will be added later from PREP.imaging file when building models. 
-
-#Age --- looks good, NAs = 2
-summary(covs_y0$age_years) 
-
-#BMI --- NAs = 94
-summary(covs$bmi)
+#Age --- NAs = 2
+summary(covs_pilot$age_years)
 
 #Race/ethnicity --- NAs = 171
 
 #Note: We are using a 6-level race measure instead of race_etnicity variable in an effort to make the measure more representative. "race.6level" includes White, Black, Asian, AIAN/NHPI (Asian Indian/Alaskan American/Native Hawaiian/Pacific Islander), Other, Mixed. 
+summary(covs_pilot$race.6level)
 
-summary(covs$race.6level)
+#family: NAs = 2
+summary(covs_pilot$rel_family_id)
 
-#Study site --- why is there a site 22? 
-summary(covs$abcd_site)
+#Scanner ID--- NAs = 77
+#use code below to get info on each level of char variable (incl. NAs)
+scanner_tbl <- covs_pilot %>%
+  group_by(scanner_id) %>% 
+  summarise(no_rows = length(scanner_id))
+print(scanner_tbl)
+
+
 
 ```
 
-##Additional Covariates
+##MAIN ANALYSIS (full model)
 
-```{r, QC covs}
-### Additional Covariates ###
+Basic Model +
 
-##Socio-economic variables
+Fixed: BMI, family income, population stratification weight,
+
+06/04/22 - BElOW IS NOT WORKING BUT WILL FIX NEXT WEEK AFTER I HAVE RUN THE PILOT ANALYSIS. 
+```{r, QC main analysis covs}
+
+covs_main <- covs_all %>% #N=17806
+  filter(eventname == "1_year_follow_up_y_arm_1"|
+         eventname == "2_year_follow_up_y_arm_1"|
+         eventname == "3_year_follow_up_y_arm_1")
 
 #Family income --- Refuse to answer=512, Don't know = 504, NAs= 2
-summary(covs$demo_comb_income_p)
+income_tbl <- covs_main %>%
+  group_by(household_income) %>% 
+  summarise(no_rows = length(household_income))
+print(income_tbl)
+
+covs_main$family_income <- as.factor(covs_main$family_income)
+summary(covs_main$family_income) #NAs = 388
 
 #Parent highest education --- NAs = 14.
-summary(covs$high.educ)
+summary(covs_main$)
 
 #Parent depression --- NAs = 5. 
 summary(covs$asr_scr_depress_r)
@@ -230,7 +251,7 @@ All covariates look within a normal range and can be exported.
 
 ```{r, export data}
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
-saveRDS(covs,"covariates_cleaned_R3.0.rds")
+saveRDS(covs_pilot,"covs_pilot_R4.0.rds")
 ```
 ####------------ END OF MAIN SCRIPT -----------------####
 
