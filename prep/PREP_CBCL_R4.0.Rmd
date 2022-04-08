@@ -1,0 +1,301 @@
+---
+title: "PREP_CBCL_R4.0"
+Date: 16/03/22
+Author: Niamh MacSweeney
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Introduction
+
+The purpose of this script is to generate depression severity measure (DSM5 scale, continuous measure) from the Child Behaviour Checklist (CBCL) using ABCD Release 4.0 to prepare a final, clean, sample for use in models for MacSweeney et al.'s Puberty RR.
+
+We will create the following dataframes:
+
+1.  CBCL_dep_y0 at baseline (we will use this in the pilot data analysis)
+2.  CBCL_dep_y1 at Year 1 (will need to remove those with depression at Year 1 from the main analysis due to our hypothesed mediation)
+3.  CBCL_dep_y3 at Year 3 (this data will be used as the primary outcome in the main analysis)
+
+###Script workflow:
+
+1.  Setup: load data, tidy, get sample sizes for each timepoint/wave.
+2.  Step 1: Inspect data.
+
+###Resources:
+ - Key reference: Achenbach, T., & Rescoral, L.A. (2001). Manual for the ASEBA School-Age Forms & Profiles. Burlington, VT: ASEBA, University of Vermont.
+ 
+ Helpful manual with info on clinical cut offs: https://www.google.com/search?client=safari&rls=en&q=measure-report-child-cbcl.df&ie=UTF-8&oe=UTF-8
+
+A note on T-scores from the ASEBA guide:
+
+"Normalized T scores are standard scores that are based on the percentiles occupied by raw scale scores in the distribution of scores obtained by individuals in the relevant normative sample. Consequently, the T score obtained by an individual tells us approximately how high (in terms of a percentile) the individual's scale score is, compared to the scores obtained by individuals in the relevant normative sample"
+
+Because substantial percentages of individuals in the normative samples obtained very low scores on the DSM-oriented and syndrome scales (e.g., scores of 0 or 1), the T score assignments start at 50, which represents the 50th percentile of scores in a normative sample. In other words, all raw scale scores that were in the lowest 50 percent of the distribution are assigned a T score of 50.
+
+However, for statistical analyses, raw scale scores are often preferable, because they reflect all the variation that actually occurs in scores obtained by the individuals whose data are being analyzed. T scores, by contrast, lump together some raw scale scores, such as the different low scores that are given a T score of 50". 
+
+For our mediation analysis, we need to exclude individuals with "clinically significant" symptoms at Year 1. According to the CBCL manual, ‘Clinically significant’ elevations are indicated by T-scores ≥ 64 on the broadband scales (externalising vs. internalising), and ≥ 70 on the syndrome scales. ‘Borderline’ elevations range from 60–63 and 65–69 on the broadband and syndrome scales, respectively. 
+
+Given that clinical cut off scores are available for the CBCL syndrome scales (and not the DSM scales), we will use the CBCL Withdrawn Depressed Syndrome Scale to measure depression symptom severity in our sample. 
+
+
+###SETUP Load libraries needed and set working directory
+
+```{r, libraries}
+
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(ggstatsplot)
+library(GGally)
+library(stringr)
+library(outliers)
+library(jtools) 
+library(readr)
+library(gridExtra)
+library(cowplot)
+library(ggpubr)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
+getwd()
+
+```
+
+LOAD DATA, REDUCE VARIABLES, CREATE DATAFRAME
+
+Variables of interest: short names (as per NDA data dictionary)
+
+-   Withdrawn Depressed Syndrome Scale: cbcl_scr_syn_withdep_r (look at correlation with DSM score)
+-   DSM-5 depression scale (raw score): cbcl_scr_dsm5_depress_r (outcome of interest)
+
+```{r, load data and tidy}
+cbcl <-rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/Mental_Health/abcd_cbcls01.rds")
+
+head(cbcl, n=10) #first few observations
+str(cbcl)  #types of variables
+names(cbcl) #List variables in dataframe
+
+#Check how sample sizes for each wave of imaging data. 
+CBCL_sample_siz_tbl <- cbcl %>%
+  group_by(eventname) %>% 
+  summarise(no_rows = length(eventname))
+print(CBCL_sample_siz_tbl)
+
+#extract all variables containing "dep" for depression variables
+
+cbcl_dep <- cbcl %>% 
+  select(src_subject_id, interview_date, interview_age, sex, eventname, contains("dep"))
+
+colnames(cbcl_dep) #check correct columns have been extracted
+str(cbcl_dep) #check variable types -- change intg. values to numeric for plotting purposes
+
+cbcl_dep$cbcl_scr_syn_withdep_r <- as.numeric(cbcl_dep$cbcl_scr_syn_withdep_r)
+cbcl_dep$cbcl_scr_dsm5_depress_r <- as.numeric(cbcl_dep$cbcl_scr_dsm5_depress_r)
+ 
+summary(cbcl_dep$cbcl_scr_syn_withdep_r) #get summary
+summary(cbcl_dep$cbcl_scr_dsm5_depress_r) 
+
+
+```
+
+Let's plot depression measures to look at distribution
+
+Looking at the graphs, it seems there are a lot of "0" values in each timepoint. For count data like this, we will need to use poisson regression in our analysis models (or negative binomial regression or zero-inflated regression if the poisson regression models are "over dispersed").
+```{r, plot distribution, fig.show="hold", out.width="50%}
+
+#### Withdrawn Depressed  ####
+
+with_dep_plot <- cbcl_dep %>% 
+  ggplot(aes(x = cbcl_scr_syn_withdep_r)) +
+  geom_histogram(bins = 15,
+                colour = "darkorange4",
+                 fill = "darkorange3") +
+  facet_grid(eventname ~ ., scales = "free") + #show dist for each timepoint separately
+  labs(title = "CBCL Withdrawn Depressed Syndrome ", x = "CBCL_with_Depress (raw score)") +
+  scale_x_continuous(breaks=seq(0, 20, 3), limits = c(0,20))
+print(with_dep_plot) #distributions all look v similar
+
+### DSM Depression ####
+dsm_dep_plot <- cbcl_dep %>% 
+  ggplot(aes(x = cbcl_scr_dsm5_depress_r)) +
+  geom_histogram(bins = 15,
+                colour = "skyblue4",
+                 fill = "skyblue3") +
+  facet_grid(eventname ~ ., scales = "free") + #this will show dist for all waves
+  labs(title = "CBCL DSM-5 Depression", x = "CBCL_DSM5_Depression (raw score)") +
+  scale_x_continuous(breaks=seq(0, 20, 3), limits = c(0,20))
+print(dsm_dep_plot) #distributions all look v similar
+
+
+```
+
+#### Correlation between two depression measures in CBCL
+
+They are very highly correlated, as expected. r = 0.73
+```{r, check correlation}
+
+#define plot
+cbcl_dep_corr <- ggplot(data = cbcl_dep,
+                       mapping = aes(x = cbcl_scr_dsm5_depress_r , y = cbcl_scr_syn_withdep_r))
+
+#plot
+cbcl_dep_corr +
+  geom_point(alpha = 0.7, size=2, color = "#00AFBB" ) +
+  labs(title = "CBCL DSM Depression and CBCL Withdrawn-Depressed Relationship",
+       y= "CBCL Withrawn-Depressed",
+       x = "CBCL DSM Depression") +
+  geom_smooth(method = "lm") +
+  stat_cor(method = "pearson", label.x = 1.5, label.y =  25)
+
+print(cbcl_dep_corr)
+
+```
+
+###Check correlation between Depression severity measure from KSADS (used in original draft of RR) for reviewer response letter. We need to use the CBCL measure since our outcome variable in the mediation analysis is at Year 3, and KSADS is not available at this time. 
+
+KSADS variable = KSADS.Dep_symptoms_sum_ever.p
+CBCL variable = cbcl_scr_dsm5_depress_r
+
+FYI: Both variables are count data (i.e., number of symptoms present)
+
+```{r, check correlation between KSADS Dep Severity and CBCL DSM Depression}
+
+#load in cleaned KSADS Depression variables from Release 3.0 (can't get script working at present for 4.0). See how it correlates with CBCL measure. 
+
+KSADS_dep <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dep_measures_cleaned_R3.0.rds")
+
+#Need to reduce CBCL dep to baseline so that row numbers match when we merge with KSADS df
+
+CBCL_dep_baseline <- cbcl_dep %>% 
+  filter(eventname== "baseline_year_1_arm_1") %>% 
+  select(src_subject_id, cbcl_scr_dsm5_depress_r) #extract variables of interest
+
+#note that the dataframes don't have the same number of rows. Let's check for duplicate IDs
+
+tmp <- KSADS_dep %>% 
+  group_by(src_subject_id) %>% 
+  filter(n()>1) #doesn't seem to be any duplicates
+
+
+#select variable of interest = KSADS Depression Symptom Severity - parent report; field name: KSADS.Dep_symptoms_sum_ever.p (from dep_measures_cleaned rds file)
+
+KSADS_dep_baseline <- KSADS_dep %>% 
+  select(src_subject_id, KSADS.Dep_symptoms_sum_ever.p)
+
+cbcl_KSADS <- merge(CBCL_dep_baseline, KSADS_dep_baseline, by = "src_subject_id") #N=11,876
+
+
+summary(cbcl_KSADS$cbcl_scr_dsm5_depress_r) #range= 0-19 (mean = 1)
+summary(cbcl_KSADS$KSADS.Dep_symptoms_sum_ever.p) #range = 0-15 (mean = 10)
+
+#plot correlation
+
+cbcl_KSADS_corr <- ggplot(data = cbcl_KSADS,
+                       mapping = aes(x = cbcl_scr_dsm5_depress_r, y = KSADS.Dep_symptoms_sum_ever.p))
+
+#plot
+cbcl_KSADS_corr +
+  geom_point(alpha = 0.7, size=2, color = "#00AFBB" ) +
+  labs(title = "CBCL DSM Depression and KSADS Depression Severity Relationship",
+       y= "KSADS Depression",
+       x = "CBCL DSM Depression") +
+  geom_smooth(method = "lm") +
+  stat_cor(method = "pearson", label.x = 1.5, label.y =  25) #they don't seem to be correlated... but this could be due to the scoring system. 
+
+
+```
+
+#### PILOT DATA ANALYSIS 
+
+We will use baseline data for our pilot analysis. 
+
+```{r, get CBCL Baseline df}
+
+cbcl_dep_y0 <- cbcl_dep %>% 
+  filter(eventname == "baseline_year_1_arm_1")  #N= 11,876
+
+#select variables of interest (just want id and CBCL WithDep Raw Score)
+cbcl_dep_y0_final <- cbcl_dep_y0 %>% 
+  select(src_subject_id, cbcl_scr_syn_withdep_r)
+
+#check for and remove NAs; NAs = 8 
+
+cbcl_dep_y0_final %>% 
+  dplyr::count(cbcl_scr_syn_withdep_r)#check
+
+cbcl_dep_y0_final <- cbcl_dep_y0_final %>% #remove NAs
+  na.omit(cbcl_scr_syn_withdep_r) #N should = 11,868, it worked! 
+
+```
+
+####YEAR 1
+For the purpose of this project, we want to exclude people with "clinically significant symptoms" (i.e., a CBCL withdrawn depressed syndrome scale ≥70) at year 1. 
+
+```{r, generate cut off score}
+
+cbcl_dep_y1 <- cbcl_dep %>% 
+  filter(eventname == "1_year_follow_up_y_arm_1")  #N= 11,225
+
+#### Using percentile cut off ####
+
+x = cbcl_dep_y1$cbcl_scr_syn_withdep_t #define function
+
+cbcl_dep_y1 <- cbcl_dep_y1 %>% 
+  mutate(dep_status_y1_t= case_when(x >=70  ~ "depressed", # ≥70 
+                        TRUE ~ "not depressed"))
+
+#count depressed and not depressed at year 1
+cases <- length(unique(temp$dep_status_y1_t))
+
+cbcl_dep_y1$dep_status_y1_t <- as.factor(cbcl_dep_y1$dep_status_y1_t)
+
+cbcl_dep_y1 %>% 
+  group_by(dep_status_y1_t) %>%
+  summarise(no_rows = length(dep_status_y1_t)) #335 people are above threshold and will be excluded
+
+#Make df of participant IDs to exclude; N=355
+ids_dep_y1 <- cbcl_dep_y1 %>% 
+  select(src_subject_id, dep_status_y1_t) %>% 
+  filter(dep_status_y1_t == "depressed")
+
+```
+
+#####YEAR 3 
+This will be our primary outcome measures in our main analysis. Although we are not looking at this data in our pilot analysis, we will still check the final sample size we can expect to work with. 
+```{r, sample size for Year 3 CBCL}
+
+cbcl_dep_y3 <- cbcl_dep %>% 
+  filter(eventname == "3_year_follow_up_y_arm_1") #N=6251
+
+#select variables of interest (just want id and CBCL WithDep Raw Score)
+cbcl_dep_y3_final <- cbcl_dep_y3 %>% 
+  select(src_subject_id, cbcl_scr_syn_withdep_r)
+
+#Check for NAs
+cbcl_dep_y3 %>% 
+  dplyr::count(cbcl_scr_syn_withdep_r) # N=118
+
+#Remove NAs
+cbcl_dep_y3_final <- cbcl_dep_y3_final %>% 
+  na.omit(cbcl_scr_syn_withdep_r) #N should = 6133; it worked! 
+```
+
+####EXPORT CLEANED DATA 
+
+Note that we will not be looking at the year 3 data. We are just exporting here for ease later on. 
+```{r, export clean data}
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+
+### Baseline data ####
+saveRDS(cbcl_dep_y0_final,"CBCL_dep_baseline_R4.0.rds")
+
+
+##### Year 3 data #####
+saveRDS(cbcl_dep_y3_final, "CBCL_y3_R4.0.rds")
+
+```

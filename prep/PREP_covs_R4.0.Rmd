@@ -1,0 +1,238 @@
+---
+title: "PREP_covs_R3.0"
+author: "Niamh MacSweeney"
+date: "5/4/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+The purpose of this script is to tidy and quality control the covariates for our analysis.
+Covariates: Age, BMI, race/ethnicity, family income, site (for not imaging models), scanner_id (for imaging models) hemisphere (for bilateral brain measures)
+
+This data frame was downloaded via the DEAP portal which works off the most recent ABCD data release (3.0). 
+
+## Setup
+
+Load libraries, set working directory.
+
+```{r, setup}
+
+library(psych)
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(ggstatsplot)
+library(readr)
+library(gridExtra)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
+getwd()
+
+```
+
+##LOAD DATA
+
+Note: Renaming variables to make the names more intuitive. 
+
+Need to insert table here of all the covariates used.... 
+
+```{r, covariate table}
+
+vars <- factor(c("src_subject_id", "eventname", "sex", "age_years", "bmi", "race.6level", "demo_comb_income_p",  "abcd_site", "high.educ", "fsqc_qu_motion", "asr_scr_depress_r", "rel_family_id"))
+
+var_lables <- factor(c("Participant ID", "Data collection wave", "Sex at birth", "Age in years", "Body Mass Index", "Race (6-level categorisation", "Household income", "Study site", "Highest education of parents", "FreeSurfer QC motion", "Parent (self-report) depressive problems", "Family ID"))
+
+```
+
+Note: While we are primarily using Release 4.0, we will use some covariates (race.6.level, BMI) from DEAP (still using Release 3.0) as these variables have been derived by DEAP and are not available on the NDA site. There have been no updates/no changes on these variables between release 3.0 and 4.0. Additionally, for our covariates, we are using baseline and year 1 data (all available in 3.0), so are confident that this won't impact our analyses. 
+
+
+```{r, load data}
+#import site info from longitudinal tracking file
+site <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/Culture_and_Environment/abcd_lt01.rds")
+
+#import family ID to track family
+family <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/Culture_and_Environment/acspsw03.rds")
+
+#note: DEAP is still waiting to be updated to release4.0.
+covs <-rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/DEAP_data_downloads/covs_puberty_RR.rds") 
+
+#import dti for additional DTI motion covariates 
+dti <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_dti_p101.rds")
+
+#import t1 to get ICV (Intracranial volume) measure 
+#Note:
+  # we have extracted this in the imaging qc but we will pull out again here
+  #for our main analysis we will need Year 2 ICV measure (we won't load data this at present)
+t1 <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_smrip10201.rds")
+
+#import MRI info for scanner manufacturer ID
+mri_info <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_mri01.rds")
+
+
+```
+
+See the following data dictionary pages for further info on variables below:
+
+Longitudinal tracking info (site): https://nda.nih.gov/data_structure.html?short_name=abcd_lt01
+
+Family info: https://nda.nih.gov/data_structure.html?short_name=acspsw03
+
+MRI info: https://nda.nih.gov/data_structure.html?short_name=abcd_mri01
+
+```{r, reduce to variables of interest}
+#rename variables so consistent across scripts and more intuitive
+covs <- covs %>% 
+  rename(eventname = event_name, sex = sex_at_birth, bmi = anthro_bmi_calc)
+colnames(covs)
+
+#extract bmi and race, parent depression rating from covs df
+covs <- covs %>% 
+  select(src_subject_id, eventname, sex, bmi, race.6level, asr_scr_depress_r)
+
+#extract site id (this give site for each event name) and subject id 
+site <- site %>% 
+  select(src_subject_id, eventname, sex, interview_age, site_id_l)
+
+#extract family id, group id, acs stratification weight 
+family <- family %>% 
+  select(src_subject_id, eventname, sex, rel_family_id, rel_group_id, acs_raked_propensity_score)
+
+#extract dti motion covariates 
+dti <- dti %>% 
+  select(src_subject_id, eventname, sex, dmri_dti_meanmotion, dmri_dti_meanrot, dmri_dti_meantrans)
+
+#extract ICV from t1 dataframe
+ICV <-  t1  %>% 
+  select(src_subject_id, eventname, sex, smri_vol_scs_intracranialv)
+
+  #rename ICV variable so naming consistent with imaging prep script
+  ICV <- ICV %>% 
+    rename(ICV = smri_vol_scs_intracranialv)
+
+#extract MRI info
+mri_info <- mri_info %>% 
+  select(src_subject_id, eventname, sex, mri_info_visitid, mri_info_manufacturersmn, mri_info_deviceserialnumber, mri_info_magneticfieldstrength, mri_info_studydate)
+```
+
+##MERGE DATAFRAMES
+
+```{r, merge dataframes}
+
+#merge dfs by id, eventname and sex
+covs_all <- covs %>% 
+  left_join(y=site, by= c("src_subject_id","eventname","sex")) #merge covs and site
+
+covs_all <- covs_all %>% 
+  left_join(y=dti, by= c("src_subject_id","eventname","sex")) #merge with dti motion
+
+covs_all <- covs_all %>% 
+  left_join(y=family, by= c("src_subject_id","eventname","sex")) #merge with family
+                     
+covs_all <- covs_all %>% 
+  left_join(y=mri_info, by= c("src_subject_id","eventname","sex")) #merge with mri info
+
+covs_all <- covs_all %>% 
+  left_join(y=ICV, by= c("src_subject_id","eventname","sex")) #merge with ICV
+
+```
+##INSPECT DATA
+
+```{r, tidy up variables}
+
+#change age to years instead of months 
+covs_all <- covs_all %>%
+  mutate(
+    age_years = interview_age/12 
+  )
+
+#check number of scanner ids: There are 30 different scanners used across 21 sites 
+scanner_id_tbl <- covs_all %>%
+  group_by(mri_info_deviceserialnumber) %>% 
+  summarise(no_rows = length(mri_info_deviceserialnumber))
+print(scanner_id_tbl)
+
+```
+
+###MAKE SEPARATE DATAFRAMES PER TIMEPOINT:
+
+1. Baseline (Pilot analysis)
+
+2. Year 1 (Main analysis - non imaging covs)
+
+3. Year 2 (Main analysis - imaging covs)
+
+```{r, make separate DFs per timepoint}
+#### Baseline #####
+covs_y0 <- covs_all %>% 
+  filter(eventname=="baseline_year_1_arm_1") #N=11,878
+  
+#### Year 1 ######
+covs_y1 <- covs_all %>% 
+  filter(eventname=="1_year_follow_up_y_arm_1") #N=11,235
+
+```
+##Quality control covariates
+
+We will get a summary of each covariate and check for number of NAs. These will be removed when running the linear models later.  
+
+##Core Covariates
+
+```{r, QC covs}
+### Core covariates for basic model ###
+
+#Note: Additional imaging covariates motion, hemisphere and ICV will be added later from PREP.imaging file when building models. 
+
+#Age --- looks good, NAs = 2
+summary(covs_y0$age_years) 
+
+#BMI --- NAs = 94
+summary(covs$bmi)
+
+#Race/ethnicity --- NAs = 171
+
+#Note: We are using a 6-level race measure instead of race_etnicity variable in an effort to make the measure more representative. "race.6level" includes White, Black, Asian, AIAN/NHPI (Asian Indian/Alaskan American/Native Hawaiian/Pacific Islander), Other, Mixed. 
+
+summary(covs$race.6level)
+
+#Study site --- why is there a site 22? 
+summary(covs$abcd_site)
+
+```
+
+##Additional Covariates
+
+```{r, QC covs}
+### Additional Covariates ###
+
+##Socio-economic variables
+
+#Family income --- Refuse to answer=512, Don't know = 504, NAs= 2
+summary(covs$demo_comb_income_p)
+
+#Parent highest education --- NAs = 14.
+summary(covs$high.educ)
+
+#Parent depression --- NAs = 5. 
+summary(covs$asr_scr_depress_r)
+
+```
+
+All covariates look within a normal range and can be exported. 
+
+##Export cleaned data 
+
+```{r, export data}
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+saveRDS(covs,"covariates_cleaned_R3.0.rds")
+```
+####------------ END OF MAIN SCRIPT -----------------####
+
+
+
