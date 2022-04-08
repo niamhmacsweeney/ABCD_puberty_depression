@@ -1,0 +1,27 @@
+This is a README file for my registered report on puberty, depression, and brain structure. 
+
+####Set Up
+
+1. Connect to VPN and GenScotDep folder (for access, contact mark.adams@ed.ac.uk)
+2. Raw data found at smb://cmvm.datastore.ed.ac.uk/igmm/GenScotDepression/data/abcd/release2.0.1/iii.data
+
+#### Folder Set Up
+There are three main folders:
+1. DATA: Contains processed/cleaning data files ready for input into scripts 
+2. PREP: Scripts for data cleaning and manipulation
+3. ANALY: Scripts for analysis
+
+File naming system: TYPE_variable_datarelease.filetype  e.g., PREP_pds_R3.0.csv = prep file for pubertal development scale.csv from data release 3.0.
+
+####DATA 
+
+This folder contains processed data that is ready for use in analysis.
+
+#####PREP
+
+This folder contains scripts for preprocessing and tidying the raw data. Raw data to be read in directly from ABCD data folder in GenScotDepression: smb://cmvm.datastore.ed.ac.uk/igmm/GenScotDepression/data/abcd/release2.0.1/iii.data
+
+ABCD data will need to be processed using Eddie.See: https://github.com/ccbs-stradl/coding_club/blob/main/Sessions/2020_11_11_eddie.md for tutorial on using Eddie. 
+
+
+
