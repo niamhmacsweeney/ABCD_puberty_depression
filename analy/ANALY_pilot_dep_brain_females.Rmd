@@ -1,7 +1,7 @@
 ---
 title: "ANALY_pilot_dep_brain_females"
 author: "Niamh MacSweeney"  Credit to X. Shen for function templates. 
-date: "08/9/2021"
+date: "20/04/2022"
 output: html_document
 editor_options: 
   markdown: 
@@ -20,7 +20,7 @@ The purpose of this script is to run the pilot analysis (DR\~BS) for the Puberty
 
 This sub-sample will be split into males and females and the script will be run independently for each.
 
-We will be using an un-related sample of participants for our analysis. The pilot analysis will use a basic model, outlined below.
+As this sample includes related individuals, we will need to account for the nested structure of the data in our models. To do this we will nest family within scanner(detailed further below). The pilot analysis will use a basic model, outlined below.
 
 Please note that in this script, brain structure is set as the dependent variable due to the treatment of hemisphere mixed effects. However, in the RR, our hypotheses state that depression is the dependent or outcome variable. As this analysis is cross-sectional, the Y and X terms are statistically interchangeable so Y \~ X = depression \~ brain = brain \~ depression. For our later mediation models, the order of the terms is important so depression will be the dependent or outcome variable. See RR manuscript for further details on mediation model set up.
 
@@ -28,19 +28,19 @@ Required Inputs
 
 Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data
 
-Independent Variable Depression Rating (Parent report): dep_measures_cleaned_R3.0.rds
+Independent Variable — Depressive symptoms: CBCL_dep_baseline_R4.0.rds
 
-Dependent Variable Brain structure: cortical_cleaned_R3.0.rds + subcort_cleaned_R3.O.rds + dti_cleaned_R3.0.rds
+Dependent Variable — Brain structure: cortical_baseline_R4.0.rds + subcort_baseline_R4.O.rds + dti_baseline_R4.0.rds
 
-Covariates Covariates: covariates_cleaned_R3.0.rds
+Covariates — Covariates: covs_pilot_R4.0.rds
 
 ------------------------------------------------------------------------
 
 ####Workflow
 
 1.  Setup: Load data, merge to create master dataframe, keep unrelated participants only
-2.  Pilot prep: Get subsample of 10% of unrelated sample (N= 9,775). Split into males and females.
-3.  Set up glm/lme function using Shen's template script
+2.  Pilot prep: Get subsample of 10% of sample (N= ~6,000). Split into males and females.
+3.  Set up lme function
 
 #####STEP 1: SETUP Load libraries and set wd
 
@@ -48,6 +48,8 @@ Covariates Covariates: covariates_cleaned_R3.0.rds
 
 
 library(tidyr)
+library(lme4)
+library(lmerTest)
 library(plyr) #load before dplyr
 library(dplyr)
 library(nlme)
@@ -69,33 +71,20 @@ setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depressi
 
 Load data:
 
-Note on depression variables:
-
-As noted in Mental Health release notes for 4.0, the ABCD Team spotted inaccuracies in the algorithm used to derive the MDD diagnosis. For this reason, we have decided to not use the MDD diagnosis as a depression rating measure in the pilot analysis. Instead, we will use the ordinal measure of DS only (KSADS.Depressive_symptoms_ever).
-
-The following measures are all available in the dep_measures_cleaned.rds file but we will only focus on the KSADS.Depressive_symptoms_ever.p for the pilot analysis.
-
--   KSADS.MDD.y: MDD diagnosis based on child report
--   KSADS.MDD.p: MDD diagnosis based on caregiver report
--   KSADS.Dep_symptoms_sum_ever.y: no. of depressive symptoms reported based on child report
--   KSADS.Dep_symptoms_sum_ever.p: no. of depressive symptoms reported based on caregiver report
--   KSADS.Depressive_symptoms_ever.y: DSM-V depressive symptoms reported by children
--   KSADS.Depressive_symptoms_ever.p: DSM-V depressive symptoms reported by caregivers
-
 ```{r,load data}
 
 #Depression data 
-dep <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dep_measures_cleaned_R3.0.rds")
+dep <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/CBCL_dep_baseline_R4.0.rds")
 
 #Imaging data
-cortical <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/cortical_cleaned_R3.0.rds")
+cortical <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/cortical_baseline_R4.0.rds")
 
-subcort <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/subcort_cleaned_R3.0.rds")
+subcort <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/subcort_baseline_R4.0.rds")
 
-dti <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dti_cleaned_R3.0.rds")
+dti <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dti_baseline_R4.0.rds")
 
 #Covariates
-covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covariates_cleaned_R3.0.rds")
+covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covs_pilot_R4.0.rds")
 
 ```
 
@@ -120,99 +109,46 @@ Check variable classifcation
 
 ```{r, variable classification}
 
-covs_str <- df %>% 
- select("sex", "bmi", "race.6level", "age_years", "abcd_site", "fsqc_qu_motion") %>% 
+df %>% 
+ select("rel_family_id", "race.6level", "age_years", "scanner_id", "dmri_dti_meanmotion") %>% 
   str()
 ```
 
-Reduce to unrelated sample only Before N=11878, After N=9,856
 
-We are going to randomise which family member is included in the study
-
-```{r, get unrelated sample using randomisation approach}
-
-#We are going to randomise which family member is included in the study 
-
-
-#Assign random number to each family ID. Set random 
-
-df$random <- NA #generate new column of NAs
-unrel_df <- data.frame() #make new df
-
-#iterate through family IDs using for loop (this will take a few minutes)
-
-
-# set.seed(2507) #to make sure random sample is the same random sample each time
-unique_fam_id <- unique(df$rel_family_id)
-for (i in unique_fam_id[1:length(unique_fam_id)]){
-  
-  set.seed(2507)
-
-  
-  #subset each family and assign random number to each individual within each family
-  df$random[df$rel_family_id == i] <- sample(nrow(df[df$rel_family_id == i,]),nrow(df[df$rel_family_id == i,]), replace= FALSE)
-  
-  #select individual with highest number for unrelated dataframe
-  unrel_individual <- df[which.max(df$random[df$rel_family_id == i]),] 
-
-  unrel_individual <- df[df$rel_family_id == i,][which.max(df$random[df$rel_family_id == i]),]
-    
-
-  #append unrelated individual to unrelated dataframe
-  unrel_df <- rbind(unrel_df, unrel_individual)
-  
-}
-
-nrow(unrel_df) #check that N= 9856
-
-# i <- 8781 #for trouble shooting. 
-nrow(unrel_df) #check that N= 9856
-length(unique(unrel_df$rel_family_id)) #check that no. of unique IDs is correct. 
-
-#Check that set.seed worked so that we get the same IDs each timescript is run
-
-test_set_seed <- unrel_df$src_subject_id #make new vector of un_rel individual ids
-
-#the rerun df$random lines + for loop, without clearing global environment
-#check if new participant id list matches test_set_seed
-
-all(unrel_df$src_subject_id == test_set_seed) #it worked! 
-
-```
-
-Get sample demographics: Age = 9.90 years; SD = 0.62
+Get sample demographics: Age = 9.91 years; SD = 0.62
 
 ```{r, sample demographics}
 
-unrel_df %>% 
+df %>% 
   dplyr::select(age_years, sex) %>% 
   summary()
 
 #get sd
-sd(unrel_df$age_years)
+sd(df$age_years)
 #get mean
-mean(unrel_df$age_years)
+mean(df$age_years)
 
-#make df with unrelated females only for demographic table purposes
-unrel_females <- unrel_df %>% #N= 4673
+#make df with females only for demographic table purposes
+females <- df %>% #N= 5680
     filter(sex == "F")
   
-
 ```
 
-#####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=986 Get females only
+#####STEP 2: Generate subsample (10% of unrelated sample) for pilot analysis. N=1188 Get females only
+
+Note: name of object needs to be targetdata for function
 
 ```{r, generate subsample, get females only}
 
 set.seed(2507) #set seed for reproducibility
-targetdata <- unrel_df %>% 
+targetdata <- df %>% 
   sample_frac(size = 0.1, replace = FALSE)
 
-#check males and females breakdown F= 475, M=511
+#check males and females breakdown F= 564, M=624
 targetdata %>% 
   dplyr::count(sex)
 
-#get mean age and sd for pilot sample
+#get mean age and sd for pilot sample. Mean age = 9.92, SD = 0.62
 mean(targetdata$age_years)
 sd(targetdata$age_years)
 
@@ -222,47 +158,21 @@ targetdata <- targetdata %>%
 
 ```
 
-Make demographics table for MDD/DS breakdown
+Make demographics table for CBCL breakdown
 
-```{r, MDD/DS demographics table}
-
-####TOTAL FEMALE UNRELATED SAMPLE
-
-#no longer using MDD binary measure in this project due to error in MDD algorithm spotted in 4.0 release notes.
-
-# #MDD case control
-# CrossTable(unrel_females$KSADS.MDD.p, 
-#            prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
-# 
-# #MDD and age breakdown
-# ddply(unrel_females,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
+```{r, CBCL demographics table}
 
 #DS category breakdown
-CrossTable(unrel_females$KSADS.Depressive_symptoms_ever.p, 
+CrossTable(targetdata$cbcl_scr_syn_withdep_r, 
            prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
 
-#DS and age breakdown
-ddply(unrel_females,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years),sd=sd(age_years))
-
-#### PILOT ANALYSIS SAMPLE
-# #MDD case control
-# CrossTable(targetdata$KSADS.MDD.p, 
-#            prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
-
-#MDD and age breakdown
-# ddply(targetdata,~KSADS.MDD.p,summarise,mean=mean(age_years),sd=sd(age_years))
-
-#DS category breakdown
-CrossTable(targetdata$KSADS.Depressive_symptoms_ever.p, 
-           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
-
-#DS and age breakdown
-ddply(targetdata,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years),sd=sd(age_years))
+# #DS and age breakdown
+# ddply(targetdata,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years),sd=sd(age_years))
 
 
 ```
 
-\#\#\#\#STEP 3: Model set up We are using X.Shen's phewasStyle_withCI.R function to run the linear models.
+\#\#\#\#STEP 3: Model set up We are using X.Shen's reg_phewasStyle_NestedRandom.R function to run nested linear  mixed effects model. See NestedRandomLME.md for documentation on function (found in functions folder in repo)
 
 We need to change "src_subject_id" to "f.eid" so that function will run.
 
@@ -272,20 +182,29 @@ colnames(targetdata) #check it worked
 
 ```
 
+Define Basic Model for pilot analysis
+
+IV: Depressive symptoms
+
+DV: Brain Measures
+
+Covariates: Fixed = age, ethnicity; Random: ID and family ID nested within scanner ID
+
+
 Set categorical variables
 
 ```{r, set categorical variables}
 
 targetdata$race.6level = as.factor(targetdata$race.6level)
 targetdata$sex = as.factor(targetdata$sex)
-targetdata$fsqc_qu_motion = as.factor(targetdata$fsqc_qu_motion)
-targetdata$abcd_site = as.factor(targetdata$abcd_site)
+targetdata$rel_family_id = as.factor(targetdata$rel_family_id)
+targetdata$scanner_id = as.factor(targetdata$scanner_id)
 
 ```
 
 Generate long-format data.
 
-Note: for the lme models (bilaterlal brain regions only), the data needs to be in long-format (i.e, there is a row per hemisphere (lh and rh) for each participant. This is why the number of obs/rows doubles. In other words we are using a repeated measures design that looks at lh and rh independently and then combines them to generate a single association metric. [This is a very rough explanation to help facilitate understanding]
+Note: for the lme models (bilaterlal brain regions only), the data needs to be in long-format.  Hemisphere is controlled for as a fixed, within-participant effect.
 
 ```{r, gen long-format data}
 # colnames of imaging data
@@ -302,11 +221,12 @@ targetdata_longformat <- long_format(targetdata,cols_nonimg,cols_img)
 
 Define functions
 
-\*\*Note: 30/11/21 - had to update the "select" function in reg_phewasStyle_withCI.R function to specify that it was dplyr::select as it wasn't working properly.
+Note: Make sure that the "family" argument in function is correct (i.e., we want it to be "poisson" not "binomial")
+
 
 ```{r, Phewas function}
 
-source('../functions/reg_phewasStyle_withCI.R')
+source('../functions/reg_phewasStyle_NestedRandom.R')
 
 ```
 
@@ -334,17 +254,13 @@ ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
 ```
 
-Set up Independent Variables (or factors) (depression measures)
+Set up Independent Variable (or factor) (CBCL withdrawn-depressed symptoms)
 
-Depression symptom severity = (ordinal measure:none, mild, moderate, severe (rated 0-3, respectively)) = KSADS.Depressive_symptoms_ever
-
-\*\*Note: We are no longer using MDD diagnosis = KSADS.MDD (1=yes, 0= no, binary) due to possible errors in the KSADS MDD diagnosis algorithm flagged by the ABCD team in 4.0 release notes (November 2021)
 
 ```{r, set up IVs}
 
-ls.factor=colnames(targetdata)[grep('^KSADS\\.Depressive_symptoms_ever',
+ls.factor=colnames(targetdata)[grep('^cbcl_scr_syn_withdep_r',
                                     colnames(targetdata))]
-ls.factor=c(ls.factor[grep('.p$',ls.factor)]) #ls.factor[grep('.y$',ls.factor)]) #we are not including youth report in current analysis. 
 
 ```
 
@@ -364,9 +280,13 @@ ls.models=data.frame(dependent=ls.dep.factor.combo$Var1,
                      factor=ls.dep.factor.combo$Var2,
                      covs='',stringsAsFactors = F)
 
-ls.models$covs=paste0(c('age_years','bmi','abcd_site','race.6level','fsqc_qu_motion'),collapse='+')
+ls.models$covs=paste0(c('age_years', 'race.6level', 'rel_family_id', 'scanner_id'),collapse='+')
 
+#add hemisphere as cov for bilateral models 
 ls.models$covs[!grepl('bl\\.',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.',ls.models$dependent)],'+hemi')
+
+# #add dti mean motion (fd) as cov for dti models 
+# ls.models$covs[!grepl('dtifa\\_|dtimd\\_.',ls.models$dependent)]=paste0(ls.models$covs[!grepl('dtifa\\_|dtimd\\_.',ls.models$dependent)],'+dmri_dti_meanmotion')
 
 ```
 
@@ -376,7 +296,7 @@ ls.models$covs[!grepl('bl\\.',ls.models$dependent)]=paste0(ls.models$covs[!grepl
 
 ls.models$model.est=''
 ls.models$model.est[grep('hemi',ls.models$covs)]='lme'
-ls.models$model.est[ls.models$model.est=='']='glm'
+ls.models$model.est[ls.models$model.est=='']='lme'
 
 
 ```
@@ -411,10 +331,10 @@ for (fac in ls.factor.cate){
 }
 ls.model.region=target.model
 
-# individual region models add intracranial volume as a covariate
+# individual region models add whole brain volume as a covariate
 ls.model.region.covWholeB=ls.model.region
 ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)]=
-      paste0(ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)],'+ICV_ASEG')
+      paste0(ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)],'+WBV')
 
 
 ```
@@ -422,11 +342,6 @@ ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG
 #### STEP 5: Run Models
 
 ```{r, run models}
-#troubleshooting function
-# ls.models <- ls.model.bulk
-# dat_short=targetdata
-# dat_long=dat_long
-# correctByFactor = TRUE
 
 #Global (bulk) models
 result.females.dep_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
@@ -435,27 +350,27 @@ result.females.dep_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata
 result.females.dep_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
 
 #Save as R.Data file
-save(result.females.dep_brain.bulk,result.females.dep_brain.region.covWholeB,file='../results/females_dep_brain_pilot_analysis_no_MDD.RData')
+save(result.females.dep_brain.bulk,result.females.dep_brain.region.covWholeB,file='../results/females_dep_brain_pilot_lme.RData')
 
 #add TRUE column if nominal p value < 0.05 for pilot ROIs
 
 #global results
-result.females.dep_brain.bulk$Sig <- as.numeric((as.character(result.females.dep_brain.bulk[,"p.value"]))) < 0.05
+result.females.dep_brain.bulk$Sig <- as.numeric((as.character(result.females.dep_brain.bulk[,"p.value"]))) < 0.005
 
 #regional results
-result.females.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.females.dep_brain.region.covWholeB[,"p.value"]))) < 0.05
+result.females.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.females.dep_brain.region.covWholeB[,"p.value"]))) < 0.005
 
 #Save results as .csv files
 
 #global results
-write.csv(result.females.dep_brain.bulk, file = "../results/tables/pilot_analy_females.dep_brain.bulk_no_MDD.csv")
+write.csv(result.females.dep_brain.bulk, file = "../results/tables/lme_pilot_analy_females.dep_brain.bulk.csv")
 
 #regional results 
-write.csv(result.females.dep_brain.region.covWholeB, file = "../results/tables/pilot_analy_females.dep_brain.regional_no_MDD.csv")
+write.csv(result.females.dep_brain.region.covWholeB, file = "../results/tables/lme_pilot_analy_females.dep_brain.regional.csv")
 
 ```
 
-STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value \< 0.05
+STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value \< 0.005
 
 ```{r, make tables}
 
@@ -470,10 +385,10 @@ ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWho
   # arrange(p.value)
 
 #save as R.data
-save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_analysis_no_MDD.RData')
+save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_lme.RData')
 
 #save as .csv
-write.csv(ROI_dep_brain_females_regional_results, file = "../results/tables/ROIs_dep_brain_females_no_MDD.csv")
+write.csv(ROI_dep_brain_females_regional_results, file = "../results/tables/ROIs_dep_brain_females_lme.csv")
 
 #save as Kable Table 
 
