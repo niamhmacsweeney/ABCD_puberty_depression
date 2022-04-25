@@ -153,14 +153,16 @@ colnames(t1)=gsub('area.','sa.',colnames(t1))
 
 ```
 
-\#Intracranial Volume\#
+\#Whole Brain Volume\#
 
-We will use intracranial volume (ICV) as a covariate in our regional measure models but not in our global measure models. ABCD have derived a measure of ICV that we will use but we will rename it to just "ICV". 
+We will use wholebrain volume (WBV) as a covariate in our regional measure models but not in our global measure models. ABCD have derived a measure of WBV that we will use but we will rename it to just "WBV". 
 
-```{r, change ICV variable name}
+We are choosing to use WBV instead of intracranial volume to account for differences in overall brain size. According to previous research (e.g., Mills et al., 2016, https://www.sciencedirect.com/science/article/pii/S1053811916303512?via%3Dihub#bb0190), ICV and WBV demonstrate different growth trajectories and should not be used interchangeably. Further, WBV may be a more appropriate measure to use in developmental samples.  
 
-t1$ICV = t1$vol.ASEG.intracranialv
-t1=t1[,!grepl('vol.ASEG.intracranialv',colnames(t1))]
+```{r, change WBV variable name}
+
+t1$WBV = t1$vvol.ASEG.wholeb #rename var
+t1=t1[,!grepl('vol.ASEG.intracranialv',colnames(t1))] #remove old
 
 ```
 
