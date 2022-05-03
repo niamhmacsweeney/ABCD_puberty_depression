@@ -76,17 +76,12 @@ Load data:
 #Depression data 
 dep <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/CBCL_dep_baseline_R4.0.rds")
 
-#test
-KSADS <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dep_measures_cleaned_R3.0.rds")
-
 #Imaging data
 cortical <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/cortical_baseline_R4.0.rds")
 
 subcort <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/subcort_baseline_R4.0.rds")
 
 dti <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dti_baseline_R4.0.rds")
-
-pds <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/pds_timing_baseline_R4.0.rds")
 
 #Covariates
 covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covs_pilot_R4.0.rds")
@@ -99,17 +94,10 @@ As we have a five data frames to merge, we are going to do it stepwise using dpl
 
 ```{r, merge DFs}
 
-#before merge, remove extra variables in pds
-
-pds <- pds %>% 
-  select(-c("eventname", "sex", "age_years"))
-
 df <- dep %>% 
   left_join(y=cortical, by= "src_subject_id") %>% 
   left_join(y=subcort, by= "src_subject_id") %>% 
   left_join(y=dti, by= "src_subject_id") %>% 
-  left_join(y=pds, by= "src_subject_id") %>%
-  left_join(y=KSADS, by= "src_subject_id") %>% 
   left_join(y=covs, by="src_subject_id")
 
 #check col names
@@ -205,7 +193,7 @@ all(unrel_df$src_subject_id == test_set_seed) #it worked!
 
 set.seed(2507) #set seed for reproducibility
 targetdata <- unrel_df %>% 
-  sample_frac(size = 0.1, replace = FALSE)
+  sample_frac(size = 0.2, replace = FALSE)
 
 #check males and females breakdown F= 896, M=1074
 targetdata %>% 
@@ -237,8 +225,17 @@ CrossTable(targetdata$cbcl_scr_syn_withdep_r,
 
 Remove columns not needed for pilot analyis
 ```{r, remove cols not needed for pilot analysis}
-# targetdata <- targetdata %>% 
-#   select(-c("bmi", "household_income", "asr_scr_depress_r", "interview_age", "site_id_l", "dmri_dti_meanrot", "dmri_dti_meantrans", "acs_raked_propensity_score" ,"mri_info_visitid", "mri_info_studydate", "rel_group_id", "random"))
+targetdata <- targetdata %>% 
+  select(-c("bmi", "household_income", "asr_scr_depress_r", "interview_age", "site_id_l", "dmri_dti_meanrot", "dmri_dti_meantrans", "acs_raked_propensity_score" ,"mri_info_visitid", "mri_info_studydate", "rel_group_id", "random"))
+
+
+#drop extra cols that relate to intracranial/whole brain vols for subcort
+
+targetdata <- targetdata %>% 
+  select(-c("bl.vol.ASEG.intracranialv" , "bl.vol.ASEG.subcorticalgv"))
+
+
+
 ```
 
 Check for multicolinearity
@@ -249,25 +246,24 @@ Check for multicolinearity
 mydata <- targetdata %>% 
   dplyr::select(where(is.numeric))
 
-#check colinearity with dti variables only 
-
-dti_corr <- targetdata %>% 
-  dplyr::select(contains("dti"))
-
-#issue only with regional measures so remove all fibers
-
-dti_corr <- dti_corr %>% 
-  dplyr::select(-(contains("allfibers")))
-
-#numeric only
-dti_corr <- dti_corr %>% 
-  dplyr::select(where(is.numeric))
 #make correlation matrix
-dti_corr_mat = cor(dti_corr, method = "pearson", use = "pairwise.complete.obs")
 
-(positions <- subset(as.data.frame(which(cor(dti_corr_mat) > 0.999, arr.ind=TRUE)), row < col)) #seems to be multicolinearity issues. 
+#short format data
+mydata_corr = cor(mydata, method = "pearson", use = "pairwise.complete.obs")
 
-#it seems that the superior longitudinal fasiculous and the superior cortical striatal tracts are collinear. 
+(positions <- subset(as.data.frame(which(cor(mydata) > 0.999, arr.ind=TRUE)), row < col)) #doesn't seem to be any multicolinarity issues. 
+sapply(positions, function(x) names(mydata)[x]) #get row names, if any
+
+
+#long-format data
+mydata_long <- targetdata_longformat %>% 
+  dplyr::select(where(is.numeric))
+
+mydata_long_corr = cor(mydata_long, method = "pearson", use = "pairwise.complete.obs")
+
+(positions <- subset(as.data.frame(which(cor(mydata_long) > 0.99999, arr.ind=TRUE)), row < col))
+
+sapply(positions, function(x) names(mydata_long)[x]) #get row names, if any
 ```
 
 
@@ -300,8 +296,8 @@ Set categorical variables
 ```{r, set categorical variables}
 
 targetdata$race.6level = as.factor(targetdata$race.6level)
-#targetdata$sex = as.factor(targetdata$sex)
-#targetdata$rel_family_id = as.factor(targetdata$rel_family_id)
+targetdata$sex = as.factor(targetdata$sex)
+targetdata$rel_family_id = as.factor(targetdata$rel_family_id)
 targetdata$scanner_id = as.factor(targetdata$scanner_id)
 
 ```
@@ -354,7 +350,7 @@ Set up dependent variables (brain measures: cortical(APARC files); subcortical(A
 
 ```{r, set up DVs}
 
-ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|dtifa\\_|dtimd\\_',colnames(dat_long))]
+ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|dtifa\\_|dtimd\\_|\\.ASEG\\.',colnames(dat_long))]
 ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.',colnames(targetdata))]
 ls.dep.all=c(ls.dep.fs.long,ls.dep.fs.short)
 
@@ -365,16 +361,6 @@ ls.dep.all=ls.dep.all[c(grep('sa\\.|thk\\.|vol\\.|sulc\\.',ls.dep.all),
                         grep('dtimd\\_',ls.dep.all))]
 ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
-#remove variables causing multicollinearity issues: superior longitudinal fasiciculus, superior corticostriate, and keep the temporal and parietal SLF, and fronto parietal SCS segementations of these more broadly defined tracts. 
-
-temp <- ls.dep.all %>% 
-  dplyr::select(contains(c("_slf", "_scs")))
-
-ls.dep.all=ls.dep.all[!grep('\\_slfls.dep.all)]
-
-
-#| grep('dtifa\\_',ls.dep.all),
-#grep('dtimd\\_',ls.dep.all))
 ```
 
 Set up Independent Variable (or factor) (CBCL withdrawn-depressed symptoms)
@@ -382,10 +368,8 @@ Set up Independent Variable (or factor) (CBCL withdrawn-depressed symptoms)
 
 ```{r, set up IVs}
 
-ls.factor=colnames(targetdata)[grep('^pt_f',
+ls.factor=colnames(targetdata)[grep('^cbcl_scr_syn_withdep_r',
                                     colnames(targetdata))]
-
-#cbcl_scr_syn_withdep_r
 
 ```
 
@@ -442,7 +426,7 @@ Individual regions
 
 ```{r, individual regions}
 
-ls.model.region=ls.models[!grepl('mean|total|allfibers|slf|scs',ls.models$dependent),] #remove slf and scs from dti models 
+ls.model.region=ls.models[!grepl('mean|total|allfibers',ls.models$dependent),]
 
 ls.model.region$p_batch=99999
 target.model=ls.model.region
@@ -458,12 +442,13 @@ for (fac in ls.factor.cate){
 }
 ls.model.region=target.model
 
-# individual region models add whole brain volume as a covariate
+#individual region models add whole brain volume as a covariate
 ls.model.region.covWholeB=ls.model.region
 ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)]=
       paste0(ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)],'+WBV')
 
-
+#
+#
 ```
 
 #### STEP 5: Run Models

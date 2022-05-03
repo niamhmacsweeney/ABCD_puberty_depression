@@ -250,7 +250,7 @@ cbcl_dep_y1 <- cbcl_dep_y1 %>%
                         TRUE ~ "not depressed"))
 
 #count depressed and not depressed at year 1
-cases <- length(unique(temp$dep_status_y1_t))
+cases <- length(unique(cbcl_dep_y1$dep_status_y1_t))
 
 cbcl_dep_y1$dep_status_y1_t <- as.factor(cbcl_dep_y1$dep_status_y1_t)
 
@@ -294,8 +294,11 @@ setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depressi
 ### Baseline data ####
 saveRDS(cbcl_dep_y0_final,"CBCL_dep_baseline_R4.0.rds")
 
+### Year 1 data 
+saveRDS(cbcl_dep_y1,"CBCL_dep_y1_R4.0.rds")
 
-##### Year 3 data #####
-saveRDS(cbcl_dep_y3_final, "CBCL_y3_R4.0.rds")
+
+#### Year 3 data ####
+saveRDS(cbcl_dep_y3_final, "CBCL_dep_y3_R4.0.rds")
 
 ```

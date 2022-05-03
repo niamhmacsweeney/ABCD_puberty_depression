@@ -1,0 +1,144 @@
+---
+title: "RR Sample Sizes"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#####Introduction
+
+We need to generate information about what our sample size will be for our main analysis, 
+
+In order to be included in the final analysis, the following criteria must be met:
+
+1. Must be an unrelated individual 
+2. Must not have depressive symptoms at year 1
+3. Must have puberty, imaging, and depression data at year 1, year 2 and year 3 respectively. 
+
+We will run FIML for people who have missing covariate data. 
+
+#####Required Inputs
+
+Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data
+
+Depressive symptoms: CBCL_dep_Y1_R4.0.rds (Year 3 = main outcome measure) and CBCL_dep_Y1_R4.0.rds (need to control for depression at y1)
+
+Brain structure: cortical_Y2_R4.0.rds + subcort_Y2_R4.O.rds + dti_Y2_R4.0.rds
+
+Covariates — Covariates: covs_pilot_R4.0.rds
+
+####SET UP
+
+```{r, load libraries and set wd}
+
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(ggstatsplot)
+library(GGally)
+library(stringr)
+library(outliers)
+library(jtools) 
+library(readr)
+library(gridExtra)
+library(cowplot)
+library(ggpubr)
+library(DiagrammeR)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
+getwd()
+
+```
+
+Load data 
+
+```{r, load data}
+
+#Depression data 
+dep_y1 <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/CBCL_dep_y1_R4.0.rds")
+
+dep_y3 <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/CBCL_dep_y3_R4.0.rds")
+
+#Imaging data
+cortical <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/cortical_year2_R4.0.rds")
+
+subcort <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/subcort_year2_R4.0.rds")
+
+dti <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dti_year2_R4.0.rds")
+
+#puberty data
+
+pds <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/pds_timing_y1_R4.0.rds")
+
+#Covariates
+covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covs_pilot_R4.0.rds")
+
+```
+
+Tidy data
+
+```{r, tidy data}
+
+#select variables of interest for dep_y1
+
+dep_y1 <- dep_y1 %>% 
+  select(src_subject_id, dep_status_y1_t)
+
+pds <- pds %>% 
+  select(src_subject_id, sex, pds_tot_all, pt_m, pt_f)
+
+```
+
+Select valid IDs
+
+```{r, valid IDs}
+
+#### CBCL #####
+
+valid_ids <-  dep_y1 %>% 
+  select(src_subject_id, dep_status_y1_t) %>%  
+  filter(dep_status_y1_t == "not depressed") #only keep individuals that were not depressed at y1. 
+valid_ids <- valid_ids$src_subject_id
+
+dep_y3_final <- dep_y3 %>% 
+  .[.$src_subject_id %in% valid_ids,] #N= 5835
+
+```
+
+Merge dataframes
+```{r, merge}
+
+df_1 <- dep_y3_final %>% 
+  left_join(y=cortical, by= "src_subject_id") %>% 
+  left_join(y=subcort, by= "src_subject_id") %>% 
+  left_join(y=dti, by= "src_subject_id") %>% 
+  left_join(y = pds, by= "src_subject_id") %>% 
+  left_join(y=covs, by="src_subject_id")
+
+```
+
+Check complete cases
+```{r, complete cases}
+
+#remove pt_timing variables before checking complete cases because there will be many NAs for the sex specific cols. 
+
+df_complete <- df %>% 
+  select(- c(pt_f, pt_m)) %>% 
+
+sum(complete.cases(df_complete)) #N=3872 for all variables. 
+
+sum(complete.cases(df$pds_tot_all)) #N=5479
+
+```
+Make flow chart - do this in stage 2
+
+```{r, flow chart}
+
+```
+
+
+

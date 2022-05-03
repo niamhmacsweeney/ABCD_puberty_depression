@@ -2,7 +2,7 @@
 title: "PREP_imaging_R4.0"
 author: "Niamh MacSweeney & Nikolaj Høier. 
 date: "21/03/2022"
-output: html_document
+output: github_document
 ---
 For any questions, please email: [niamh.macsweeney\@ed.ac.uk](mailto:niamh.macsweeney@ed.ac.uk){.email} or Nikolaj Høier ([2250502\@ed.ac.uk](mailto:2250502@ed.ac.uk){.email})
 
@@ -10,7 +10,7 @@ For any questions, please email: [niamh.macsweeney\@ed.ac.uk](mailto:niamh.macsw
 
 The purpose of this script is to quality control and process the ABCD imaging data (cortical, diffusion/white matter, subcortical) using data from Release 4.0.
 
-\#Helpful Documents:
+##Helpful Documents:
 
 Follow the QC criteria recommended by ABCD in NDA release 4.0 Imaging Instrument Release Notes:
 
@@ -25,7 +25,7 @@ For dMRI (DTI/RSI): imgincl_dmri_include = 1 indicates that the dMRI series meet
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-\#SETUP Load libraries needed and set working directory.
+####SETUP Load libraries needed and set working directory.
 
 USER: change working directory as needed.
 
@@ -37,6 +37,7 @@ library(broom)
 library(ggplot2)
 library(kableExtra)
 library(readxl)
+library(corrplot)
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
 
@@ -49,9 +50,9 @@ For reference, here is an Excel spread sheet of the cortical, subcortical, and w
 brain_region_description <- read_excel("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep/brain_measures_descriptions.xlsx")
 
 ```
-\#STEP 1: LOAD DATA FOR QUALITY CONTROL AND SELECT VALID IDS
+##STEP 1: LOAD DATA FOR QUALITY CONTROL AND SELECT VALID IDS
 
-\#USER: Adjust filter accordingly depending on your timepoint of interest (e.g., baseline, year 2 etc.)
+##USER: Adjust filter accordingly depending on your timepoint of interest (e.g., baseline, year 2 etc.)
 
 For the purposes of this project, we are interested in Year 0 (baseline) and Year 2 (Two-year followup) Imaging data:
 
@@ -128,11 +129,11 @@ dti_ids_pass_y2 <- dti_ids_pass_y2$src_subject_id #make new column for valid DTI
 
 ```
 
-\#STEP 2: PROCESS IMAGING DATA
+#STEP 2: PROCESS IMAGING DATA
 
 #### Cortical Measures
 
-\#Using cortical volume, surface area, thickness and sulcal depth.
+Using cortical volume, surface area, thickness and sulcal depth.
 
 ```{r, load T1 structural measures (cortical,subcortical) data}
 t1 <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_smrip10201.rds")
@@ -159,10 +160,14 @@ We will use wholebrain volume (WBV) as a covariate in our regional measure model
 
 We are choosing to use WBV instead of intracranial volume to account for differences in overall brain size. According to previous research (e.g., Mills et al., 2016, https://www.sciencedirect.com/science/article/pii/S1053811916303512?via%3Dihub#bb0190), ICV and WBV demonstrate different growth trajectories and should not be used interchangeably. Further, WBV may be a more appropriate measure to use in developmental samples.  
 
-```{r, change WBV variable name}
+```{r, change WBV and ICV variable name}
 
-t1$WBV = t1$vvol.ASEG.wholeb #rename var
-t1=t1[,!grepl('vol.ASEG.intracranialv',colnames(t1))] #remove old
+t1 <- t1 %>% 
+  dplyr::rename(WBV = vol.ASEG.wholeb)
+
+t1 <- t1 %>% 
+   dplyr::rename(ICV = vol.ASEG.intracranialv)
+         
 
 ```
 
@@ -195,13 +200,13 @@ Note: we are selecting our imaging columns that contain "APARC" as these are the
 ### Baseline ###
 cortical_y0 <- t1 %>% 
   filter(eventname == "baseline_year_1_arm_1") %>% #reduce to baseline; N= 11760
-  select("src_subject_id", contains("APARC"), "ICV") #selecting cols contains "APARC" = 278 variables in df and also ICV
+  select("src_subject_id", contains("APARC"), "WBV", "ICV") #selecting cols contains "APARC" = 278 variables in df and also WBV
    
 
 ### Year 2 ###
 cortical_y2 <- t1 %>%  
   filter(eventname == "2_year_follow_up_y_arm_1") %>% #reduce to Year 2 only --- N= 7827
-  select("src_subject_id", contains("APARC"), "ICV") #select cols containing "APARC" = 278 vars
+  select("src_subject_id", contains("APARC"), "WBV", "ICV") #select cols containing "APARC" = 278 vars
 
 ```
 
@@ -376,7 +381,43 @@ dti_y2_dist <- dti_y2_final %>%
                  bins = 30) 
 dti_y2_dist
 ```
-\#\#\#\#Subcortical volume measures (before QC, N =11,736)
+
+Check for multicollinearity in DTI measures
+
+Our pilot analysis for the RR revealed singularity/multicollinearity issues for the baseline DTI measures, so we will check whether this is the case for Baseline and Year 2 DTI measures
+
+
+```{r, check for mutlicollinearity}
+
+
+#check colinearity with dti variables only 
+dti_y0_corr <- dti_y0_final %>% 
+  dplyr::select(contains("dti"))
+
+#issue only with regional measures so remove all fibers
+dti_y0_corr <- dti_y0_corr %>% 
+  dplyr::select(-(contains("allfibers")))
+
+#make correlation matrix for fa and md measures separately 
+
+fa_y0 <- dti_y0_corr %>% 
+    dplyr::select(contains("fa")) #37 variables (36 dti measures, 18 per hemisphere)
+
+fa_y0_corr_mat = cor(fa_y0, method = "pearson", use = "pairwise.complete.obs")
+
+(positions <- subset(as.data.frame(which(cor(fa_y0_corr_mat) > 0.99, arr.ind=TRUE)), row < col)) #seems to be multicolinearity issues. 
+
+#visualise correlation matrix
+
+corrplot(fa_y0_corr_mat, type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 40)
+
+
+```
+
+
+
+####Subcortical volume measures (before QC, N =11,736)
 
 We will select the subcortical regions that overlap with ENIGMA and add in the ventral diencephalon. Note that we are only looking at subcortical volume (not thicnkess, surface area or sulcal depth)
 
@@ -394,14 +435,14 @@ Create separate dataframes for Baseline and Year 2.
 ###Baseline####
 subcort_y0 <- subcort %>% 
 filter(eventname == "baseline_year_1_arm_1") %>% #reduce to baseline --- N = 11,760
-.[,grep("subject|vol.ASEG.|ICV", colnames(.))] %>%   #select smri vol data
-.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|subcortical|ICV",colnames(.))] #select relevant columns 
+.[,grep("subject|vol.ASEG.|ICV|WBV", colnames(.))] %>%   #select smri vol data
+.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|WBV|ICV",colnames(.))] #select relevant columns 
 
 ###Year 2 ####
 subcort_y2 <- subcort %>% 
 filter(eventname == "2_year_follow_up_y_arm_1") %>% #reduce to  --- N = 7827
-.[,grep("subject|vol.ASEG.|ICV", colnames(.))] %>%   #select smri vol data
-.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|subcortical|ICV",colnames(.))] #select relevant columns
+.[,grep("subject|vol.ASEG.||WBV|ICV", colnames(.))] %>%   #select smri vol data
+.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|WBV|ICV",colnames(.))] #select relevant columns
 
 
 ```
