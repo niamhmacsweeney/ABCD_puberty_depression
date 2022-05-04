@@ -76,9 +76,6 @@ Load data:
 #Depression data 
 dep <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/CBCL_dep_baseline_R4.0.rds")
 
-#test
-KSADS <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dep_measures_cleaned_R3.0.rds")
-
 #Imaging data
 cortical <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/cortical_baseline_R4.0.rds")
 
@@ -86,10 +83,14 @@ subcort <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_
 
 dti <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dti_baseline_R4.0.rds")
 
-pds <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/pds_timing_baseline_R4.0.rds")
-
 #Covariates
 covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covs_pilot_R4.0.rds")
+
+#for troubleshooting  (old variables) 
+#KSADS <-rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dep_measures_cleaned_R3.0.rds")
+#pds <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/pds_timing_baseline_R4.0.rds")
+
+
 
 ```
 
@@ -99,17 +100,15 @@ As we have a five data frames to merge, we are going to do it stepwise using dpl
 
 ```{r, merge DFs}
 
-#before merge, remove extra variables in pds
-
-pds <- pds %>% 
-  select(-c("eventname", "sex", "age_years"))
+# #before merge, remove extra variables in pds
+# 
+# pds <- pds %>% 
+#   select(-c("eventname", "sex", "age_years"))
 
 df <- dep %>% 
   left_join(y=cortical, by= "src_subject_id") %>% 
   left_join(y=subcort, by= "src_subject_id") %>% 
   left_join(y=dti, by= "src_subject_id") %>% 
-  left_join(y=pds, by= "src_subject_id") %>%
-  left_join(y=KSADS, by= "src_subject_id") %>% 
   left_join(y=covs, by="src_subject_id")
 
 #check col names
@@ -146,12 +145,12 @@ females <- df %>% #N= 5680
   
 ```
 
-Inspect Ns per nested condition
+IGNORE: Inspect Ns per nested condition
 ```{r, inspect Ns per condition}
-
-test <- females %>% 
-  group_by(rel_family_id, scanner_id) %>% 
-  count()
+# 
+# test <- females %>% 
+#   group_by(rel_family_id, scanner_id) %>% 
+#   count()
 
 ```
 
@@ -252,9 +251,7 @@ mydata <- targetdata %>%
 #check colinearity with dti variables only 
 
 dti_corr <- targetdata %>% 
-  dplyr::select(contains("dti"))
-
-#issue only with regional measures so remove all fibers
+  dplyr::select(matches('age_years|race.6level|scanner_id|dti'))
 
 dti_corr <- dti_corr %>% 
   dplyr::select(-(contains("allfibers")))
@@ -265,9 +262,13 @@ dti_corr <- dti_corr %>%
 #make correlation matrix
 dti_corr_mat = cor(dti_corr, method = "pearson", use = "pairwise.complete.obs")
 
-(positions <- subset(as.data.frame(which(cor(dti_corr_mat) > 0.999, arr.ind=TRUE)), row < col)) #seems to be multicolinearity issues. 
+#get column names that have a correlation >0.95
+tmp <- dti_corr_mat > 0.95
+diag(tmp) <- FALSE
+names(Filter(function(x) x > 0, rowSums(tmp) > 0 | colSums(tmp) > 0))
 
-#it seems that the superior longitudinal fasiculous and the superior cortical striatal tracts are collinear. 
+
+#it seems that the superior longitudinal fasiculus and the superior cortical striatal tracts are collinear. 
 ```
 
 
@@ -290,9 +291,9 @@ IV: Depressive symptoms
 
 DV: Brain Measures
 
-Covariates: Fixed = age, ethnicity; scanner ID
+Covariates: Fixed = age, ethnicity; scanner ID, dti mean motion for (DTI models), hemisphere for bilateral (LME) models
 
-Random: ID and #family ID nested within# and scanner ID
+Random: ID for LME models. 
 
 
 Set categorical variables
@@ -352,12 +353,19 @@ dat_long=targetdata_longformat
 
 Set up dependent variables (brain measures: cortical(APARC files); subcortical(ASEG files); whitematter(dti)
 
+#Trouble shooting: remove 20 variables causing multicollinearity issues: superior longitudinal fasiciculus, superior corticostriate, and keep the temporal and parietal SLF, and fronto parietal SCS segementations of these more broadly defined tracts:
+"rh.dtifa_slf"  "lh.dtifa_slf"  "lh.dtifa_tslf" "rh.dtifa_pslf" "rh.dtifa_scs"  "lh.dtifa_scs"  "rh.dtifa_pscs" "lh.dtifa_pscs" "rh.dtimd_slf" "lh.dtimd_slf"  "rh.dtimd_tslf" "lh.dtimd_tslf" "rh.dtimd_pslf" "lh.dtimd_pslf" "rh.dtimd_scs"  "lh.dtimd_scs"  "rh.dtimd_fscs" "lh.dtimd_fscs" "rh.dtimd_pscs" "lh.dtimd_pscs" - MODEL STILL GIVING SINGULARITY ISSUES.
+
+
+
+
 ```{r, set up DVs}
 
-ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|dtifa\\_|dtimd\\_',colnames(dat_long))]
+ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|dtifa\\_|dtimd\\_',colnames(dat_long))] #select vars of interest
+ls.dep.fs.long=colnames(dat_long)[-grep('\\_slf|\\_tslf|\\_pslf|\\_scs|\\_pscs|\\_fscs|\\_fxcut|\\_fx|\\_sifc|\\_ifsfc|\\_cst',colnames(dat_long))] #remove multicolin. vars
+
 ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.',colnames(targetdata))]
 ls.dep.all=c(ls.dep.fs.long,ls.dep.fs.short)
-
 
 ls.dep.all=ls.dep.all[c(grep('sa\\.|thk\\.|vol\\.|sulc\\.',ls.dep.all),
                         grep('\\.ASEG\\.',ls.dep.all),
@@ -365,16 +373,7 @@ ls.dep.all=ls.dep.all[c(grep('sa\\.|thk\\.|vol\\.|sulc\\.',ls.dep.all),
                         grep('dtimd\\_',ls.dep.all))]
 ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
-#remove variables causing multicollinearity issues: superior longitudinal fasiciculus, superior corticostriate, and keep the temporal and parietal SLF, and fronto parietal SCS segementations of these more broadly defined tracts. 
 
-temp <- ls.dep.all %>% 
-  dplyr::select(contains(c("_slf", "_scs")))
-
-ls.dep.all=ls.dep.all[!grep('\\_slfls.dep.all)]
-
-
-#| grep('dtifa\\_',ls.dep.all),
-#grep('dtimd\\_',ls.dep.all))
 ```
 
 Set up Independent Variable (or factor) (CBCL withdrawn-depressed symptoms)
@@ -382,7 +381,7 @@ Set up Independent Variable (or factor) (CBCL withdrawn-depressed symptoms)
 
 ```{r, set up IVs}
 
-ls.factor=colnames(targetdata)[grep('^pt_f',
+ls.factor=colnames(targetdata)[grep('^cbcl_scr_syn_withdep_r',
                                     colnames(targetdata))]
 
 #cbcl_scr_syn_withdep_r
@@ -407,7 +406,7 @@ ls.models=data.frame(dependent=ls.dep.factor.combo$Var1,
 
 ls.models$covs=paste0(c('age_years','race.6level', 'scanner_id'),collapse='+')
 
-
+#
 
 #add hemisphere as cov for bilateral models 
 ls.models$covs[!grepl('bl\\.',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.',ls.models$dependent)],'+hemi')
@@ -442,7 +441,7 @@ Individual regions
 
 ```{r, individual regions}
 
-ls.model.region=ls.models[!grepl('mean|total|allfibers|slf|scs',ls.models$dependent),] #remove slf and scs from dti models 
+ls.model.region=ls.models[!grepl('mean|total|allfibers',ls.models$dependent),] 
 
 ls.model.region$p_batch=99999
 target.model=ls.model.region
@@ -477,9 +476,9 @@ result.females.dep_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata
 result.females.dep_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata,dat_long=dat_long,correctByFactor = T)
 
 #Save as R.Data file
-save(result.females.dep_brain.bulk,result.females.dep_brain.region.covWholeB,file='../results/females_dep_brain_pilot_lme.RData')
+save(result.females.dep_brain.bulk,result.females.dep_brain.region.covWholeB,file='../results/revised_pilot/females_dep_brain_pilot.RData')
 
-#add TRUE column if nominal p value < 0.05 for pilot ROIs
+#add TRUE column if nominal p value < 0.005 for pilot ROIs
 
 #global results
 result.females.dep_brain.bulk$Sig <- as.numeric((as.character(result.females.dep_brain.bulk[,"p.value"]))) < 0.005
@@ -490,44 +489,44 @@ result.females.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result
 #Save results as .csv files
 
 #global results
-write.csv(result.females.dep_brain.bulk, file = "../results/tables/lme_pilot_analy_females.dep_brain.bulk.csv")
+write.csv(result.females.dep_brain.bulk, file = "../results/revised_pilot/tables/pilot_females.dep_brain.bulk.csv")
 
 #regional results 
-write.csv(result.females.dep_brain.region.covWholeB, file = "../results/tables/lme_pilot_analy_females.dep_brain.regional.csv")
+write.csv(result.females.dep_brain.region.covWholeB, file = "../results/revised_pilot/tables/pilot_females_dep_brain.regional.csv")
 
 ```
 
 STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value \< 0.005
 
 ```{r, make tables}
-
-ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWholeB %>% 
-  filter(p.value <0.05)
-
-
-  # filter(p.value <0.05) %>% 
-  # select(-dependent, -factor) %>% 
-  # #mutate(as.numeric(ROI_females_regional)) %>% 
-  # #mutate_if(is.numeric, ~round(., 4)) %>% 
-  # arrange(p.value)
-
-#save as R.data
-save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_lme.RData')
-
-#save as .csv
-write.csv(ROI_dep_brain_females_regional_results, file = "../results/tables/ROIs_dep_brain_females_lme.csv")
-
-#save as Kable Table 
-
-ROI_table <- ROI_dep_brain_females_regional_results %>%
-       kable(digits=4, format = "html",
-      caption = "Females: Depressive symptoms-brain structure models and associated statistics with significant ROI associations") %>%
-               kable_styling(font_size = 15,
-                             position = "left",
-                             full_width = F) #%>%
-      #save_kable(file = "../figs/female_ROIs_PT_brain_pilot_analysis.png")
-
-str(ROI_dep_brain_females_regional_results) #check variable chars
+# 
+# ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWholeB %>% 
+#   filter(p.value <0.05)
+# 
+# 
+#   # filter(p.value <0.05) %>% 
+#   # select(-dependent, -factor) %>% 
+#   # #mutate(as.numeric(ROI_females_regional)) %>% 
+#   # #mutate_if(is.numeric, ~round(., 4)) %>% 
+#   # arrange(p.value)
+# 
+# #save as R.data
+# save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_lme.RData')
+# 
+# #save as .csv
+# write.csv(ROI_dep_brain_females_regional_results, file = "../results/tables/ROIs_dep_brain_females_lme.csv")
+# 
+# #save as Kable Table 
+# 
+# ROI_table <- ROI_dep_brain_females_regional_results %>%
+#        kable(digits=4, format = "html",
+#       caption = "Females: Depressive symptoms-brain structure models and associated statistics with significant ROI associations") %>%
+#                kable_styling(font_size = 15,
+#                              position = "left",
+#                              full_width = F) #%>%
+#       #save_kable(file = "../figs/female_ROIs_PT_brain_pilot_analysis.png")
+# 
+# str(ROI_dep_brain_females_regional_results) #check variable chars
 
 
 ```

@@ -305,6 +305,8 @@ colnames(dti)[grep('\\_all',colnames(dti))]=paste0('bl.',colnames(dti))[grep('\\
 colnames(dti)[grep('^dti',colnames(dti))]=paste0('bl.',colnames(dti))[grep('^dti',colnames(dti))]
 
 ```
+
+
 Here, we want to reduce the dataframes to our variables of interest. We want to keep all fa and md measures for our tracts of interest and exclude certain columns (detailed below) that are not relevant to our analysis. 
 
 At this point we will generate separate dataframes for each timepoint (i.e., Baseline (Year 0) and Year 2)
@@ -340,6 +342,110 @@ colnames(dti_y2)=gsub('dmri_','',colnames(dti_y2))
 colnames(dti_y2)=gsub('fiberat_','',colnames(dti_y2))
 
 ```
+
+#Multicolinearity 
+
+Due to singularity errors when running the lme models, caused by highly correlated left and right regions in the superior longitudinal fasiculus and the superior cortical striatal tracts, we are going to generate an average measure across left and right hemispheres for the following variables:
+
+"rh.dtifa_slf"  "lh.dtifa_slf"  "lh.dtifa_tslf" "rh.dtifa_pslf" "rh.dtifa_scs"  "lh.dtifa_scs"  "rh.dtifa_pscs" "lh.dtifa_pscs" "rh.dtimd_slf" "lh.dtimd_slf"  "rh.dtimd_tslf" "lh.dtimd_tslf" "rh.dtimd_pslf" "lh.dtimd_pslf" "rh.dtimd_scs"  "lh.dtimd_scs"  "rh.dtimd_fscs" "lh.dtimd_fscs" "rh.dtimd_pscs" "lh.dtimd_pscs"
+
+```{r, get average measure across two hemispheres for regional measures}
+
+#make list of bilateral DTI variable names from brain_region_description df (17 measures)
+
+bl_dti_vars <- list("fx","fxcut","cgc","cgh","cst","atr","unc","ilf","ifo","slf","tslf","pslf","scs","fscs","pscs","sifc", "ifsfc")       
+
+for (i in bl_dti_vars[1:length(bl_dti_vars)]){
+  
+  
+  
+  
+  
+  
+  
+}
+                      
+                      for (i in unique_fam_id[1:length(unique_fam_id)]){
+## Add column indicating hemisphere
+dti_y0$hemisphere <- NA
+
+x = cbcl_dep_y1$cbcl_scr_syn_withdep_t #define function
+
+cbcl_dep_y1 <- cbcl_dep_y1 %>% 
+  mutate(dep_status_y1_t= case_when(x >=70  ~ "depressed", # ≥70 
+                        TRUE ~ "not depressed"))
+
+x <- dti_y0
+
+dti_bilateral <- dti_y0 %>%
+  select(starts_with(c("rh","lh"))) 
+
+
+dti_bilateral %>% 
+  select(contains("rh")) %>% 
+  mutate(hemisphere = case_when("right"),
+    TRUE ~ "left"
+  )
+
+
+
+    mutate(across(.
+                  ~case_when(
+                      col_b != "1" ~ NA_character_,
+                      TRUE ~ .), 
+                  .names = "{.col}_new")
+    
+
+temp <- dti_y0 %>% 
+  mutate(across(hemisphere = case_when(
+    
+
+dti
+
+
+  UKB_inflammation_imaging_covariates_imaging_small_long$Hemisphere[UKB_inflammation_imaging_covariates_imaging_small_long$Region == FA_bilateral_FIDs[i]] <- "left"
+  UKB_inflammation_imaging_covariates_imaging_small_long$Hemisphere[UKB_inflammation_imaging_covariates_imaging_small_long$Region == FA_bilateral_FIDs[i + 1]] <- "right"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#make new column
+temp <- dti_y0 %>% 
+  
+
+
+df %>%  
+   mutate(group = case_when(grepl("Bl", b) ~ "Group1",
+                            grepl("re", b, ignore.case = TRUE) ~"Group2"))
+
+
+write a function that averages across two variables 
+
+
+
+
+#### Baseline ####
+
+#select variables with lh and rh measure
+dt
+
+
+```
+
 
 Select IDs that pass QC for each timepoint
 

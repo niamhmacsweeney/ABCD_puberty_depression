@@ -41,7 +41,7 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
       dep.dat=mod.dat_short[,mod.dep]            
       if (length(table(dep.dat))==2){
          mod=paste0(mod.dep,'~',mod.covs,'+scale(',mod.factor,')')
-         fit=glm(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,family = 'binomial')
+         fit=glm(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,family = 'poisson')
       }else{
          mod=paste0('scale(',mod.dep,')~',mod.covs,'+scale(',mod.factor,')')
          fit=glm(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude)
@@ -100,7 +100,7 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
     dep.dat=mod.dat_short[,mod.dep]            
     if (length(table(dep.dat))==2){
       mod=paste0(mod.dep,'~',mod.covs,'+scale(',mod.factor,')')
-      fit=glm(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,family = 'binomial')
+      fit=glm(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,family = 'poisson')
     }else{
       mod=paste0('scale(',mod.dep,')~',mod.covs,'+scale(',mod.factor,')')
       fit=glm(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude)
