@@ -203,7 +203,7 @@ all(unrel_df$src_subject_id == test_set_seed) #it worked!
 ```{r, generate subsample, get females only}
 
 set.seed(2507) #set seed for reproducibility
-targetdata <- unrel_df %>% 
+targetdata <- df %>% 
   sample_frac(size = 0.1, replace = FALSE)
 
 #check males and females breakdown F= 896, M=1074
@@ -263,7 +263,7 @@ dti_corr <- dti_corr %>%
 dti_corr_mat = cor(dti_corr, method = "pearson", use = "pairwise.complete.obs")
 
 #get column names that have a correlation >0.95
-tmp <- dti_corr_mat > 0.95
+tmp <- dti_corr_mat > 0.7
 diag(tmp) <- FALSE
 names(Filter(function(x) x > 0, rowSums(tmp) > 0 | colSums(tmp) > 0))
 
@@ -361,19 +361,26 @@ Set up dependent variables (brain measures: cortical(APARC files); subcortical(A
 
 ```{r, set up DVs}
 
-ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|dtifa\\_|dtimd\\_',colnames(dat_long))] #select vars of interest
-ls.dep.fs.long=colnames(dat_long)[-grep('\\_slf|\\_tslf|\\_pslf|\\_scs|\\_pscs|\\_fscs|\\_fxcut|\\_fx|\\_sifc|\\_ifsfc|\\_cst',colnames(dat_long))] #remove multicolin. vars
+ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|avg\\.dtifa\\_|avg\\.dtimd\\_|\\_allfibers|\\_cc|\\_fmaj|\\_fmin',colnames(dat_long))] #select vars of interest
+
+
 
 ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.',colnames(targetdata))]
 ls.dep.all=c(ls.dep.fs.long,ls.dep.fs.short)
 
 ls.dep.all=ls.dep.all[c(grep('sa\\.|thk\\.|vol\\.|sulc\\.',ls.dep.all),
                         grep('\\.ASEG\\.',ls.dep.all),
-                        grep('dtifa\\_',ls.dep.all),
-                        grep('dtimd\\_',ls.dep.all))]
+                        grep('avg\\.dtifa\\_',ls.dep.all),
+                        grep('avg\\.dtimd\\_',ls.dep.all),
+                        grep('\\_allfibers',ls.dep.all),
+                        grep('\\_cc',ls.dep.all),
+                        grep('\\_fmaj',ls.dep.all),
+                        grep('\\_fmin',ls.dep.all))]
 ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
+#ls.dep.fs.long=colnames(dat_long)[-grep('\\_slf|\\_tslf|\\_pslf|\\_scs|\\_pscs|\\_fscs|\\_fxcut|\\_fx|\\_sifc|\\_ifsfc|\\_cst',colnames(dat_long))] #remove multicolin. vars
 
+#grep('dtimd\\_',ls.dep.all)
 ```
 
 Set up Independent Variable (or factor) (CBCL withdrawn-depressed symptoms)
@@ -409,10 +416,16 @@ ls.models$covs=paste0(c('age_years','race.6level', 'scanner_id'),collapse='+')
 #
 
 #add hemisphere as cov for bilateral models 
-ls.models$covs[!grepl('bl\\.',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.',ls.models$dependent)],'+hemi')
+ls.models$covs[!grepl('bl\\.|dtifa\\_|dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.|dtifa\\_|dtimd\\_',ls.models$dependent)],'+hemi')
 
 #add dti mean motion (fd) as cov for dti models
-ls.models$covs[grepl('dtifa\\_|dtimd\\_.',ls.models$dependent)]=paste0(ls.models$covs[grepl('dtifa\\_|dtimd\\_.',ls.models$dependent)],'+dmri_dti_meanmotion')
+ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)],'+dmri_dti_meanmotion')
+
+
+#ls.models$covs[!grepl('bl\\.|avg\\.dtifa\\_|avg\\.dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.|avg\\.dtifa\\_|avg\\.dtimd\\_',ls.models$dependent)],'+hemi')
+
+#add dti mean motion (fd) as cov for dti models
+# ls.models$covs[grepl('avg\\.dtifa\\_|avg\\.dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[grepl('avg\\.dtifa\\_|avg\\.dtimd\\_',ls.models$dependent)],'+dmri_dti_meanmotion')
 
 ```
 
@@ -481,10 +494,10 @@ save(result.females.dep_brain.bulk,result.females.dep_brain.region.covWholeB,fil
 #add TRUE column if nominal p value < 0.005 for pilot ROIs
 
 #global results
-result.females.dep_brain.bulk$Sig <- as.numeric((as.character(result.females.dep_brain.bulk[,"p.value"]))) < 0.005
+result.females.dep_brain.bulk$Sig <- as.numeric((as.character(result.females.dep_brain.bulk[,"p.value"]))) < 0.01
 
 #regional results
-result.females.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.females.dep_brain.region.covWholeB[,"p.value"]))) < 0.005
+result.females.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.females.dep_brain.region.covWholeB[,"p.value"]))) < 0.01
 
 #Save results as .csv files
 
