@@ -20,9 +20,7 @@ The purpose of this script is to run the pilot analysis (DR\~BS) for the Puberty
 
 This sub-sample will be split into males and females and the script will be run independently for each.
 
-As this sample includes unrelated individual - ignore below for timebeing. 
-
-<!-- we will need to account for the nested structure of the data in our models. To do this we will nest family within scanner(detailed further below). The pilot analysis will use a basic model, outlined below. -->
+Note that this sample includes unrelated individuals. 
 
 Please note that in this script, brain structure is set as the dependent variable due to the treatment of hemisphere mixed effects. However, in the RR, our hypotheses state that depression is the dependent or outcome variable. As this analysis is cross-sectional, the Y and X terms are statistically interchangeable so Y \~ X = depression \~ brain = brain \~ depression. For our later mediation models, the order of the terms is important so depression will be the dependent or outcome variable. See RR manuscript for further details on mediation model set up.
 
@@ -42,7 +40,7 @@ Covariates — Covariates: covs_pilot_R4.0.rds
 
 1.  Setup: Load data, merge to create master dataframe, keep unrelated participants only
 2.  Pilot prep: Get subsample of 10% of sample (N= ~6,000). Split into males and females.
-3.  Set up lme function
+3.  Set up glm/lme function
 
 #####STEP 1: SETUP Load libraries and set wd
 
@@ -272,8 +270,7 @@ names(Filter(function(x) x > 0, rowSums(tmp) > 0 | colSums(tmp) > 0))
 ```
 
 
-\#\#\#\#STEP 3: Model set up We are using X.Shen's reg_phewasStyle_NestedRandom.R function to run nested linear  mixed effects model. See NestedRandomLME.md for documentation on function (found in functions folder in repo)
-
+\#\#\#\#STEP 3: Model set up We are using X.Shen's reg_phewasStyle_withCI.R function to run the glm and lme for unilateral and bilateral brain regions respectively.
 We need to change "src_subject_id" to "f.eid" so that function will run.
 
 ```{r, colnames}
@@ -353,34 +350,22 @@ dat_long=targetdata_longformat
 
 Set up dependent variables (brain measures: cortical(APARC files); subcortical(ASEG files); whitematter(dti)
 
-#Trouble shooting: remove 20 variables causing multicollinearity issues: superior longitudinal fasiciculus, superior corticostriate, and keep the temporal and parietal SLF, and fronto parietal SCS segementations of these more broadly defined tracts:
-"rh.dtifa_slf"  "lh.dtifa_slf"  "lh.dtifa_tslf" "rh.dtifa_pslf" "rh.dtifa_scs"  "lh.dtifa_scs"  "rh.dtifa_pscs" "lh.dtifa_pscs" "rh.dtimd_slf" "lh.dtimd_slf"  "rh.dtimd_tslf" "lh.dtimd_tslf" "rh.dtimd_pslf" "lh.dtimd_pslf" "rh.dtimd_scs"  "lh.dtimd_scs"  "rh.dtimd_fscs" "lh.dtimd_fscs" "rh.dtimd_pscs" "lh.dtimd_pscs" - MODEL STILL GIVING SINGULARITY ISSUES.
-
-
 
 
 ```{r, set up DVs}
 
-ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|avg\\.dtifa\\_|avg\\.dtimd\\_|\\_allfibers|\\_cc|\\_fmaj|\\_fmin',colnames(dat_long))] #select vars of interest
+ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|dtifa\\_|dtimd\\_',colnames(dat_long))] #select vars of interest
+ls.dep.fs.long=colnames(dat_long)[-grep('avg\\.',colnames(dat_long))] #remove average DTI measures 
 
-
-
-ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.',colnames(targetdata))]
+ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.|\\_cc|\\_fmaj|\\_fmin',colnames(targetdata))]
 ls.dep.all=c(ls.dep.fs.long,ls.dep.fs.short)
 
 ls.dep.all=ls.dep.all[c(grep('sa\\.|thk\\.|vol\\.|sulc\\.',ls.dep.all),
                         grep('\\.ASEG\\.',ls.dep.all),
-                        grep('avg\\.dtifa\\_',ls.dep.all),
-                        grep('avg\\.dtimd\\_',ls.dep.all),
-                        grep('\\_allfibers',ls.dep.all),
-                        grep('\\_cc',ls.dep.all),
-                        grep('\\_fmaj',ls.dep.all),
-                        grep('\\_fmin',ls.dep.all))]
+                        grep('dtifa\\_',ls.dep.all),
+                        grep('dtimd\\_',ls.dep.all))]
 ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
-#ls.dep.fs.long=colnames(dat_long)[-grep('\\_slf|\\_tslf|\\_pslf|\\_scs|\\_pscs|\\_fscs|\\_fxcut|\\_fx|\\_sifc|\\_ifsfc|\\_cst',colnames(dat_long))] #remove multicolin. vars
-
-#grep('dtimd\\_',ls.dep.all)
 ```
 
 Set up Independent Variable (or factor) (CBCL withdrawn-depressed symptoms)
@@ -413,10 +398,9 @@ ls.models=data.frame(dependent=ls.dep.factor.combo$Var1,
 
 ls.models$covs=paste0(c('age_years','race.6level', 'scanner_id'),collapse='+')
 
-#
-
-#add hemisphere as cov for bilateral models 
-ls.models$covs[!grepl('bl\\.|dtifa\\_|dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.|dtifa\\_|dtimd\\_',ls.models$dependent)],'+hemi')
+#For all models that are not bilateral, add hemisphere as a covariate. 
+#Note that these DTI measures: CC, fmaj and fmin are unilateral, so these need to be listed here too. 
+ls.models$covs[!grepl('bl\\.|\\_cc|\\_fmaj|\\_fmin',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.|\\_cc|\\_fmaj|\\_fmin',ls.models$dependent)],'+hemi')
 
 #add dti mean motion (fd) as cov for dti models
 ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)],'+dmri_dti_meanmotion')
@@ -502,35 +486,35 @@ result.females.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result
 #Save results as .csv files
 
 #global results
-write.csv(result.females.dep_brain.bulk, file = "../results/revised_pilot/tables/pilot_females.dep_brain.bulk.csv")
+write.csv(result.females.dep_brain.bulk, file = '../results/revised_pilot/tables/pilot_females.dep_brain.bulk.csv')
 
 #regional results 
-write.csv(result.females.dep_brain.region.covWholeB, file = "../results/revised_pilot/tables/pilot_females_dep_brain.regional.csv")
+write.csv(result.females.dep_brain.region.covWholeB, file = '../results/revised_pilot/tables/pilot_females_dep_brain.regional.csv')
 
 ```
 
-STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value \< 0.005
+STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value \< 0.01
 
 ```{r, make tables}
-# 
-# ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWholeB %>% 
-#   filter(p.value <0.05)
-# 
-# 
-#   # filter(p.value <0.05) %>% 
-#   # select(-dependent, -factor) %>% 
-#   # #mutate(as.numeric(ROI_females_regional)) %>% 
-#   # #mutate_if(is.numeric, ~round(., 4)) %>% 
-#   # arrange(p.value)
-# 
-# #save as R.data
-# save(ROI_dep_brain_females_regional_results,file='../results/ROIs_dep_brain_females_pilot_lme.RData')
-# 
-# #save as .csv
-# write.csv(ROI_dep_brain_females_regional_results, file = "../results/tables/ROIs_dep_brain_females_lme.csv")
-# 
-# #save as Kable Table 
-# 
+
+ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWholeB %>%
+  filter(p.value <0.01)
+
+
+  # filter(p.value <0.05) %>%
+  # select(-dependent, -factor) %>%
+  # #mutate(as.numeric(ROI_females_regional)) %>%
+  # #mutate_if(is.numeric, ~round(., 4)) %>%
+  # arrange(p.value)
+
+#save as R.data
+save(ROI_dep_brain_females_regional_results,file='../results/revised_pilot/ROIs_dep_brain_females.RData')
+
+#save as .csv
+write.csv(ROI_dep_brain_females_regional_results, file = "../results/revised_pilot/tables/ROIs_dep_brain_females.csv")
+
+#save as Kable Table
+
 # ROI_table <- ROI_dep_brain_females_regional_results %>%
 #        kable(digits=4, format = "html",
 #       caption = "Females: Depressive symptoms-brain structure models and associated statistics with significant ROI associations") %>%

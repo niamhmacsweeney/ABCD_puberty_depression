@@ -179,7 +179,11 @@ colnames(t1)[grep('lh$',colnames(t1))]=paste0('lh.',gsub('lh$','',colnames(t1)))
 colnames(t1)[grep('rh$',colnames(t1))]=paste0('rh.',gsub('rh$','',colnames(t1)))[grep('rh$',colnames(t1))]
 colnames(t1)[grep('^vol.|^sa.|^sulc.|^thk.',colnames(t1))]=paste0('bl.',colnames(t1))[grep('^vol.|^sa.|^sulc.|^thk.',colnames(t1))]
 
-colnames(t1) #check it worked
+colnames(t1) #check it worked - looks like there is an issue with the accumbens area (subcortical measure) so rename manually
+
+t1 <- t1 %>% 
+  rename(rh.vol.ASEG.aa = bl.vol.ASEG.aar,
+         lh.vol.ASEG.aa = bl.vol.ASEG.aal) #rename right aa
 
 ```
 
@@ -343,7 +347,7 @@ colnames(dti_y2)=gsub('fiberat_','',colnames(dti_y2))
 
 ```
 
-#Multicolinearity 
+#Multicolinearity - only need to run chunk below if there is a multicollinearity issue. 
 
 Due to singularity errors when running the lme models, caused by highly correlated left and right regions in the superior longitudinal fasiculus and the superior cortical striatal tracts, we are going to generate an average measure across left and right hemispheres for the following variables:
 
@@ -353,27 +357,27 @@ Due to singularity errors when running the lme models, caused by highly correlat
 
 #### Baseline #####
 
-dti_bilateral_colnames <- names(dti_y0)[! names(dti_y0) %in% c("src_subject_id", "bl.dtifa_allfibers", "bl.dtimd_allfibers","dtimd_fmaj", "dtimd_fmin", "dtimd_cc","dtifa_fmaj", "dtifa_fmin", "dtifa_cc" )]
-
-
-
-for (i in seq(1, length(dti_bilateral_colnames), by=2)){
-
-
-  ## Average right left hemisphere
-  mean <- rowMeans(dti_y0[,dti_bilateral_colnames[c(i, i+ 1)]])
-  dti_bilateral_colnames[i]
-  
-  DTI_tract_name <- sub("rh.", "", dti_bilateral_colnames[i])
-  DTI_tract_name <- sub("lh.", "", DTI_tract_name)
-  DTI_tract_name <- paste0("avg.", DTI_tract_name)
-  
-  ## Save averaged measures to new column
-  dti_y0[,paste0(DTI_tract_name)] <- mean
-  
-}
-
-colnames(dti_y0) #check that it worked
+# dti_bilateral_colnames <- names(dti_y0)[! names(dti_y0) %in% c("src_subject_id", "bl.dtifa_allfibers", "bl.dtimd_allfibers","dtimd_fmaj", "dtimd_fmin", "dtimd_cc","dtifa_fmaj", "dtifa_fmin", "dtifa_cc" )]
+# 
+# 
+# 
+# for (i in seq(1, length(dti_bilateral_colnames), by=2)){
+# 
+# 
+#   ## Average right left hemisphere
+#   mean <- rowMeans(dti_y0[,dti_bilateral_colnames[c(i, i+ 1)]])
+#   dti_bilateral_colnames[i]
+#   
+#   DTI_tract_name <- sub("rh.", "", dti_bilateral_colnames[i])
+#   DTI_tract_name <- sub("lh.", "", DTI_tract_name)
+#   DTI_tract_name <- paste0("avg.", DTI_tract_name)
+#   
+#   ## Save averaged measures to new column
+#   dti_y0[,paste0(DTI_tract_name)] <- mean
+#   
+# }
+# 
+# colnames(dti_y0) #check that it worked
 
 ```
 
@@ -470,16 +474,20 @@ Create separate dataframes for Baseline and Year 2.
 ```{r, make DFs for baseline and year 2}
 
 ###Baseline####
+
+
 subcort_y0 <- subcort %>% 
-filter(eventname == "baseline_year_1_arm_1") %>% #reduce to baseline --- N = 11,760
-.[,grep("subject|vol.ASEG.|ICV|WBV", colnames(.))] %>%   #select smri vol data
-.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|WBV|ICV",colnames(.))] #select relevant columns 
+filter(eventname == "baseline_year_1_arm_1") %>%#reduce to baseline --- N = 11,760
+.[,grep("subject|vol\\.ASEG|WBV|ICV", colnames(.))] %>%   #select smri vol data
+.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|WBV|ICV",colnames(.))] #select relevant columns 
+
 
 ###Year 2 ####
 subcort_y2 <- subcort %>% 
 filter(eventname == "2_year_follow_up_y_arm_1") %>% #reduce to  --- N = 7827
-.[,grep("subject|vol.ASEG.||WBV|ICV", colnames(.))] %>%   #select smri vol data
-.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|cranial|WBV|ICV",colnames(.))] #select relevant columns
+.[,grep("subject|vol\\.ASEG|WBV|ICV", colnames(.))] %>%   #select smri vol data
+.[,grep("subject|aa|amygdala|caudate|hpus|pallidum|putamen|tp|vedc|WBV|ICV",colnames(.))] #select relevant columns #should have 19 cols in df if worked correctly
+
 
 
 ```
@@ -526,6 +534,29 @@ subcort_y0_dist
 Let's look at the final variables for subcortical measures (17 in total, including lh and rh) after QC. Note: subcortical_gv = subcortical grey volume.
 
 
+
+
+####Check for and remove duplicate or highly similar columns that may have occured due to earlier renaming.  
+
+User can adapt as needed for the purposes of their own analysis. 
+
+```{r, remove cols not needed}
+
+###Baseline data ####
+#check colnames
+colnames(cortical_y0_final) #no duplicate cols. 
+colnames(subcort_y0_final) 
+colnames(dti_y0_final)
+
+###Year 2 data ####
+#check colnames
+colnames(cortical_y2_final) #no duplicate cols. 
+colnames(subcort_y2_final) 
+colnames(dti_y2_final)
+
+```
+
+
 ####EXPORT CLEANED DATA
 
 USER: change as needed 
@@ -537,14 +568,14 @@ Change working directory and save clean file there. Note: clean files should be 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
 
 ###Baseline data ####
-# saveRDS(cortical_y0_final,"cortical_baseline_R4.0.rds")
+saveRDS(cortical_y0_final,"cortical_baseline_R4.0.rds")
 saveRDS(dti_y0_final,"dti_baseline_R4.0.rds")
-# saveRDS(subcort_y0_final,"subcort_baseline_R4.0.rds")
+saveRDS(subcort_y0_final,"subcort_baseline_R4.0.rds")
 # 
 # ###Year 2 data ####
-# saveRDS(cortical_y2_final,"cortical_year2_R4.0.rds")
-# saveRDS(dti_y2_final,"dti_year2_R4.0.rds")
-# saveRDS(subcort_y2_final,"subcort_year2_R4.0.rds")
+saveRDS(cortical_y2_final,"cortical_year2_R4.0.rds")
+saveRDS(dti_y2_final,"dti_year2_R4.0.rds")
+saveRDS(subcort_y2_final,"subcort_year2_R4.0.rds")
 
 ```
 
