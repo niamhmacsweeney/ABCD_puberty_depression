@@ -8,7 +8,7 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
    mod.type = as.character(ls.mod[4])
    
    # run model
-   if (mod.type=='lme'){
+   if (mod.type=='bilateral'){
       # model.expression
       fh_r=1:(nrow(mod.dat_long)/2)
       sh_r=(nrow(mod.dat_long)/2+1):nrow(mod.dat_long)

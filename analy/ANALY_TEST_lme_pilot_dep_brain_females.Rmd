@@ -61,6 +61,7 @@ library(gridExtra)
 library(sandwich)
 library(stringr)
 library(kableExtra)
+library(janitor)
 #library(epiDisplay)
 library(gmodels)
 library(caret)
@@ -147,12 +148,27 @@ females <- df %>% #N= 5680
   
 ```
 
+
 Inspect Ns per nested condition
 ```{r, inspect Ns per condition}
 
-nest_str <- females %>%
-  group_by(rel_family_id, scanner_id) %>%
+#let's look at how the data is nested for females
+nest_str_all <- df %>%
+  group_by(rel_family_id, src_subject_id, scanner_id) %>%
   count()
+
+#check if individuals from each family went to the same scanner
+#This is because we plan to nest family id within scanner id 
+#group by family id and then count number of unique scanner_ids per family group
+#N=47 individuals within each family that went to different scanners
+scanner_test <- df %>% 
+  group_by(rel_family_id) %>%  
+  na.omit() %>%  #some missing values for scanner_id 
+  distinct(scanner_id) %>% 
+  summarise(scanner_match = n()) %>% 
+  count()
+
+
 
 ```
 
@@ -165,41 +181,41 @@ IGNORE: Try to get nested structure working first before using unrelated sample.
 Note: Uunrelated sample N= 9850 (full)
 ```{r, get unrelated sample using randomisation approach}
 
-# #Assign random number to each family ID. Set random 
-# 
-# df$random <- NA #generate new column of NAs
-# unrel_df <- data.frame() #make new df
-# 
-# #iterate through family IDs using for loop (this will take a few minutes)
-# # set.seed(2507) #to make sure random sample is the same random sample each time
-# unique_fam_id <- unique(df$rel_family_id)
-# for (i in unique_fam_id[1:length(unique_fam_id)]){
-#   
-#   set.seed(2507)
-#   
-#   #subset each family and assign random number to each individual within each family
-#   df$random[df$rel_family_id == i] <- sample(nrow(df[df$rel_family_id == i,]),nrow(df[df$rel_family_id == i,]), replace= FALSE)
-#   
-#   #select individual with highest number for unrelated dataframe
-#   unrel_individual <- df[df$rel_family_id == i,][which.max(df$random[df$rel_family_id == i]),]
-#     
-#   #append unrelated individual to unrelated dataframe
-#   unrel_df <- rbind(unrel_df, unrel_individual)
-#   
-# }
-# 
-# # i <- 8781 #for trouble shooting. 
-# nrow(unrel_df) #check that N= 9850
-# length(unique(unrel_df$rel_family_id)) #check that no. of unique IDs is correct. 
-# 
-# #Check that set.seed worked so that we get the same IDs each timescript is run
-# 
-# test_set_seed <- unrel_df$src_subject_id #make new vector of un_rel individual ids
-# 
-# #the rerun df$random lines + for loop, without clearing global environment
-# #check if new participant id list matches test_set_seed
-# 
-# all(unrel_df$src_subject_id == test_set_seed) #it worked! 
+#Assign random number to each family ID. Set random
+
+df$random <- NA #generate new column of NAs
+unrel_df <- data.frame() #make new df
+
+#iterate through family IDs using for loop (this will take a few minutes)
+# set.seed(2507) #to make sure random sample is the same random sample each time
+unique_fam_id <- unique(df$rel_family_id)
+for (i in unique_fam_id[1:length(unique_fam_id)]){
+
+  set.seed(2507)
+
+  #subset each family and assign random number to each individual within each family
+  df$random[df$rel_family_id == i] <- sample(nrow(df[df$rel_family_id == i,]),nrow(df[df$rel_family_id == i,]), replace= FALSE)
+
+  #select individual with highest number for unrelated dataframe
+  unrel_individual <- df[df$rel_family_id == i,][which.max(df$random[df$rel_family_id == i]),]
+
+  #append unrelated individual to unrelated dataframe
+  unrel_df <- rbind(unrel_df, unrel_individual)
+
+}
+
+# i <- 8781 #for trouble shooting.
+nrow(unrel_df) #check that N= 9850
+length(unique(unrel_df$rel_family_id)) #check that no. of unique IDs is correct.
+
+#Check that set.seed worked so that we get the same IDs each timescript is run
+
+test_set_seed <- unrel_df$src_subject_id #make new vector of un_rel individual ids
+
+#the rerun df$random lines + for loop, without clearing global environment
+#check if new participant id list matches test_set_seed
+
+all(unrel_df$src_subject_id == test_set_seed) #it worked!
 
 ```
 
@@ -210,7 +226,7 @@ USER: You can change size = 0.1, 0.5 etc. to get the subsample of choice (i.e., 
 ```{r, generate subsample, get females only}
 
 set.seed(2507) #set seed for reproducibility
-targetdata <- df %>% 
+targetdata <- unrel_df %>% 
   sample_frac(size = 0.2, replace = FALSE)
 
 #check males and females breakdown F= 896, M=1074
@@ -231,9 +247,14 @@ Make demographics table for CBCL breakdown
 
 ```{r, CBCL demographics table}
 
-#DS category breakdown
-CrossTable(targetdata$cbcl_scr_syn_withdep_r, 
-           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+# #DS category breakdown
+# CrossTable(df$cbcl_scr_syn_withdep_r, 
+#            prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
+# 
+# test <- targetdata %>% 
+#   group_by(rel_family_id, f.eid) %>% 
+#   summarise()
+
 
 # #DS and age breakdown
 # ddply(targetdata,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years),sd=sd(age_years))
@@ -300,7 +321,7 @@ DV: Brain Measures
 
 Covariates: Fixed = age, ethnicity; dti mean motion for (DTI models), hemisphere for bilateral models
 
-Random: participant id (f.eid), rel_family_id, scanner ID, 
+Random: participant id (f.eid), scanner ID, 
 
 
 Set categorical variables
@@ -345,7 +366,7 @@ Note: Make sure that the "family" argument in function is correct (i.e., we want
 
 ```{r, Phewas function}
 
-source('../functions/reg_phewasStyle_NestedRandom.R')
+source('../functions/reg_phewasStyle_Random.R')
 
 ```
 
@@ -361,29 +382,20 @@ Set up dependent variables (brain measures: cortical(APARC files); subcortical(A
 
 ```{r, set up DVs}
 
-ls.dep.fs.long=colnames(dat_long)[grep('dtifa\\_|dtimd\\_',colnames(dat_long))] #select vars of interest
+
+ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|dtifa\\_|dtimd\\_',colnames(dat_long))] #select vars of interest
+#ls.dep.fs.long=colnames(dat_long)[-grep('avg\\.',colnames(dat_long))] #remove average DTI measures
 
 #For all models that are not bilateral, we will keep data in short format
-#Note that these DTI measures: CC, fmaj and fmin are unilateral, so these need to be listed here too. 
+#Note that these DTI measures: CC, fmaj and fmin are unilateral, so these need to be listed here too.
 ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.|\\_cc|\\_fmaj|\\_fmin',colnames(targetdata))]
 ls.dep.all=c(ls.dep.fs.long,ls.dep.fs.short)
 
-ls.dep.all=ls.dep.all[c(grep('dtifa\\_|dtimd\\_',ls.dep.all))]
+ls.dep.all=ls.dep.all[c(grep('sa\\.|thk\\.|vol\\.|sulc\\.',ls.dep.all),
+                        grep('\\.ASEG\\.',ls.dep.all),
+                        grep('dtifa\\_',ls.dep.all),
+                        grep('dtimd\\_',ls.dep.all))]
 ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
-
-# ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|dtifa\\_|dtimd\\_',colnames(dat_long))] #select vars of interest
-# ls.dep.fs.long=colnames(dat_long)[-grep('avg\\.',colnames(dat_long))] #remove average DTI measures
-# 
-# #For all models that are not bilateral, we will keep data in short format
-# #Note that these DTI measures: CC, fmaj and fmin are unilateral, so these need to be listed here too.
-# ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.|\\_cc|\\_fmaj|\\_fmin',colnames(targetdata))]
-# ls.dep.all=c(ls.dep.fs.long,ls.dep.fs.short)
-# 
-# ls.dep.all=ls.dep.all[c(grep('sa\\.|thk\\.|vol\\.|sulc\\.',ls.dep.all),
-#                         grep('\\.ASEG\\.',ls.dep.all),
-#                         grep('dtifa\\_',ls.dep.all),
-#                         grep('dtimd\\_',ls.dep.all))]
-# ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
 ```
 
@@ -423,7 +435,7 @@ ls.models$covs=paste0(c('age_years','race.6level'),collapse='+') #just list fixe
 ls.models$covs[!grepl('bl\\.|\\_cc|\\_fmaj|\\_fmin',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.|\\_cc|\\_fmaj|\\_fmin',ls.models$dependent)],'+hemi')
 
 #add dti mean motion (fd) as cov for dti models
-# ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)],'+dmri_dti_meanmotion')
+ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)],'+dmri_dti_meanmotion')
 
 
 ```
@@ -433,8 +445,8 @@ ls.models$covs[!grepl('bl\\.|\\_cc|\\_fmaj|\\_fmin',ls.models$dependent)]=paste0
 ```{r, specify models}
 
 ls.models$model.est=''
-ls.models$model.est[grep('hemi',ls.models$covs)]='lme'
-ls.models$model.est[ls.models$model.est=='']='lme'
+ls.models$model.est[grep('hemi',ls.models$covs)]='bilateral'
+ls.models$model.est[ls.models$model.est=='']='unilateral'
 
 
 ```
@@ -447,7 +459,7 @@ Bulk (global) measures
 ls.model.bulk=ls.models[grep('mean|total|allfibers',ls.models$dependent),]
 ls.model.bulk$p_batch=1
 
-
+#
 
 ```
 
@@ -459,7 +471,7 @@ ls.model.region=ls.models[!grepl('mean|total|allfibers',ls.models$dependent),]
 
 ls.model.region$p_batch=99999
 target.model=ls.model.region
-ls.dep.cate=c('dtifa\\_|dtimd\\_')
+ls.dep.cate=c('thk\\.','sa\\.','vol\\.APARC','sulc\\.','vol\\.ASEG','dtifa\\_','dtimd\\_')
 ls.factor.cate=unique(target.model$factor)
 cate.no = 1
 for (fac in ls.factor.cate){
@@ -473,13 +485,8 @@ ls.model.region=target.model
 
 # individual region models add whole brain volume as a covariate
 ls.model.region.covWholeB=ls.model.region
-ls.model.region.covWholeB$covs[grep('dtifa\\_|dtimd\\_',ls.model.region.covWholeB$dependent)]=
-      paste0(ls.model.region.covWholeB$covs[grep('dtifa\\_|dtimd\\_',ls.model.region.covWholeB$dependent)])
-
-
-#thk\\.','sa\\.','vol\\.APARC','sulc\\.', 'dtifa\\_','dtimd\\_
-#ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)]=
-#paste0(ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)],'+WBV')
+ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)]=
+      paste0(ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)],'+WBV')
 
 ```
 
@@ -514,12 +521,32 @@ write.csv(result.females.dep_brain.region.covWholeB, file = '../results/revised_
 
 ```
 
+Troubleshooting 
+
+```{r, check levels of nesting in pilot data}
+
+nest_str <- targetdata %>%
+  group_by(scanner_id) %>%
+  count()
+
+
+
+```
+
+
+
 STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value \< 0.01
 
 ```{r, make tables}
 
+#save regional ROIs
 ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWholeB %>%
   filter(p.value <0.01)
+
+ROI_dep_brain_females_global_results <- result.females.dep_brain.bulk %>% 
+    filter(p.value <0.01)
+
+
 
 
   # filter(p.value <0.05) %>%
@@ -529,10 +556,14 @@ ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWho
   # arrange(p.value)
 
 #save as R.data
-save(ROI_dep_brain_females_regional_results,file='../results/revised_pilot/ROIs_dep_brain_females.RData')
+save(ROI_dep_brain_females_regional_results, ROI_dep_brain_females_global_results, file='../results/revised_pilot/ROIs_dep_brain_females.RData')
 
 #save as .csv
-write.csv(ROI_dep_brain_females_regional_results, file = "../results/revised_pilot/tables/ROIs_dep_brain_females.csv")
+#regional
+write.csv(ROI_dep_brain_females_regional_results, file = "../results/revised_pilot/tables/ROIs_dep_brain_regional_females.csv")
+
+#global
+write.csv(ROI_dep_brain_females_global_results, file = "../results/revised_pilot/tables/ROIs_dep_brain_global_females.csv")
 
 #save as Kable Table
 
