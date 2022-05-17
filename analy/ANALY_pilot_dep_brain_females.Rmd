@@ -214,7 +214,7 @@ all(unrel_df$src_subject_id == test_set_seed) #it worked!
 ```{r, generate subsample, get females only}
 
 set.seed(2507) #set seed for reproducibility
-targetdata <- df %>% 
+targetdata <- unrel_df %>% 
   sample_frac(size = 0.2, replace = FALSE)
 
 #check males and females breakdown F= 896, M=1074
@@ -487,13 +487,13 @@ result.females.dep_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWho
 #Save as R.Data file
 save(result.females.dep_brain.bulk,result.females.dep_brain.region.covWholeB,file='../results/revised_pilot/females_dep_brain_pilot.RData')
 
-#add TRUE column if nominal p value < 0.01 for pilot ROIs
+#add TRUE column if nominal p value < 0.02 for pilot ROIs, which means that all values of ≤0.01... will be included due to the large number of decimal places. 
 
 #global results
-result.females.dep_brain.bulk$Sig <- as.numeric((as.character(result.females.dep_brain.bulk[,"p.value"]))) < 0.01
+result.females.dep_brain.bulk$Sig <- as.numeric((as.character(result.females.dep_brain.bulk[,"p.value"]))) < 0.02
 
 #regional results
-result.females.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.females.dep_brain.region.covWholeB[,"p.value"]))) < 0.01
+result.females.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.females.dep_brain.region.covWholeB[,"p.value"]))) < 0.02
 
 #Save results as .csv files
 
@@ -505,16 +505,18 @@ write.csv(result.females.dep_brain.region.covWholeB, file = '../results/revised_
 
 ```
 
-###STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value < 0.01
+###STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value ≤ 0.01
+
+Note: The threshold is indicated as <0.02 to account for the large number of decimal places given for p-values. 
 
 ```{r, make tables}
 
 #save regional ROIs
 ROI_dep_brain_females_regional_results <- result.females.dep_brain.region.covWholeB %>%
-  filter(p.value <0.01)
+  filter(p.value < 0.02)
 
 ROI_dep_brain_females_global_results <- result.females.dep_brain.bulk %>% 
-    filter(p.value <0.01)
+    filter(p.value < 0.02)
 
 
 #save as R.data
@@ -542,11 +544,4 @@ write.csv(ROI_dep_brain_females_global_results, file = "../results/revised_pilot
 
 ```
 
-# \#\#\#\#\#\#\#\#\#\#\#\#\#\# End of Script \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
-
-Make demographic table for paper - where we have a breakdown of the MDD and DS categories for each sex
-
-```{r, demographic table}
-
-
-```
+ \#\#\#\#\#\#\#\#\#\#\#\#\#\# End of Script \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#

@@ -473,13 +473,13 @@ result.males.dep_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWhole
 #Save as R.Data file
 save(result.males.dep_brain.bulk,result.males.dep_brain.region.covWholeB,file='../results/revised_pilot/males_dep_brain_pilot.RData')
 
-#add TRUE column if nominal p value < 0.005 for pilot ROIs
+#add TRUE column if nominal p value < 0.02 for pilot ROIs, which means that all values of ≤0.01... will be included due to the large number of decimal places. 
 
 #global results
-result.males.dep_brain.bulk$Sig <- as.numeric((as.character(result.males.dep_brain.bulk[,"p.value"]))) < 0.01
+result.males.dep_brain.bulk$Sig <- as.numeric((as.character(result.males.dep_brain.bulk[,"p.value"]))) < 0.02
 
 #regional results
-result.males.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.males.dep_brain.region.covWholeB[,"p.value"]))) < 0.01
+result.males.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.males.dep_brain.region.covWholeB[,"p.value"]))) < 0.02
 
 #Save results as .csv files
 
@@ -491,24 +491,26 @@ write.csv(result.males.dep_brain.region.covWholeB, file = '../results/revised_pi
 
 ```
 
-STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value \< 0.01
+STEP 6: Identify ROIs for confirmatory analysis. Threshold: Nominal p-value < 0.01
+
+Note: The threshold is indicated as <0.02 to account for the large number of decimal places given for p-values. 
 
 ```{r, make tables}
 
 #global
 ROI_dep_brain_males_global_results <- result.males.dep_brain.bulk %>%
-  filter(p.value <0.01)
+  filter(p.value <0.02)
 
 #regional
 ROI_dep_brain_males_regional_results <- result.males.dep_brain.region.covWholeB %>%
-  filter(p.value <0.01)
+  filter(p.value <0.02)
 
 #save as R.data
 save(ROI_dep_brain_males_regional_results,ROI_dep_brain_males_global_results,file='../results/revised_pilot/ROIs_dep_brain_males.RData')
 
 #save as .csv
 #global
-write.csv(ROI_dep_brain_males_bulk_results,file= "../results/revised_pilot/tables/ROIs_dep_brain_global_males.csv")
+write.csv(ROI_dep_brain_males_global_results,file= "../results/revised_pilot/tables/ROIs_dep_brain_global_males.csv")
 
 #regional
 write.csv(ROI_dep_brain_males_regional_results,file= "../results/revised_pilot/tables/ROIs_dep_brain_regional_males.csv")
@@ -530,9 +532,3 @@ write.csv(ROI_dep_brain_males_regional_results,file= "../results/revised_pilot/t
 
 # \#\#\#\#\#\#\#\#\#\#\#\#\#\# End of Script \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
 
-Make demographic table for paper - where we have a breakdown of the MDD and DS categories for each sex
-
-```{r, demographic table}
-
-
-```
