@@ -26,7 +26,7 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
       #(1|scanner_id) + (1|scanner_id:rel_family_id) + (1|scanner_id:rel_family_id:f.eid) #scanner, individual within scanner, individual within family within scanner
       
       fit=lmer(as.formula(as.character(mod)),data=mod.dat_long,
-              na.action=na.exclude,control = lmerControl(optimizer ="Nelder_Mead"))
+              na.action=na.exclude,control = lmerControl(optimizer ="bobyqa"))
       # tmp.ci = intervals(fit,which='fixed')$fixed %>% as.data.frame %>% 
       #    dplyr::select(Lower_95CI=lower,Upper_95CI=upper) %>% 
       #    tail(1)
@@ -42,12 +42,12 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
    }else{
       dep.dat=mod.dat_short[,mod.dep]            
       if (length(table(dep.dat))==2){
-         mod=paste0(mod.dep,'~',mod.covs,'+(1|scanner_id) +scale(',mod.factor,')')
+         mod=paste0(mod.dep,'~',mod.covs,'+(1|scanner_id) + (1|rel_family_id) +scale(',mod.factor,')')
          fit=glmer(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,
-                   control = glmerControl(optimizer ="Nelder_Mead"),family = 'poisson')
+                   control = glmerControl(optimizer ="bobyqa"),family = 'poisson')
       }else{
-         mod=paste0('scale(',mod.dep,')~',mod.covs,'+(1|scanner_id) +scale(',mod.factor,')')
-         fit=lmer(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,control = lmerControl(optimizer ="Nelder_Mead"))
+         mod=paste0('scale(',mod.dep,')~',mod.covs,'+(1|scanner_id) + (1|rel_family_id) +scale(',mod.factor,')')
+         fit=lmer(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,control = lmerControl(optimizer ="bobyqa"))
       }            
       # tmp.ci = confint(fit) %>% as.data.frame %>% 
       #    dplyr::select(Lower_95CI=`2.5 %`,Upper_95CI=`97.5 %`) %>% 
