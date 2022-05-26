@@ -1,6 +1,6 @@
 ---
 title: "ANALY_pilot_dep_brain_females"
-author: "Niamh MacSweeney"  Credit to X. Shen for function templates. 
+author: "Niamh MacSweeney"
 date: "20/04/2022"
 output: github_document
 editor_options: 
@@ -16,15 +16,17 @@ ABCD Pilot Analysis Script - Depression ~ Brain Structure -> Females
 
 #Introduction
 
-The purpose of this script is to run the pilot analysis (Depression - brain structure) for the Puberty RR. For this analysis, we will be using a random sub-sample of 20% (N= ~1,000 per males and females, N= ~1700 in total) to generate ROIs for the depression ~ brain structure association.
+The purpose of this script is to run the pilot analysis (Depression - brain structure) for the Puberty RR. For this analysis, we will be using the baseline ABCD data N=9,339, males= 4802, females = 4537, to generate ROIs for the puberty - brain structure - depression mediation analysis that constitutes H2 and H3 in our main analyses. 
 
-This sub-sample will be split into males and females and the script will be run independently for each.
+Please note the following: 
 
-Note that this sample includes unrelated individuals. 
+- We will run models for males and females separately.
 
-Please note that in this script, brain structure is set as the dependent variable due to the treatment of hemisphere mixed effects. However, in the RR, our hypotheses state that depression is the dependent or outcome variable. As this analysis is cross-sectional, the Y and X terms are statistically interchangeable so Y ~ X = depression ~ brain = brain ~ depression. For our later mediation models, the order of the terms is important so depression will be the dependent or outcome variable. See RR manuscript for further details on mediation model set up.
+- This sample of ABCD participants includes related individuals.
 
-Required Inputs
+- In this script, brain structure is set as the dependent variable due to the treatment of hemisphere mixed effects. However, in the RR, our         hypotheses state that depression is the dependent or outcome variable. As this analysis is cross-sectional, the Y and X terms are statistically interchangeable so Y ~ X = depression ~ brain = brain ~ depression. For our later mediation models, the order of the terms is important so depression will be the dependent or outcome variable. See RR manuscript for further details on mediation model set up.
+
+*Required Inputs*
 
 Cleaned data Rds files are located in /Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data
 
@@ -38,8 +40,8 @@ Covariates — Covariates: covs_pilot_R4.0.rds
 
 ####Workflow
 
-1.  Setup: Load data, merge to create master dataframe, keep unrelated participants only
-2.  Pilot prep: Get subsample of 20% of sample (N= ~1,700). Split into males and females.
+1.  Setup: Load data, merge to create master dataframe.
+2.  Pilot prep: Split into males and females.
 3.  Set up  function
 4.  Run models
 
@@ -124,7 +126,6 @@ df %>%
   str()
 ```
 
-
 Get sample demographics: Age = 9.91 years; SD = 0.62
 
 ```{r, sample demographics}
@@ -144,113 +145,60 @@ females <- df %>% #N= 5680
   
 ```
 
-IGNORE for pilot analysis: Inspect Ns per nested condition
+IGNORE for pilot analysis — we will not nest the random factors due to model convergence issues but the code below gives us an insight into the nested structure of the data. 
+
+Inspect Ns per nested condition
 ```{r, inspect Ns per condition}
 
-#let's look at how the data is nested for females
-nest_str_all <- df %>%
-  group_by(rel_family_id, src_subject_id, scanner_id) %>%
-  count()
-
-#check if individuals from each family went to the same scanner
-#This is because we plan to nest family id within scanner id 
-#group by family id and then count number of unique scanner_ids per family group
-#N=47 individuals within each family that went to different scanners
-scanner_test <- df %>% 
-  group_by(rel_family_id) %>%  
-  na.omit() %>%  #some missing values for scanner_id 
-  distinct(scanner_id) %>% 
-  summarise(scanner_match = n()) %>% 
-  count()
+# #let's look at how the data is nested for females
+# nest_str_all <- df %>%
+#   group_by(rel_family_id, src_subject_id, scanner_id) %>%
+#   count()
+# 
+# #check if individuals from each family went to the same scanner
+# #This is because we plan to nest family id within scanner id 
+# #group by family id and then count number of unique scanner_ids per family group
+# #N=47 individuals within each family that went to different scanners
+# scanner_test <- df %>% 
+#   group_by(rel_family_id) %>%  
+#   na.omit() %>%  #some missing values for scanner_id 
+#   distinct(scanner_id) %>% 
+#   summarise(scanner_match = n()) %>% 
+#   count()
 
 ```
 
 
-####STEP 2: Generate subsample (20% of unrelated sample) for pilot analysis. N=1188 Get females only
+####STEP 2: Generate female only dataframe from related baseline sample. 
 
 Note: name of object needs to be targetdata for function
 
-1. Get unrelated sample N= 9850
-```{r, get unrelated sample using randomisation approach}
-
-# #Assign random number to each family ID. Set random 
-# 
-# df$random <- NA #generate new column of NAs
-# unrel_df <- data.frame() #make new df
-# 
-# #iterate through family IDs using for loop (this will take a few minutes)
-# # set.seed(2507) #to make sure random sample is the same random sample each time
-# unique_fam_id <- unique(df$rel_family_id)
-# for (i in unique_fam_id[1:length(unique_fam_id)]){
-#   
-#   set.seed(2507)
-#   
-#   #subset each family and assign random number to each individual within each family
-#   df$random[df$rel_family_id == i] <- sample(nrow(df[df$rel_family_id == i,]),nrow(df[df$rel_family_id == i,]), replace= FALSE)
-#   
-#   #select individual with highest number for unrelated dataframe
-#   unrel_individual <- df[df$rel_family_id == i,][which.max(df$random[df$rel_family_id == i]),]
-#     
-#   #append unrelated individual to unrelated dataframe
-#   unrel_df <- rbind(unrel_df, unrel_individual)
-#   
-# }
-# 
-# # i <- 8781 #for trouble shooting. 
-# nrow(unrel_df) #check that N= 9850
-# length(unique(unrel_df$rel_family_id)) #check that no. of unique IDs is correct. 
-# 
-# #Check that set.seed worked so that we get the same IDs each timescript is run
-# 
-# test_set_seed <- unrel_df$src_subject_id #make new vector of un_rel individual ids
-# 
-# #the rerun df$random lines + for loop, without clearing global environment
-# #check if new participant id list matches test_set_seed
-# 
-# all(unrel_df$src_subject_id == test_set_seed) #it worked! 
-
-```
-
 ```{r, generate subsample, get females only}
 
-set.seed(2507) #set seed for reproducibility
-targetdata <- df %>% 
-  sample_frac(size = 0.99, replace = FALSE)
+targetdata <- df
 
 #check males and females breakdown F= 896, M=1074
-targetdata %>% 
+targetdata %>%
   dplyr::count(sex)
 
 #get mean age and sd for pilot sample. Mean age = 9.91, SD = 0.62
 mean(targetdata$age_years)
 sd(targetdata$age_years)
 
-#Get Female sample only 
-targetdata <- targetdata %>% 
+#Get Female sample only N= 5675
+targetdata <- targetdata %>%
   filter(sex == "F")
 
 ```
 
-Make demographics table for CBCL breakdown
+Check minimum sample size as we are using complete case analysis in lme models. 
+N= 4537
 
-```{r, CBCL demographics table}
+```{r, check complete cases}
 
-#DS category breakdown
-CrossTable(targetdata$cbcl_scr_syn_withdep_r, 
-           prop.t = TRUE, prop.r = TRUE, prop.c = TRUE)
-
-# #DS and age breakdown
-# ddply(targetdata,~KSADS.Depressive_symptoms_ever.p,summarise,mean=mean(age_years),sd=sd(age_years))
-
+sum(complete.cases(targetdata)) #N= 4537
 
 ```
-
-Remove columns not needed for pilot analyis
-```{r, remove cols not needed for pilot analysis}
-# targetdata <- targetdata %>% 
-#   select(-c("bmi", "household_income", "asr_scr_depress_r", "interview_age", "site_id_l", "dmri_dti_meanrot", "dmri_dti_meantrans", "acs_raked_propensity_score" ,"mri_info_visitid", "mri_info_studydate", "rel_group_id", "random"))
-```
-
 TROUBLESHOOTING: Check for multicolinearity
 
 ```{r, multicolinearity}
@@ -281,7 +229,8 @@ TROUBLESHOOTING: Check for multicolinearity
 ```
 
 
-####STEP 3: Model set up We are using X.Shen's reg_phewasStyle_Random.R function to run the mixed effects models for both unilateral and bilateral brain regions.
+####STEP 3: Model set up We are using X.Shen's reg_phewasStyle_Random.R function to run the mixed effects models for both unilateral and bilateral brain regions. Note that we will use an average measure across the left and right hemispheres for bilateral brain regions. 
+
 We need to change "src_subject_id" to "f.eid" so that function will run.
 
 ```{r, colnames}
@@ -299,25 +248,21 @@ IV: Depressive symptoms
 
 DV: Brain Measures
 
-Covariates: Fixed = age, ethnicity; dti mean motion for (DTI models), hemisphere for bilateral models
+Covariates: Fixed = age, race/ethnicity; dti mean motion for (DTI models), WBV
 
-Random: participant id (f.eid), scanner ID.
-
-For main analysis, family id will be nested in scanner_id. 
-
+Random: family ID, scanner ID.
 
 Set categorical variables
 
 ```{r, set categorical variables}
 
 targetdata$race.6level = as.factor(targetdata$race.6level)
-#targetdata$sex = as.factor(targetdata$sex)
 targetdata$rel_family_id = as.factor(targetdata$rel_family_id)
 targetdata$scanner_id = as.factor(targetdata$scanner_id)
 
 ```
-Standardise variables before running models to avoid scaling issues. Note, we will only scale the numeric variables
 
+Standardise variables before running models to avoid scaling issues. Note, we will only scale the numeric variables
 ```{r, scale variables}
 
 targetdata <- targetdata %>% 
@@ -325,11 +270,20 @@ mutate_if(is.numeric, scale)
 
 ```
 
-Generate long-format data.
+Notes on function:
 
-Note: for the lme models (bilateral brain regions only), the data needs to be in long-format.  Hemisphere is controlled for as a fixed, within-participant effect.
+- Make sure that the "family" argument in function is correct (i.e., we want it to be "poisson" not "binomial")
 
+- Due to model convergence and singularity issues when modelling hemisphere as a fixed within participant effect and participant ID as a random     factor, we are using an average measure across left and right hemisphere for bilateral brain regions. For this reason, the data does not need to be convered to long format and we can ignore the long-format sections of the function. 
+
+
+IGNORE
 ```{r, gen long-format data}
+
+#Generate long-format data.
+#Note: for the lme models (bilateral brain regions only), the data needs to be in long-format.  Hemisphere is controlled for as a fixed, within-participant effect.
+
+
 # # colnames of imaging data
 # dat_colnames = colnames(targetdata)[grep('lh\\.|rh\\.',colnames(targetdata))] 
 # 
@@ -342,10 +296,7 @@ Note: for the lme models (bilateral brain regions only), the data needs to be in
 
 ```
 
-Define functions
-
-Note: Make sure that the "family" argument in function is correct (i.e., we want it to be "poisson" not "binomial")
-
+Define function 
 
 ```{r, Phewas function}
 
@@ -357,29 +308,15 @@ Define global variables
 
 ```{r, global vars}
 targetdata=targetdata
-#dat_long=targetdata_longformat
 
 ```
 
 Set up dependent variables (brain measures: cortical(APARC files); subcortical(ASEG files); whitematter(dti)
 
-
-
 ```{r, set up DVs}
 #select vars of interest
-#ls.dep.fs.long=colnames(dat_long)[grep('sa\\.|thk\\.|vol\\.|sulc\\.|\\.ASEG\\.|dtifa\\_|dtimd\\_',colnames(dat_long))] 
-#For all models that are not bilateral, we will keep data in short format
-#Note that these DTI measures: CC, fmaj and fmin are unilateral, so these need to be listed here too.
+
 ls.dep.fs.short=colnames(targetdata)[grep('^bl\\.|^avg\\.|\\_cc|\\_fmaj|\\_fmin',colnames(targetdata))]
-
-# #ls.dep.all=c(ls.dep.fs.long,ls.dep.fs.short)
-# 
-# ls.dep.all=ls.dep.all[c(grep('sa\\.|thk\\.|vol\\.|sulc\\.',ls.dep.all),
-#                         grep('\\.ASEG\\.',ls.dep.all),
-#                         grep('dtifa\\_',ls.dep.all),
-#                         grep('dtimd\\_',ls.dep.all))]
-# ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
-
 ls.dep.all = ls.dep.fs.short
 ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
@@ -387,13 +324,10 @@ ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
 
 Set up Independent Variable (or factor) (CBCL withdrawn-depressed symptoms)
 
-
 ```{r, set up IVs}
 
 ls.factor=colnames(targetdata)[grep('^cbcl_scr_syn_withdep_r',
                                     colnames(targetdata))]
-
-#cbcl_scr_syn_withdep_r
 
 ```
 
@@ -413,17 +347,10 @@ ls.models=data.frame(dependent=ls.dep.factor.combo$Var1,
                      factor=ls.dep.factor.combo$Var2,
                      covs='',stringsAsFactors = F)
 
-ls.models$covs=paste0(c('age_years','race.6level'),collapse='+') #just list fixed covariates here. Random effects:'scanner_id', participant ID are specified in function
-
-
-# #For all models that are not bilateral, add hemisphere as a covariate. 
-# #Note that these DTI measures: CC, fmaj and fmin are unilateral, so these need to be listed here too. 
-# ls.models$covs[!grepl('bl\\.|\\_cc|\\_fmaj|\\_fmin',ls.models$dependent)]=paste0(ls.models$covs[!grepl('bl\\.|\\_cc|\\_fmaj|\\_fmin',ls.models$dependent)],'+hemi')
+ls.models$covs=paste0(c('age_years','race.6level'),collapse='+') #just list fixed covariates here. Random effects:'scanner_id', rel_family_id are specified in function
 
 #add dti mean motion (fd) as cov for dti models
 ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)],'+dmri_dti_meanmotion')
-
-
 
 ```
 
@@ -433,10 +360,9 @@ USER: Make sure that the model names specified below match the model names defin
 
 ```{r, specify models}
 
-
 ls.models$model.est=''
-ls.models$model.est[grep('hemi',ls.models$covs)]='bilateral'
-ls.models$model.est[ls.models$model.est=='']='unilateral'
+ls.models$model.est[grep('hemi',ls.models$covs)]='bilateral' #we are defining here for purposes of function but we are not using the bilateral elements as we have used an average measure - therefore, the model will use lme models for all other cases. 
+ls.models$model.est[ls.models$model.est=='']='lme'
 
 
 ```
@@ -481,6 +407,8 @@ ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG
 
 #### STEP 5: Run Models
 
+We do not have any dat_long data in this analysis due to using average measures for bilateral brain regions but specifying it here is fine, it just won't be called by the function. 
+
 ```{r, run models}
 
 #Global (bulk) models
@@ -492,7 +420,7 @@ result.females.dep_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWho
 #Save as R.Data file
 save(result.females.dep_brain.bulk,result.females.dep_brain.region.covWholeB,file='../results/revised_pilot/females_dep_brain_pilot.RData')
 
-#add TRUE column if nominal p value < 0.02 for pilot ROIs, which means that all values of ≤0.01... will be included due to the large number of decimal places. 
+#add TRUE column if nominal p value < 0.006 for pilot ROIs, which means that all values of ≤0.005... will be included due to the large number of decimal places. 
 
 #global results
 result.females.dep_brain.bulk$Sig <- as.numeric((as.character(result.females.dep_brain.bulk[,"p.value"]))) < 0.006
@@ -503,10 +431,10 @@ result.females.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result
 #Save results as .csv files
 
 #global results
-write.csv(result.females.dep_brain.bulk, file = '../results/revised_pilot/tables/ROIs_pilot_females.dep_brain.bulk.csv')
+write.csv(result.females.dep_brain.bulk, file = '../results/revised_pilot/tables/supplementary_data/pilot_females.dep_brain.bulk.csv')
 
 #regional results 
-write.csv(result.females.dep_brain.region.covWholeB, file = '../results/revised_pilot/tables/ROIs_pilot_females_dep_brain.regional.csv')
+write.csv(result.females.dep_brain.region.covWholeB, file = '../results/revised_pilot/tables/supplementary_data/pilot_females_dep_brain.regional.csv')
 
 ```
 
@@ -533,19 +461,6 @@ write.csv(ROI_dep_brain_females_regional_results, file = "../results/revised_pil
 
 #global
 write.csv(ROI_dep_brain_females_global_results, file = "../results/revised_pilot/tables/ROIs_dep_brain_global_females.csv")
-
-#save as Kable Table
-
-# ROI_table <- ROI_dep_brain_females_regional_results %>%
-#        kable(digits=4, format = "html",
-#       caption = "Females: Depressive symptoms-brain structure models and associated statistics with significant ROI associations") %>%
-#                kable_styling(font_size = 15,
-#                              position = "left",
-#                              full_width = F) #%>%
-#       #save_kable(file = "../figs/female_ROIs_PT_brain_pilot_analysis.png")
-# 
-# str(ROI_dep_brain_females_regional_results) #check variable chars
-
 
 ```
 
