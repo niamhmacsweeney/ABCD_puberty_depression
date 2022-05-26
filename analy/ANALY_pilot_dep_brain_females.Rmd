@@ -1,6 +1,6 @@
 ---
 title: "ANALY_pilot_dep_brain_females"
-author: "Niamh MacSweeney"
+author: "Niamh MacSweeney" Credit to X. Shen for function templates.
 date: "20/04/2022"
 output: github_document
 editor_options: 
