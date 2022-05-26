@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 ABCD Pilot Analysis Script - Depression ~ Brain Structure -> Males
 
-#Introduction
+##Introduction
 
 The purpose of this script is to run the pilot analysis (Depression - brain structure) for the Puberty RR. For this analysis, we will be using the baseline ABCD data N=9,339, males= 4802, females = 4537, to generate ROIs for the puberty - brain structure - depression mediation analysis that constitutes H2 and H3 in our main analyses. 
 
@@ -33,7 +33,7 @@ Independent Variable — Depressive symptoms: CBCL_dep_baseline_R4.0.rds
 
 Dependent Variable — Brain structure: cortical_baseline_R4.0.rds + subcort_baseline_R4.O.rds + dti_baseline_R4.0.rds
 
-Covariates — Covariates: covs_pilot_R4.0.rds
+Covariates: covs_pilot_R4.0.rds
 ------------------------------------------------------------------------
 
 ####Workflow
@@ -175,7 +175,7 @@ IGNORE for pilot analysis: Inspect Ns per nested condition - we will not nest th
 ```
 
 
-####STEP 2: Generate mmale only dataframe from related baseline sample. 
+####STEP 2: Generate male only dataframe from related baseline sample. 
 
 ```{r, generate male sample only}
 
@@ -340,7 +340,7 @@ ls.models=data.frame(dependent=ls.dep.factor.combo$Var1,
                      factor=ls.dep.factor.combo$Var2,
                      covs='',stringsAsFactors = F)
 
-ls.models$covs=paste0(c('age_years','race.6level'),collapse='+') #just list fixed covariates here. Random effects:'scanner_id', participant ID are specified in function
+ls.models$covs=paste0(c('age_years','race.6level'),collapse='+') #just list fixed covariates here. Random effects:'scanner_id' and rel_family_id are specified in function
 
 #add dti mean motion (fd) as cov for dti models
 ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)]=paste0(ls.models$covs[grepl('dtifa\\_|dtimd\\_',ls.models$dependent)],'+dmri_dti_meanmotion')
