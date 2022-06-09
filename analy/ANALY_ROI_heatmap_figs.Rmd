@@ -1,0 +1,301 @@
+---
+title: "Heatmap"
+author: "Nikolaj Høier" and "Niamh MacSweeney"
+date: "24/5/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction 
+
+This script is created to help produce heatmaps for ABCD studies at Div. Psych. UoE. Imaging Group led by HW. 
+We will be utilizing ggseg for starts. ggseg is an amazing tool and a guide can be found  here: https://drmowinckels.io/blog/2018-08-24-introducing-the-ggseg-r-package-for-brain-segmentations/
+
+We will use this script to visualise the ROIs for our Puberty-Depression RR. These ROIs were generated from our pilot analyses. 
+
+#Set Up
+
+Load in packages
+```{r, ggseg}
+
+library(tidyverse)
+library(ggseg)
+library(gridExtra)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs")
+
+
+```
+#General introduction to GGSEG - what can it help us do?
+
+## hemisphere stacking
+we can stack hemisphere if we want
+
+```{r, stacked}
+ggseg(position="stacked")
+```
+Now we want to colour in our segmentated area
+
+```{r, fill}
+#here we see the novelty of the underlying code, basically works like a GGplot syntax :) 
+ggseg(mapping=aes(fill=region), position="stacked")
+
+
+```
+
+```{r, fill}
+#we can also colour and fill but avoid showing the legend from prev. figure and add in a title :) 
+ggseg(mapping=aes(fill=region), position="stacked", show.legend = F) +
+  ggtitle("first atlas")
+  
+  # +theme_darkbrain() #can add this on if you want a dark background
+```
+So this atlas quite nicely helps us view cortical areas. But what about subcortical? Well there is the ASEG
+subcortical atlas
+
+```{r, ASEG/SUBCORT}
+ggseg(atlas=aseg,mapping=aes(fill=region)) +
+  ggtitle("Automatic subcortical segmentation")
+```
+
+#Visualise ROIs 
+
+We are going to look at the ROIs from the RR pilot analyses.
+
+
+#STEP 1: List Hypohtheses
+
+For reference, here are our regional hypotheses:
+
+The association between earlier pubertal timing and increased depressive symptoms (H1) will be mediated by:
+
+•	H3a: Reduced cortical thickness in temporal regions, namely, the middle temporal gyrus and insula.
+
+•	H3b: Reduced cortical thickness in frontal regions namely, the lateral orbito-frontal cortex and middle frontal gyrus.
+
+•	H3c: Reduced cortical volume in temporal regions, namely, middle temporal gyrus and bank of the superior temporal sulcus.
+
+•	H3d: Reduced cortical volume in fronto-parietal regions, namely, the middle frontal and postcentral gyri. 
+
+•	H3e Reduced FA in the cortico-striatal tract and corpus collosum.
+
+•	H3f: Increased sulcal depth in the pars orbitalis
+
+•	H3g: Increased cortical volume in the ventral diencephalon. 
+
+For completeness, H2 refers to global hypotheses:
+
+•	H2a: Reduced global cortical volume, surface area, thickness and sulcal depth.
+
+•	H2b: Reduced global FA
+
+#Step 2: Load in ROI data
+
+```{r, load data}
+
+
+
+```
+
+
+
+
+
+
+
+Group by cortical measurement type:
+
+1. Cortical thickness
+2. Cortical volume
+3. Sulcal Depth 
+4. Subcortical regions - ventral diencephalon. 
+
+
+
+
+#Cortical thickness; region, beta value
+PDS-Brain
+Females
+Insula (thickness)	-0.0663
+Lateral orbitofrontal cortex (thickness)	-0.0635
+Middle temporal gyrus (thickness)	-0.0708
+Medial orbitofrontal cortex (thickness)	-0.0640
+Rostral middle frontal gyrus (thickness)	-0.0696
+
+Volume
+Bank of the superior temporal sulcus (volume)	-0.0545
+Caudal middle frontal gyrus (volume)	-0.0449
+middle temporal gyrus (volume)	-0.0425
+
+surface area
+post central -0.0256
+
+sulcal depth 
+pars orbitalis  0.0393
+
+subcort
+Ventral diencephalon (volume)	0.0931
+
+
+Males
+Lateral orbitofrontal cortex (thickness)	-0.0525
+
+
+```{r, test}
+
+
+someData <- tibble(
+  region = rep(c("transverse temporal", "insula",
+           "precentral","superior parietal"), 2), 
+  p = sample(seq(0,.5,.001), 8),
+  groups = c(rep("g1", 4), rep("g2", 4))
+)
+
+someData %>%
+  group_by(groups) %>%
+  ggplot() +
+  geom_brain(atlas = dk, 
+             position = position_brain(hemi ~ side),
+             aes(fill = p)) +
+  facet_wrap(~groups)
+#> merging atlas and data by 'region'
+
+```
+
+
+
+ We can add in our own heating to these maps:
+```{R, add results}
+#make dataframe with regions, Beta values and group type
+thk.results = tibble(
+              Region=c("insula","lateral orbitofrontal", "middle temporal", "medial orbitofrontal", "rostral middle frontal"),
+              Beta=c(-0.0663, -0.0635, -0.0708, -0.0640, -0.0696),
+              groups = c("thickness", "thickness", "thickness","thickness","thickness"), 
+    stringsAsFactors = FALSE)
+
+
+vol.results = tibble(
+              Region=c("bankssts","caudal middle frontal", "middle temporal", "postcentral"),
+              Beta=c(-0.0545, -0.0449, -0.0425, -0.0285),
+              groups = c("volume", "volume", "volume", "volume"),
+              stringsAsFactors = FALSE)
+
+sulc.results = tibble(
+                Region = "pars orbitalis",
+                Beta = 0.0393,
+                groups = c(rep("sulcal depth", 1)),
+                stringsAsFactors = FALSE)
+
+
+sa.results = tibble(
+            Region = "postcentral",
+            Beta = -0.0256,
+            groups = c(rep("surface area", 1)),
+            stringsAsFactors = FALSE)
+
+
+#merge dataframes to display on one figure
+df <- rbind(thk.results, vol.results, sulc.results, sa.results) 
+
+df <- as_tibble(df) %>% 
+  group_by(groups) #need to group by so that facet_wrap works
+  
+df %>% 
+  ggseg(mapping=aes(fill= Region),
+        colour="black", size=.8) +
+  ggtitle("Regions of interest") + theme_brain2() +
+  facet_wrap(~groups, ncol=2) +
+  
+
+
+df %>% 
+  ggplot() +
+  geom_brain(atlas=dk, 
+              mapping = aes(fill = Beta),
+              position = position_brain(hemi ~ side)) +
+  facet_wrap(~groups, ncol=2) +
+  theme(legend.position = "bottom") +
+  scale_fill_gradientn(colours = c("royalblue","firebrick","goldenrod"), na.value="grey")
+
+
+
+ggplot(someData) +
+  geom_brain(atlas = dk, 
+             position = position_brain(hemi ~ side),
+             aes(fill = beta)) +
+  scale_fill_viridis_c(option = "cividis", direction = -1) +
+  theme_void() +
+  labs(title = "Suicidal ideation and cortical thickness", 
+       subtitle = "Associations between changes to cortical thickness and SI",
+       caption = "Adjusted for sex, age, BMI, family, ID, race, anxiety and depression")
+
+
+
+
+df %>% 
+  ggplot() +
+  geom_brain(
+    atlas = dk, 
+    show.legend = TRUE,
+    position = position_brain(side  + hemi ~ .)
+  )
+
+  
+thk.results %>% 
+  ggseg(mapping=aes(fill=as.numeric(Beta)),
+        colour="black", size=.8) +
+  ggtitle("Cortical thickness ROIs") + theme_brain2() 
+  
+  
+vol_plot <- vol.results %>% 
+  ggseg(mapping=aes(fill=Beta),
+        colour="black", size=.8, show.legend = F) +
+  ggtitle("Coritcal Volume ROIs") + theme_brain2()
+
+
+thk_plot_2 <- thk.results %>% 
+  ggseg(mapping=aes(fill=Beta),
+        colour="black", size=.8) +
+  ggtitle("Cortical thickness ROIs") + theme_brain2() 
+  
+
+vol_plot_2 <- vol.results %>% 
+  ggseg(mapping=aes(fill=Beta),
+        colour="black", size=.8, show.legend = F) +
+  ggtitle("Coritcal Volume ROIs") + theme_brain2()
+
+plot <- grid.arrange(thk_plot,thk_plot_2, vol_plot, vol_plot_2, ncol=2, nrow=2),
+                     heights=unit(c(1,10), c("in", "mm")) %>% 
+  ggsave("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/ROI_heatmaps.pdf")
+
+vol_plots <- grid.arrange(vol_plot, vol_plot_2, ncol=1, nrow=2)
+
+
+position="stacked", show.legend = F
+
+
+
+
+```
+
+```{r}
+
+# If you group_by the columns you will facet by, this will work well.
+someData = someData %>% 
+  group_by(AgeG)
+
+# We can now supply the newAtlas as an atlas to ggseg
+ggplot(someData) +
+  geom_brain(atlas=dk, 
+             colour="white",
+             mapping=aes(fill=p)) +
+  facet_wrap(~AgeG, ncol=1) +
+  theme(legend.position = "bottom") +
+  scale_fill_gradientn(colours = c("royalblue","firebrick","goldenrod"),na.value="grey")
+
+```
+
+
