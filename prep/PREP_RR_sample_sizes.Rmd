@@ -112,26 +112,49 @@ dep_y3_final <- dep_y3 %>%
 Merge dataframes
 ```{r, merge}
 
-df_1 <- dep_y3_final %>% 
+df <- dep_y3_final %>% 
   left_join(y=cortical, by= "src_subject_id") %>% 
   left_join(y=subcort, by= "src_subject_id") %>% 
   left_join(y=dti, by= "src_subject_id") %>% 
   left_join(y = pds, by= "src_subject_id") %>% 
   left_join(y=covs, by="src_subject_id")
 
+#rename duplicate vars 
+df <- df %>% 
+  rename(sex = sex.x)
+
+#remove sex.y 
+df <- df %>% 
+  select((-sex.y))
+
 ```
 
 Check complete cases
 ```{r, complete cases}
 
+#Make male and female def 
+
+males_df <- df %>% #N=2844
+  filter(sex == "M")
+
+females_df <- df %>% #N=2635
+  filter(sex == "F")
+
 #remove pt_timing variables before checking complete cases because there will be many NAs for the sex specific cols. 
 
 df_complete <- df %>% 
-  select(- c(pt_f, pt_m)) %>% 
+  dplyr::select(- c(pt_f, pt_m))
 
 sum(complete.cases(df_complete)) #N=3872 for all variables. 
 
+dep_pt <- df %>% 
+  select("src_subject_id", "cbcl_scr_syn_withdep_r", "pds_tot_all", "eventname", "bmi", "household_income", "race.6level","asr_scr_depress_r",  "site_id_l", "age_years")
+
+sum(complete.cases(dep_pt)) #5078
+
 sum(complete.cases(df$pds_tot_all)) #N=5479
+
+sum(complete.cases(df$acs_raked_propensity_score)) #5835
 
 ```
 Make flow chart - do this in stage 2
