@@ -16,7 +16,7 @@ The purpose of this script is to generate depression severity measure (DSM5 scal
 We will create the following dataframes:
 
 1.  CBCL_dep_y0 at baseline (we will use this in the pilot data analysis)
-2.  CBCL_dep_y1 at Year 1 (will need to remove those with depression at Year 1 from the main analysis due to our hypothesed mediation)
+2.  CBCL_dep_y1 at Year 1 (for ues in sensitivity analyses)
 3.  CBCL_dep_y3 at Year 3 (this data will be used as the primary outcome in the main analysis)
 
 ###Script workflow:
@@ -302,3 +302,52 @@ saveRDS(cbcl_dep_y1,"CBCL_dep_y1_R4.0.rds")
 saveRDS(cbcl_dep_y3_final, "CBCL_dep_y3_R4.0.rds")
 
 ```
+
+#### CONVERT TO WIDE DATA 
+
+This will allow us to have multiple timepoint variables in one data frame
+
+```{r, convert to wide, tidy}
+#before converting to wide, keep raw CBCL scores only for imputation purpose
+
+cbcl_dep_wide <- cbcl_dep %>% 
+  select(-(ends_with(c("_t", "_nm", "_m")))) %>% 
+  select(-c("interview_date", "interview_age"))
+colnames(cbcl_dep_wide) #check col names
+         
+
+dep_wide <- reshape(cbcl_dep_wide, idvar = "src_subject_id", timevar = "eventname", direction = "wide") #convert dep data to wide format
+colnames(dep_wide)
+
+#rename col names
+dep_wide <- dep_wide %>% 
+  rename(sex = sex.baseline_year_1_arm_1,
+         cbcl_withdep_y0 = cbcl_scr_syn_withdep_r.baseline_year_1_arm_1,
+         cbcl_withdep_y1 = cbcl_scr_syn_withdep_r.1_year_follow_up_y_arm_1,
+         cbcl_withdep_y2 = cbcl_scr_syn_withdep_r.2_year_follow_up_y_arm_1,
+         cbcl_withdep_y3 = cbcl_scr_syn_withdep_r.3_year_follow_up_y_arm_1,
+         cbcl_anxdep_y0 = cbcl_scr_syn_anxdep_r.baseline_year_1_arm_1,
+         cbcl_anxdep_y1 = cbcl_scr_syn_anxdep_r.1_year_follow_up_y_arm_1,
+         cbcl_anxdep_y2 = cbcl_scr_syn_anxdep_r.2_year_follow_up_y_arm_1,
+         cbcl_anxdep_y3 = cbcl_scr_syn_anxdep_r.3_year_follow_up_y_arm_1)
+colnames(dep_wide)        
+        
+#select variables needed 
+dep_wide <- dep_wide %>% 
+  select(src_subject_id, sex, cbcl_withdep_y0, cbcl_withdep_y1, cbcl_withdep_y2, cbcl_withdep_y3, 
+         cbcl_anxdep_y0, cbcl_anxdep_y1, cbcl_anxdep_y2, cbcl_anxdep_y3)
+colnames(dep_wide)
+```
+
+
+```{r, export wide df}
+### EXPORT WIDE DATAFRAME ###
+
+#This dataframe contains multiple time points of data 
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+
+saveRDS(dep_wide,"CBCL_dep_all_yrs_R4.0.rds")
+
+```
+

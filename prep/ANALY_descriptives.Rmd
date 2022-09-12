@@ -1,0 +1,175 @@
+---
+title: "ANALY_descriptives.Rmd"
+author: "Niamh MacSweeney"
+date: '2022-08-31'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+library(tidyverse)
+library(psych)
+library(ggplot2)
+library(readr)
+library(pbapply)
+library(gridExtra)
+library(sandwich)
+library(stringr)
+library(kableExtra)
+library(gtsummary)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
+```
+
+
+```{r, load data}
+
+pds_y1 <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/pds_timing_y1_R4.0.rds")
+  
+dep_vars <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/CBCL_dep_all_yrs_R4.0.rds")
+  
+covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covs_main_R4.0.rds")
+
+```
+
+```{r, tidy up variables}
+
+pds_y1 <- pds_y1 %>% 
+  select (-c("pds_m_pt_valid", "pds_f_pt_valid"))
+
+#the dep and covs dataframes are in wide format so before merge, check that all of pds variables are definitely from year 1
+#they should be based on earlier QC
+
+pds_y1 %>% 
+  select(eventname) %>% 
+  as.factor() #only one level when converted to factor --- so looks good! 
+
+#remove eventname column before merge because we know that the pds vars are all from year 1
+
+pds_y1 <- pds_y1 %>% 
+  select(- c(eventname, age_years))
+colnames(pds_y1)
+```
+
+### Merge
+```{r, merge}
+#inspect vars before merge
+colnames(covs)
+colnames(dep_vars)
+colnames(pds_y1)
+
+#merge by src_subject_id and sex as they are common to all dataframes 
+
+#merge 1
+df <- covs %>% 
+  left_join(y=dep_vars, by= c("src_subject_id", "sex"))
+  
+#merge 2
+df <- df %>% 
+  left_join(y=pds_y1, by= c("src_subject_id", "sex"))
+
+#check if merge worked okay
+colnames(df)
+
+```
+
+#Explore data 
+
+```{r, get list of vars}
+
+
+#all vars including aux vars
+
+main_vars <- c("src_subject_id", #character variable
+               "sex",    #character variable                    
+               "site_id",  
+              "parent_dep_y2", #continuous score
+               "acs_raked_propensity_score_y0" , 
+               "bmi_y0", 
+               "household_income_y0", #character variable
+               "race_y0", 
+              "dti_mean_motion_y2",  #continuous score       
+               "scanner_id_y2", #character variable
+               "age_years", #continuous score
+               "cbcl_withdep_y3", #continuous score
+               "pds_tot_all",
+              "pt_f",
+              "pt_m" #continuous score
+               )
+
+# main_vars <- c("Study ID" = "src_subject_id", #character variable
+#                "Sex",    #character variable                    
+#                "Site ID" = "site_id",  
+#                "Parent depressive symptoms" = "parent_dep_y0", 
+#                "Population stratification weight" = "acs_raked_propensity_score_y0",
+#                "BMI" = "bmi_y0",
+#                "Household income" = "household_income_y0", 
+#                "Race/ethnicity" = "race_y0", 
+#                "DTI mean FD" = "dti_mean_motion_y2",  #continuous score       
+#                "Scanner ID" = "scanner_id_y2",
+#                "Age" = "age_years", #continuous score
+#               "Youth depressive symptoms" = "cbcl_withdep_y3", #continuous score
+#                "PDS total score" = "pds_tot_all",
+#               "PT females" = "pt_f",
+#               "PT males" = "pt_m", #continuous score
+#                )
+```
+
+Check missingness
+```{r, missingness}
+
+#Extract main variables 
+main_df <- df[, main_vars]
+
+#only include subjects that have pds data N= #10400
+main_df <- main_df %>% 
+  filter(!is.na(pds_tot_all))
+
+summary(main_df)
+
+```
+
+Make descriptives table 
+
+Table code working without labels. - return to later. 
+
+```{r, descriptives table}
+
+main_df %>% 
+  select(-c(src_subject_id, site_id, scanner_id_y2, pt_f, pt_m)) %>% 
+  tbl_summary(
+    by = sex,
+    statistic = list(all_continuous() ~ "{mean} ({sd})",
+                     all_categorical() ~ "{n} / {N} ({p}%)"),
+    digits = all_continuous() ~ 2,
+    label = c(cbcl_withdep_y3 ~ "Youth depressive symptoms", pds_tot_all ~  "PDS total score",
+            age_years ~ "age",
+            race_y0 ~ "race/ethnicity",
+            # site_id ~ "site ID",
+            parent_dep_y0 ~ "parent DS",
+            acs_raked_propensity_score_y0 ~ "population stratification weight",
+            bmi_y0 ~ "BMI",
+            household_income_y0 ~ "household income",
+            dti_mean_motion_y2 ~ "DTI mean FD",
+            # scanner_id_y2 ~ "scanner ID"
+            ),
+    type = c(cbcl_withdep_y3, pds_tot_all, age_years, parent_dep_y2, acs_raked_propensity_score_y0, bmi_y0, dti_mean_motion_y2) ~ "continuous",
+            c(sex, race_y0, household_income_y0) ~ "categorical",
+    missing_text = "(Missing)"
+  )
+
+main_df %>%
+  select(cbcl_withdep_y3, race_y0, sex) %>% 
+  tbl_summary(
+    by = sex,
+    statistic = list(all_continuous() ~ "{mean} ({sd})",
+                     all_categorical() ~ "{n} / {N} ({p}%)"),
+    digits = all_continuous() ~ 2
+  )
+    
+
+
+```
+

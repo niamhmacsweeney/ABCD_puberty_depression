@@ -12,7 +12,7 @@ The purpose of this script is to:
 tidy and score the pubertal development scale (PDS) data (caregiver report) from ABCD Release 4.0
 to prepare a final, clean, sample for use in models. 
 
- SETUP
+## SETUP
 Load libraries needed and set working directory
 
 ```{r, libraries}
@@ -816,9 +816,7 @@ org_f_QQplot <- plot(pt_f_lm, which= c(2))
 ```
 
 
-STEP 7: Export clean data. 
-
-Note (4/04/22) - for the purposes of the revised pilot analysis for the RR, I will use the original/raw pubertal timing data (i.e., non transformed)
+STEP 7: Export clean data for Year 1. 
 
 Change working directory and save clean file there. 
 Note: clean files should be saved in data folder in ABCD_puberty_RR project folder.

@@ -24,6 +24,9 @@ Load in packages
 library(tidyverse)
 library(ggseg)
 library(gridExtra)
+library(hrbrthemes) #nice ggplot themes
+library(gcookbook)
+
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs")
 
@@ -92,18 +95,7 @@ For completeness, H2 refers to global hypotheses:
 
 •	H2b: Reduced global FA
 
-#Step 2: Load in ROI data
-
-```{r, load data}
-
-
-
-```
-
-
-
-
-
+#Step 2: Load in ROI data (for both puberty and depression associations)
 
 
 Group by cortical measurement type:
@@ -112,8 +104,6 @@ Group by cortical measurement type:
 2. Cortical volume
 3. Sulcal Depth 
 4. Subcortical regions - ventral diencephalon. 
-
-
 
 
 #Cortical thickness; region, beta value
@@ -139,116 +129,108 @@ pars orbitalis  0.0393
 subcort
 Ventral diencephalon (volume)	0.0931
 
-
 Males
 Lateral orbitofrontal cortex (thickness)	-0.0525
 
+White matter - ggseg doesn't have atlas to match the DTI parcellation in ABCD. 
 
-```{r, test}
+Lower FA in cortico-striate tract (beta = -0.0327) and corpus callosum (beta = -0.0280)
+
+ We can add in our own heating to these maps:
+ 
+```{R, add results}
+#make dataframe with regions, Beta values and group type
+thk.results = tibble(
+              region=c("insula","lateral orbitofrontal", "middle temporal", "medial orbitofrontal", "rostral middle frontal"),
+              beta=c(-0.0663, -0.0635, -0.0708, -0.0640, -0.0696),
+              group = c("thickness", "thickness", "thickness","thickness","thickness"))
+    #stringsAsFactors = FALSE
 
 
-someData <- tibble(
-  region = rep(c("transverse temporal", "insula",
-           "precentral","superior parietal"), 2), 
-  p = sample(seq(0,.5,.001), 8),
-  groups = c(rep("g1", 4), rep("g2", 4))
-)
+vol.results = tibble(
+              region=c("bankssts","caudal middle frontal", "middle temporal", "postcentral"),
+              beta=c(-0.0545, -0.0449, -0.0425, -0.0285),
+              group = c("volume", "volume", "volume", "volume"))
+              #stringsAsFactors = FALSE)
 
-someData %>%
-  group_by(groups) %>%
-  ggplot() +
-  geom_brain(atlas = dk, 
-             position = position_brain(hemi ~ side),
-             aes(fill = p)) +
-  facet_wrap(~groups)
-#> merging atlas and data by 'region'
+sulc.results = tibble(
+                region = "pars orbitalis",
+                beta = 0.0393,
+                group = "sulcal depth")
+                #stringsAsFactors = FALSE)
 
+
+sa.results = tibble(
+            region = "postcentral",
+            beta = -0.0256,
+            group = "surface area")
+            #stringsAsFactors = FALSE)
+
+
+#merge dataframes to display on one figure
+df <- rbind(thk.results, vol.results, sulc.results, sa.results)
 ```
 
 
 
- We can add in our own heating to these maps:
-```{R, add results}
-#make dataframe with regions, Beta values and group type
-thk.results = tibble(
-              Region=c("insula","lateral orbitofrontal", "middle temporal", "medial orbitofrontal", "rostral middle frontal"),
-              Beta=c(-0.0663, -0.0635, -0.0708, -0.0640, -0.0696),
-              groups = c("thickness", "thickness", "thickness","thickness","thickness"), 
-    stringsAsFactors = FALSE)
+```{r, plot cortical}
 
-
-vol.results = tibble(
-              Region=c("bankssts","caudal middle frontal", "middle temporal", "postcentral"),
-              Beta=c(-0.0545, -0.0449, -0.0425, -0.0285),
-              groups = c("volume", "volume", "volume", "volume"),
-              stringsAsFactors = FALSE)
-
-sulc.results = tibble(
-                Region = "pars orbitalis",
-                Beta = 0.0393,
-                groups = c(rep("sulcal depth", 1)),
-                stringsAsFactors = FALSE)
-
-
-sa.results = tibble(
-            Region = "postcentral",
-            Beta = -0.0256,
-            groups = c(rep("surface area", 1)),
-            stringsAsFactors = FALSE)
-
-
-#merge dataframes to display on one figure
-df <- rbind(thk.results, vol.results, sulc.results, sa.results) 
-
-df <- as_tibble(df) %>% 
-  group_by(groups) #need to group by so that facet_wrap works
-  
+###Cortical ROIs #####
+#via ggseg
 df %>% 
-  ggseg(mapping=aes(fill= Region),
-        colour="black", size=.8) +
-  ggtitle("Regions of interest") + theme_brain2() +
-  facet_wrap(~groups, ncol=2) +
-  
+  group_by(group) %>% 
+  ggseg(atlas = dk, 
+      colour = "black",
+      size = .2, 
+      hemi = "right",
+      position = "stacked",
+      mapping = aes(fill = beta)) +
+  scale_fill_gradient(low="deepskyblue",high="midnightblue") +
+  labs(title = "Pilot Analysis — Cortical Regions of Interest") +
+  theme_custombrain(plot.background = "white",text.colour = "black", text.size = 12, text.family = "mono") +
+  facet_wrap(~group)
+ggsave("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/cortical_ROI_heatmap.png")
 
 
-df %>% 
+
+## via geom_brain
+df %>%
+  group_by(group) %>%
   ggplot() +
-  geom_brain(atlas=dk, 
-              mapping = aes(fill = Beta),
-              position = position_brain(hemi ~ side)) +
-  facet_wrap(~groups, ncol=2) +
-  theme(legend.position = "bottom") +
-  scale_fill_gradientn(colours = c("royalblue","firebrick","goldenrod"), na.value="grey")
-
-
-
-ggplot(someData) +
-  geom_brain(atlas = dk, 
+  geom_brain(atlas = dk,colour="white",
              position = position_brain(hemi ~ side),
              aes(fill = beta)) +
-  scale_fill_viridis_c(option = "cividis", direction = -1) +
-  theme_void() +
-  labs(title = "Suicidal ideation and cortical thickness", 
-       subtitle = "Associations between changes to cortical thickness and SI",
-       caption = "Adjusted for sex, age, BMI, family, ID, race, anxiety and depression")
+  theme_brain() +
+  scale_fill_gradient(low="deepskyblue",high="midnightblue") +
+  labs(title = "Pilot Analysis — Regions of Interest") +
+  facet_wrap(~group)
+
+```
 
 
+```{r, subcortical}
 
+#make df for subcortical ROI
 
-df %>% 
-  ggplot() +
-  geom_brain(
-    atlas = dk, 
-    show.legend = TRUE,
-    position = position_brain(side  + hemi ~ .)
-  )
+subcort_df  = tibble(
+                region = "ventral DC",
+                beta = 	0.0931)
+subcort_df %>% 
+  ggseg(atlas = aseg, 
+        side = "sagittal",
+      colour = "black",
+      size = .1, 
+      mapping = aes(fill = beta)) +
+  labs(title = "Pilot Analysis — Subcortical Regions of Interest") +
+  theme_custombrain(plot.background = "white",text.colour = "black", text.size = 12, text.family = "mono")
+ggsave("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/subcortical_ROI_heatmap.png")
 
   
-thk.results %>% 
-  ggseg(mapping=aes(fill=as.numeric(Beta)),
-        colour="black", size=.8) +
-  ggtitle("Cortical thickness ROIs") + theme_brain2() 
-  
+```
+
+
+``` {r, individual plots}
+
   
 vol_plot <- vol.results %>% 
   ggseg(mapping=aes(fill=Beta),
@@ -274,28 +256,223 @@ plot <- grid.arrange(thk_plot,thk_plot_2, vol_plot, vol_plot_2, ncol=2, nrow=2),
 vol_plots <- grid.arrange(vol_plot, vol_plot_2, ncol=1, nrow=2)
 
 
-position="stacked", show.legend = F
+```
+
+#####Puberty Brain Associations ROIs
+
+Global cortical thickness	-0.0659
+Global sulcal depth	-0.0540
+
+Insula (thickness)	-0.0663
+Lateral orbitofrontal cortex (thickness)	-0.0635
+Middle temporal gyrus (thickness)	-0.0708
+Medial orbitofrontal cortex (thickness)	-0.0640
+Rostral middle frontal gyrus (thickness)	-0.0696
+Bank of the superior temporal sulcus (volume)	-0.0545
+Caudal middle frontal gyrus (volume)	-0.0449
+middle temporal gyrus (volume)	-0.0425
+Lateral orbitofrontal cortex (thickness)	-0.0525
+
+Ventral diencephalon (volume)	0.0931
+	
+
+```{R, add results}
+#make dataframe with regions, Beta values and group type
+pub_thk.results = tibble(
+              region=c("insula","lateral orbitofrontal", "middle temporal", "medial orbitofrontal", "rostral middle frontal"),
+              beta=c(-0.0663, -0.0635, -0.0708, -0.0640, -0.0696),
+              group = c("thickness", "thickness", "thickness","thickness","thickness"))
+    #stringsAsFactors = FALSE
 
 
+pub_vol.results = tibble(
+              region=c("bankssts","caudal middle frontal", "middle temporal"),
+              beta=c(-0.0545, -0.0449, -0.0425),
+              group = c("volume", "volume", "volume"))
+              #stringsAsFactors = FALSE)
+
+
+#merge dataframes to display on one figure
+pub_df <- rbind(pub_thk.results, pub_vol.results)
+```
+
+Plot
+```{r, plot puberty ROIs}
+
+###Cortical ROIs #####
+#via ggseg
+pub_df %>% 
+  group_by(group) %>% 
+  ggseg(atlas = dk, 
+      colour = "black",
+      size = .2, 
+      hemi = "right",
+      position = "stacked",
+      mapping = aes(fill = beta)) +
+  scale_fill_gradient(low="deepskyblue",high="midnightblue") +
+  labs(title = "Pubertal Timing — Cortical Regions of Interest") +
+  theme_custombrain(plot.background = "white",text.colour = "black", text.size = 10, text.family = "mono") +
+  theme(plot.margin=unit(c(2,2,2,3),'mm'),
+        plot.title = element_text(lineheight=1, face="bold", vjust=1, hjust=0.5,size=12)) +
+  facet_wrap(~group)
+ggsave("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/PT_cortical_ROI_heatmap.png")
+
+```
+
+Only one subcortical ROI for puberty-brain associations. 
+```{r, subcortical}
+
+#make df for subcortical ROI
+
+subcort_df  = tibble(
+                region = "ventral DC",
+                beta = 	0.0931)
+subcort_df %>% 
+  ggseg(atlas = aseg, 
+        side = "sagittal",
+      colour = "black",
+      size = .1, 
+      mapping = aes(fill = beta)) +
+  labs(title = "Pubertal Timing — Subcortical Regions of Interest") +
+  theme_custombrain(plot.background = "white",text.colour = "black", text.size = 10, text.family = "mono") +
+  theme(plot.margin=unit(c(2,2,2,3),'mm'),
+        plot.title = element_text(lineheight=1, face="bold", vjust=1, hjust=0.5,size=12)) 
+ggsave("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/PT_subcortical_ROI_heatmap.png")
 
 
 ```
 
+####Depression - Brain Measures (Cortical/subcortical)
+
+Postcentral gyrus (surface area)	-0.0256
+Middle temporal gyrus (volume)	-0.0283
+Postcentral gyrus (volume)	-0.0285
+Pars orbitalis
+(Sulcal depth)	0.0393
+
+
+```{R, add results}
+#make dataframe with regions, Beta values and group type
+
+
+dep_vol.results = tibble(
+              region=c("postcentral", "middle temporal"),
+              beta=c(-0.0285, -0.0425),
+              group = c("volume", "volume"))
+            
+
+
+dep_sulc.results = tibble(
+                region = "pars orbitalis",
+                beta = 0.0393,
+                group = "sulcal depth")
+                #stringsAsFactors = FALSE)
+
+
+dep_sa.results = tibble(
+            region = "postcentral",
+            beta = -0.0256,
+            group = "surface area")
+            #stringsAsFactors = FALSE)
+
+
+#merge dataframes to display on one figure
+dep_df <- rbind(dep_vol.results, dep_sulc.results, dep_sa.results)
+
+```
+
+Plot Cortical Measures
+
+```{r, plot depression ROIs}
+
+###Cortical ROIs #####
+#via ggseg
+dep_df %>% 
+  group_by(group) %>% 
+  ggseg(atlas = dk, 
+      colour = "black",
+      size = .2, 
+      hemi = "right",
+      position = "stacked",
+      mapping = aes(fill = beta)) +
+  scale_fill_gradient(low="deepskyblue",high="midnightblue") +
+  labs(title = "Depressive Symptoms — Cortical Regions of Interest") +
+  theme_custombrain(plot.background = "white",text.colour = "black", text.size = 10, text.family = "mono") +
+  theme(plot.margin=unit(c(2,2,2,3),'mm'),
+        plot.title = element_text(lineheight=1, face="bold", vjust=1, hjust=0.5,size=12)) +
+  facet_wrap(~group, ncol = 3)
+ggsave("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/dep_cortical_ROI_heatmap.png")
+
+```
+
+Plot Global Measures
+
+Puberty
+Females
+Global cortical thickness	-0.0659
+Global sulcal depth	-0.0540
+
+
+Depression
+Females
+Global surface area	-0.0396
+Global cortical volume	-0.0393
+Global FA	-0.0290
+
+Males
+Global cortical surface area	-0.0607
+Global cortical volume	-0.0636
+
+For plotting purposes, get average for values that are shared between males and females
+Surface area: -.0501
+Cortical volume: -0.0513
+
+
+```{r, global data}
+
+global_results <- data.frame(
+                measure = c("volume", "surface area", "thickness", "sulcal depth","FA"),
+                beta = 	c(-.0513, -.0501, -.0959, -.0540 , -0.029),
+                group = c("Depressive Symptoms", "Depressive Symptoms", "Pubertal Timing", "Pubertal Timing", "Depressive Symptoms"))
+
+```
+
+
+
+Make bar graph 
 ```{r}
 
-# If you group_by the columns you will facet by, this will work well.
-someData = someData %>% 
-  group_by(AgeG)
+global_fig=
+  ggplot(global_results, aes(x=measure, y=beta)) + 
+  geom_bar(fill='deepskyblue4', position=position_dodge(), stat="identity", width=0.5) +
+  ggtitle("Global Results")+
+  theme(
+    panel.background = element_blank(),
+    panel.grid = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_text(hjust=0.5),
+    axis.line.x = element_line(size=0.3),
+    axis.text=element_text(size=10, hjust=-0.01), axis.title=element_text(size=10),
+    plot.title = element_text(lineheight=1, face="bold", vjust=1, hjust=0.5,size=14),
+    strip.text = element_text(size=10),
+    panel.spacing = unit(2, "lines"),
+    plot.margin=unit(c(2,2,2,3),'mm')) +
+  # geom_text(aes(label=sig), colour="black", hjust=12, size=3)+
+  # ylab("Beta") + xlab("\n\n") +
+  # ylim(c(-0.07,0.06))+
+  #scale_y_reverse()+
+  scale_x_discrete(position='top')+
+  geom_hline(yintercept=0,size=0.5,color='white')+
+  geom_vline(xintercept=2.5,size=0.5,color='white', linetype = "dashed")+
+  coord_flip() +
+      facet_wrap(~group) 
+print(global_fig)
+ggsave("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/global_results_barplot.png")
 
-# We can now supply the newAtlas as an atlas to ggseg
-ggplot(someData) +
-  geom_brain(atlas=dk, 
-             colour="white",
-             mapping=aes(fill=p)) +
-  facet_wrap(~AgeG, ncol=1) +
-  theme(legend.position = "bottom") +
-  scale_fill_gradientn(colours = c("royalblue","firebrick","goldenrod"),na.value="grey")
 
 ```
+
+
 
 

@@ -11,10 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-The purpose of this script is to tidy and quality control the covariates for our analysis.
-Covariates: Age, BMI, race/ethnicity, family income, site (for not imaging models), scanner_id (for imaging models) hemisphere (for bilateral brain measures)
+The purpose of this script is to tidy and quality control the covariates for our RR analysis
 
-This data frame was downloaded via the DEAP portal which works off the most recent ABCD data release (3.0). 
+Covariates: Age, BMI, race/ethnicity, family income, site (for not imaging models), scanner_id (for imaging models), parental current mood, population weighting variable, family id. 
+
+This data frame was downloaded from Release 4.0 and the DEAP portal which works off the ABCD data release (3.0) for the BMI and income variables. 
 
 ## Setup
 
@@ -57,17 +58,21 @@ Note: While we are primarily using Release 4.0, we will use some covariates (rac
 #import site info from longitudinal tracking file
 site <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/Culture_and_Environment/abcd_lt01.rds")
 
-#import family ID to track family
+#import family ID to track family and population stratification weight
 family <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/Culture_and_Environment/acspsw03.rds")
 
 #note: DEAP is still waiting to be updated to release4.0.
 covs <-rio::import("/Volumes/GenScotDepression/users/niamh/ABCD_release3.0/iii.data/DEAP_data_downloads/covs_puberty_RR.rds") 
 
-#import dti for additional DTI motion covariates 
+#parent mental health data
+parent_mh <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/Mental_Health/abcd_asrs01.rds")
+
+#import dti for additional DTI motion covariates
 dti <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_dti_p101.rds")
 
 #import MRI info for scanner manufacturer ID
 mri_info <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_mri01.rds")
+
 ```
 
 See the following data dictionary pages for further info on variables below:
@@ -84,29 +89,33 @@ covs <- covs %>%
   rename(eventname = event_name, sex = sex_at_birth, bmi = anthro_bmi_calc, household_income = household.income)
 colnames(covs)
 
-#extract bmi and race, household income, parent depression rating from covs df
+#extract bmi and race, household income from covs df
 covs <- covs %>% 
-  select(src_subject_id, eventname, sex, bmi, household_income, race.6level, asr_scr_depress_r)
+  select(src_subject_id, eventname, sex, bmi, household_income, race.6level)
+
+#parent mood
+parent_mh <- parent_mh %>% 
+  select(src_subject_id, eventname, sex, asr_scr_depress_r)
 
 #extract site id (this give site for each event name) and subject id 
 site <- site %>% 
   select(src_subject_id, eventname, sex, interview_age, site_id_l)
 
-#extract family id, group id, acs stratification weight 
+#extract family id, acs stratification weight 
 family <- family %>% 
-  select(src_subject_id, eventname, sex, rel_family_id, rel_group_id, acs_raked_propensity_score)
+  select(src_subject_id, eventname, sex, rel_family_id, acs_raked_propensity_score)
 
-#extract dti motion covariates 
-dti <- dti %>% 
+#extract dti motion covariates
+dti <- dti %>%
   select(src_subject_id, eventname, sex, dmri_dti_meanmotion, dmri_dti_meanrot, dmri_dti_meantrans)
 
 #extract MRI info
-#rename MRI info vars 
+#rename MRI info vars
 
-mri_info <- mri_info %>% 
+mri_info <- mri_info %>%
   rename(scanner_id = mri_info_deviceserialnumber)
 
-mri_info <- mri_info %>% 
+mri_info <- mri_info %>%
   select(src_subject_id, eventname, sex, mri_info_visitid, scanner_id, mri_info_studydate)
 ```
 Let's explore family ID structure 
@@ -120,22 +129,146 @@ print(family_id_tbl)
 
 ```
 
+Double check household income variable characteristics using tabulated data from release 4.0
+
+Income data is only available at baseline 
+
+```{r, family income info}
+
+demo <- parent_mh <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/Mental_Health/pdem02.rds")
+
+demo <- demo %>% 
+  select(src_subject_id, eventname, demo_comb_income_v2)
+
+#convert to wide to check eventname var and availability of data across timepoints 
+
+demo_wide <- reshape(demo, idvar = "src_subject_id", timevar = "eventname", direction = "wide")
+
+```
+
+# CONVERT TO WIDE AND TIDY
+
+To derive variables for different timepoints, it is easier to convert the dataframe to wide format. 
+
+```{r, convert to wide, filter}
+
+#convert first covariate dataframe to wide
+
+covs_wide <- reshape(covs, idvar = "src_subject_id", timevar = "eventname", direction = "wide")
+#rename variables of interest
+covs_wide <- covs_wide %>% 
+  rename( bmi_y0 = bmi.baseline_year_1_arm_1, 
+          bmi_y1 = bmi.1_year_follow_up_y_arm_1,
+          bmi_y2 = bmi.2_year_follow_up_y_arm_1,
+          household_income_y0 = household_income.baseline_year_1_arm_1,
+          sex = sex.baseline_year_1_arm_1, #using baseline sex variable
+          race_y0 = race.6level.baseline_year_1_arm_1,
+          race_6m = race.6level.6_month_follow_up_arm_1,
+          race_y1 = race.6level.1_year_follow_up_y_arm_1,
+          race_18m = race.6level.18_month_follow_up_arm_1,
+          race_y2 = race.6level.2_year_follow_up_y_arm_1
+          )
+colnames(covs_wide)
+
+#keep vars needed for imputation
+covs_wide <- covs_wide %>% 
+  select(src_subject_id, bmi_y0, bmi_y1, bmi_y2, household_income_y0, sex, race_y0, race_6m, race_y1, race_18m, race_y2)
+
+#convert family df to wide
+family_wide <- reshape(family, idvar = "src_subject_id", timevar = "eventname", direction = "wide")
+family_wide <- family_wide %>% 
+  rename(sex = sex.baseline_year_1_arm_1, #baseline sex variable 
+         rel_family_id = rel_family_id.baseline_year_1_arm_1,#rel_family_id collected at baseline
+         acs_raked_propensity_score_y0 = acs_raked_propensity_score.baseline_year_1_arm_1,
+         acs_raked_propensity_score_y1 = acs_raked_propensity_score.1_year_follow_up_y_arm_1
+         ) 
+colnames(family_wide)
+
+#select vars 
+family_wide <- family_wide %>% 
+  select(src_subject_id,sex, rel_family_id, acs_raked_propensity_score_y0, acs_raked_propensity_score_y1)
+
+#convert site df to wide 
+site_wide <- reshape(site, idvar = "src_subject_id", timevar = "eventname", direction = "wide")
+site_wide <- site_wide %>% 
+  rename(sex = sex.baseline_year_1_arm_1,
+         site_id = site_id_l.baseline_year_1_arm_1,
+         site_id_6m = site_id_l.6_month_follow_up_arm_1,
+        site_id_y1 = site_id_l.1_year_follow_up_y_arm_1,
+        site_id_18m = site_id_l.18_month_follow_up_arm_1,
+        site_id_y2 = site_id_l.2_year_follow_up_y_arm_1,
+        site_id_y3 = site_id_l.3_year_follow_up_y_arm_1,
+        interview_age = interview_age.baseline_year_1_arm_1 #baseline age
+           )
+colnames(site_wide)
+#select vars
+site_wide <- site_wide %>% 
+  select(src_subject_id, sex, site_id, site_id_6m, site_id_y1, site_id_18m, site_id_y2, site_id_y3, interview_age)
+
+#convert parent mental health df to wide 
+#no parent depression data available for year 1
+
+parent_mh_wide <- reshape(parent_mh, idvar = "src_subject_id", timevar = "eventname", direction = "wide")
+parent_mh_wide <- parent_mh_wide %>% 
+  rename(sex = sex.baseline_year_1_arm_1,
+         parent_dep_y0 = asr_scr_depress_r.baseline_year_1_arm_1,
+         parent_dep_y2 = asr_scr_depress_r.2_year_follow_up_y_arm_1,
+         parent_dep_y3 = asr_scr_depress_r.3_year_follow_up_y_arm_1)
+colnames(parent_mh_wide)
+
+#select vars of interest
+parent_mh_wide <- parent_mh_wide %>% 
+  select(src_subject_id, sex, parent_dep_y0, parent_dep_y2, parent_dep_y3)
+
+#convert dti vars to wide
+dti_wide <- reshape(dti, idvar = "src_subject_id", timevar = "eventname", direction = "wide")
+dti_wide <- dti_wide %>% 
+  rename(sex = sex.baseline_year_1_arm_1,
+         dti_mean_motion_y0 = dmri_dti_meanmotion.baseline_year_1_arm_1,
+         dti_mean_motion_y2 = dmri_dti_meanmotion.2_year_follow_up_y_arm_1)
+colnames(dti_wide)
+
+#select vars of interest 
+dti_wide <- dti_wide %>% 
+  select(src_subject_id, sex, dti_mean_motion_y0, dti_mean_motion_y2)
+
+#convert mri info vars to wide 
+
+mri_wide <- reshape(mri_info, idvar = "src_subject_id", timevar = "eventname", direction = "wide")
+mri_wide <- mri_wide %>% 
+  rename(sex = sex.baseline_year_1_arm_1,
+         scanner_id_y2 = scanner_id.2_year_follow_up_y_arm_1)
+mri_wide <- mri_wide %>% 
+  select(src_subject_id, sex, scanner_id_y2)
+
+```
+
 ##MERGE DATAFRAMES
 
 ```{r, merge dataframes}
 
-#merge dfs by id, eventname and sex
-covs_all <- covs %>% 
-  left_join(y=site, by= c("src_subject_id","eventname","sex")) #merge covs and site
+#merge dfs by id and sex. N should be equal to 11,876
 
-covs_all <- covs_all %>% 
-  left_join(y=dti, by= c("src_subject_id","eventname","sex")) #merge with dti
+#merge site with parent_mh 
+covs_main <- site_wide  %>% 
+  left_join(y=parent_mh_wide, by= c("src_subject_id", "sex"))
 
-covs_all <- covs_all %>% 
-  left_join(y=family, by= c("src_subject_id","eventname","sex")) #merge with family
-                     
-covs_all <- covs_all %>% 
-  left_join(y=mri_info, by= c("src_subject_id","eventname","sex")) #merge with mri info
+#merge with family
+covs_main <- covs_main %>% 
+  left_join(y=family_wide, by= c("src_subject_id", "sex"))
+
+#merge with remaining covs
+covs_main <- covs_main  %>% 
+  left_join(y=covs_wide, by= c("src_subject_id", "sex")) 
+
+#merge with dti motion covs
+covs_main <- covs_main  %>% 
+  left_join(y=dti_wide, by= c("src_subject_id", "sex")) 
+
+#merge with mri info covs
+covs_main <- covs_main  %>% 
+  left_join(y=mri_wide, by= c("src_subject_id", "sex"))
+
 
 ```
 ##INSPECT DATA
@@ -143,27 +276,33 @@ covs_all <- covs_all %>%
 ```{r, tidy up variables}
 
 #change age to years instead of months 
-covs_all <- covs_all %>%
+covs_main <- covs_main %>%
   mutate(
     age_years = interview_age/12 
   )
 
-#check number of scanner ids: There are 30 different scanners used across 21 sites 
-scanner_id_tbl <- covs_all %>%
-  group_by(scanner_id) %>% 
-  summarise(no_rows = length(scanner_id))
-print(scanner_id_tbl)
-
-#inspect what household income info is available per wave
-income <- covs_all %>% 
-  select(household_income, eventname)
-
-income_tbl <- covs_all %>%
-  group_by(eventname) %>% 
-   summarise(no_rows = length(household_income))
-print(income_tbl)
-
-
+# #check number of scanner ids: There are 30 different scanners used across 21 sites 
+# scanner_id_tbl <- covs_all %>%
+#   group_by(scanner_id) %>% 
+#   summarise(no_rows = length(scanner_id))
+# print(scanner_id_tbl)
+# 
+# #inspect what household income info is available per wave
+# income <- covs_all %>% 
+#   select(household_income, eventname)
+# 
+# income_tbl <- covs_all %>%
+#   group_by(eventname) %>% 
+#    summarise(no_rows = length(household_income))
+# print(income_tbl)
+# 
+# parent_dep <-  covs_all %>% 
+#   select(asr_scr_depress_r, eventname)
+# 
+# parent_dep_tbl <- covs_all %>%
+#   group_by(eventname) %>% 
+#    summarise(no_rows = length(parent_dep))
+# print(parent_dep_tbl)
 
 ```
 
@@ -180,7 +319,7 @@ We will get a summary of each covariate and check for number of NAs. These will 
 
 # PILOT ANALYSIS: Core Covariates (Basic Model)
 
-- Fixed: age, ethnicity, family, hemisphere
+- Fixed: age, ethnicity, family. 
 - Random: scanner
 
 Note: Hemisphere will be added in later in the analysis script. 
@@ -216,42 +355,29 @@ print(scanner_tbl)
 
 ##MAIN ANALYSIS (full model)
 
-Basic Model +
+```{r, check covs dataframe}
 
-Fixed: BMI, family income, population stratification weight,
-
-06/04/22 - BElOW IS NOT WORKING BUT WILL FIX NEXT WEEK AFTER I HAVE RUN THE PILOT ANALYSIS. 
-```{r, QC main analysis covs}
-
-covs_main <- covs_all %>% #N=17806
-  filter(eventname == "1_year_follow_up_y_arm_1"|
-         eventname == "2_year_follow_up_y_arm_1"|
-         eventname == "3_year_follow_up_y_arm_1")
-
-#Family income --- Refuse to answer=512, Don't know = 504, NAs= 2
-income_tbl <- covs_main %>%
-  group_by(household_income) %>% 
-  summarise(no_rows = length(household_income))
-print(income_tbl)
-
-covs_main$family_income <- as.factor(covs_main$family_income)
-summary(covs_main$family_income) #NAs = 388
-
-#Parent highest education --- NAs = 14.
-summary(covs_main$)
-
-#Parent depression --- NAs = 5. 
-summary(covs$asr_scr_depress_r)
+colnames(covs_main)
+summary(covs_main)
 
 ```
+Hypothesis 1 (no imaging data)
 
-All covariates look within a normal range and can be exported. 
+Basic Model : Age, race, family, site 
+
+Full model: age, race, family, site + BMI + income + parental mood  + population weight. 
+
+All covariates are from baseline expect for parental mood, which is taken from year 2. Although our outcome measure is youth depression at Year 3, there was no parental mood available from year 3 in release 4.0. 
+
+See PREP_imputation script for exploration and imputation of missing data
 
 ##Export cleaned data 
 
 ```{r, export data}
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
-saveRDS(covs_pilot,"covs_pilot_R4.0.rds")
+#saveRDS(covs_pilot,"covs_pilot_R4.0.rds")
+
+saveRDS(covs_main, "covs_main_R4.0.rds")
 ```
 ####------------ END OF MAIN SCRIPT -----------------####
 
