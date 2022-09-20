@@ -1,0 +1,769 @@
+---
+title: "ANALY_H1_females"
+author: "Niamh MacSweeney" Credit to Amelia Edmondson-Stait for the template script
+date: '2022-08-26'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(nlme)
+library(psych)
+library(ggplot2)
+library(readr)
+library(pbapply)
+library(gridExtra)
+library(sandwich)
+library(stringr)
+library(kableExtra)
+
+library(gmodels)
+library(caret)
+
+library(mice)
+library(broom.mixed) #so that pool function runs properly
+
+
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
+```
+
+## Introduction
+
+SCRIPT FOR FEMALES
+
+This script runs the linear mixed effects model to test Hypothesis 1 in our main analysis. 
+
+The bulk of this script deals with imputing missing data. 
+
+We imputed missing data for individuals with PDS data (predictor)
+
+We used multiple imputation using chained equations (using the "mice" package in R) to replace missing data for covariates and outcome variables for individuals with exposure data (pubertal timing (via PDS) measured at year 1) and individuals who at year 3 follow up data at the time of release 4.0 (Nov 2021) 
+
+Predictive mean matching was used for continuous variables and logisitic regression for binary categorical variables.
+
+Covariates were selected that predicted either missingness of variable to be imputed or associated with variable to be imputed. The variables had no less than 40% missing data. This reduces bias towards "missing not at random" (NMAR) and provides more accurate estimates. We will be imputing the outcome and covariates data only. 
+
+Model: Depressive symptoms ~ pubertal timing	
+
+Fixed covs: age, race/ethnicity, BMI, site, household income, parental current mood, population weighting variable.
+
+Random: family, site
+
+We will not impute household income as it was only collected at baseline. 
+
+We will run sensitivity analysis with complete cases and report this analysis in the supplementary materials. 
+
+Script Workflow
+1. Load in Outcome (depression) and Covariates data 
+2. Inspect variables and select auxiliary variables
+2. Perform imputation on each variable
+3. Save new imputed dataframe.
+4. Run models using imputed dataframe
+5. Compare model to complete case analysis
+
+We will do imputation separately for males and females 
+
+
+#LOAD DATA AND TIDY
+
+```{r, load in data}
+
+pds_y1 <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/pds_timing_y1_R4.0.rds")
+  
+dep_vars <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/CBCL_dep_all_yrs_R4.0.rds")
+  
+covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covs_main_R4.0.rds")
+
+```
+
+Remove variables we don't need/want to impute
+
+```{r, tidy up variables}
+
+pds_y1 <- pds_y1 %>% 
+  select (-c("pds_m_pt_valid", "pds_f_pt_valid"))
+
+#the dep and covs dataframes are in wide format so before merge, check that all of pds variables are definitely from year 1
+#they should be based on earlier QC
+
+pds_y1 %>% 
+  select(eventname) %>% 
+  as.factor() #only one level when converted to factor --- so looks good! 
+
+#remove eventname column before merge because we know that the pds vars are all from year 1
+
+pds_y1 <- pds_y1 %>% 
+  select(- c(eventname, age_years))
+colnames(pds_y1)
+
+
+```
+
+### Merge
+
+```{r, merge}
+#inspect vars before merge
+colnames(covs)
+colnames(dep_vars)
+colnames(pds_y1)
+
+#merge by src_subject_id and sex as they are common to all dataframes 
+
+#merge 1
+df <- covs %>% 
+  left_join(y=dep_vars, by= c("src_subject_id", "sex"))
+  
+#merge 2
+df <- df %>% 
+  left_join(y=pds_y1, by= c("src_subject_id", "sex"))
+
+#check if merge worked okay
+colnames(df)
+
+```
+
+###Reduce dataframe to correct sample
+
+We will only include people with complete exposure (puberty) data and who had available year 3 data at release 4.0. 
+
+Total N = 5727
+
+```{r, filter sample}
+
+df %>% 
+  select(src_subject_id, pds_tot_all, interview_date_y3) %>% 
+summary() 
+
+#get number of complete cases for pds total and interview date y3
+sum(complete.cases(df$pds_tot_all)) #N = 10,400
+sum(complete.cases(df$interview_date_y3)) #6251
+
+total_df <- df #save complete data frame before filter for reference
+
+
+df <- df %>% 
+  filter(!is.na(pds_tot_all)) %>% #N=10,400
+  filter(!is.na(interview_date_y3)) #N = 5727
+
+```
+
+
+### Split by sex
+
+We will do imputation separately for males and females so we need to split the dataframe by sex. 
+
+Total N for females = 2726
+
+```{r, get females only}
+
+df <- df %>% #N = 2726
+  filter(sex == "F")
+
+#remove male specific cols (pds_tot_m and pt_m and pds_tot_all) #should have 43 variables after. 
+
+df <- df %>% 
+  select(-c(pds_tot_m, pds_tot_all, pt_m))
+
+```
+
+#EXPLORE DATA
+
+Look at data structure to determine nature of missingness
+
+Note: We will not be using the imaging related variables in imputation as we are only conducting imputation for H1. 
+
+```{r, get list of variables}
+
+#all vars including aux vars
+
+variables <- c("src_subject_id", #character variable
+               "sex",    #character variable                    
+               "site_id",  "site_id_6m" , "site_id_y1", "site_id_18m", "site_id_y2", "site_id_y3", #character variable
+               "interview_age",    #continuous score            
+               "parent_dep_y0",  "parent_dep_y2", "parent_dep_y3", #continuous score
+               "rel_family_id", #character variable
+               "acs_raked_propensity_score_y0" , "acs_raked_propensity_score_y1", #continuous score
+               "bmi_y0", "bmi_y1", "bmi_y2",  #continuous score
+               "household_income_y0", #numeric variable - need to change
+               "parent_high_ed_y0",
+               "race_y0",  "race_6m", "race_y1", "race_18m",  "race_y2", #character variable
+               "dti_mean_motion_y0",  "dti_mean_motion_y2",  #continuous score       
+               "scanner_id_y2", #character variable
+               "age_years", #continuous score
+               "cbcl_withdep_y0", "cbcl_withdep_y1", "cbcl_withdep_y2", "cbcl_withdep_y3", #continuous score
+               "cbcl_anxdep_y0", "cbcl_anxdep_y1", "cbcl_anxdep_y2", "cbcl_anxdep_y3", #continuous score
+               "pds_tot_f",  "pt_f" #continuous score
+               )
+  
+```
+
+Make sure variable classes are correct and scale continuous variables - we will scale all continuous variables in the dataframe. 
+
+```{r, check variable type}
+
+str(df)
+
+#change rel_group_id from interger to factor
+df$rel_family_id <- as.factor(df$rel_family_id)
+
+#change household income and parent education from numeric to factor
+df$household_income_y0 <- as.factor(df$household_income_y0)
+df$parent_high_ed_y0<- as.factor(df$parent_high_ed_y0)
+
+
+#Get all character columns we want to factorise
+charCols <- (df[sapply(df, class) == 'character']) #extract char vars
+charCols <- colnames(charCols) #get list of col names 
+
+#change integer variables to numeric for ease of scaling later 
+intCols <- df[sapply(df, class) == 'integer']
+intCols <- colnames(intCols)
+
+df <- df %>% 
+  mutate_at(intCols, as.numeric)
+
+# Get continuous variables we want to z-scale
+conCols <- df[sapply(df, class) == 'numeric']
+conCols <- colnames(conCols)
+
+#make list of factor columns for ease of sorting new df later
+facCols <- df[sapply(df, class) == 'factor']
+facCols <- colnames(facCols)
+
+# Factorise character variables, z-scale continuous, 
+dataSub <- df %>%
+  mutate_at(charCols, as.factor) %>%
+  mutate_at(facCols, as.factor) %>% 
+  mutate_at(conCols, scale) %>% 
+  mutate_at(conCols, as.numeric)
+
+str(dataSub)
+head(dataSub)
+
+```
+
+##Explore missingness
+
+```{r, explore missingness}
+
+summary(dataSub)
+
+```
+
+## Explore outcome depression measure
+
+As only partial year 3 data was available at release 4.0, 46 participants have other year 3 measures but are missing the depression outcome measure. We will impute depression outcome measures for these participants. 
+
+```{r, outcome imputation diagnostics}
+
+dataSub %>% 
+  filter(is.na(cbcl_withdep_y3)) %>% #has missing depression data at year 3
+  filter(!is.na(site_id_y3)) %>% #but did complete other measures (e.g., longitudinal tracking data)
+  filter(!is.na(interview_date_y3)) %>%  #double check with interview date variable
+  nrow() #46 participants 
+
+```
+
+##Is missing data >40%?
+
+We will only impute variables with less than 40% missing data.
+
+
+Variables with missing data that is >40%
+- parent_dep_y3 = 100%
+
+We won't be able to use parental year 3 depression as a covariate due to it not being available. We will use year 2 parental depression instead as it is the next closest time point.
+
+
+```{r, % missing}
+
+# Which variables have <= 40% missing:
+propNA <- round(colSums(is.na(dataSub))/nrow(dataSub), 3) ;propNA
+colnames(dataSub)[propNA > 0.40]
+
+```
+
+##Variables to impute:
+
+- youth depression year 3 (NA =46)
+- BMI (NA=51)
+- parental mood (NA=35)
+
+##Variables NOT imputed:
+- household income - this info only available at baseline (looked at parental education as an aux variable but all participants with missing income data also have missing education data!)
+- Race: Participants with missing data at baseline, also have missing data at all other timepoints
+- Site: no NAs for baseline or year 1
+- Age: no NAs
+- Sex: no NAs
+- ACS population stratification weight: No NAs
+
+## Check auxiliary variables 
+
+We will only use variables as auxiliary variables with ≤ 40% missingness
+
+Youth Depression
+```{r, outcome data missing}
+
+dataSub %>% 
+  filter(is.na(cbcl_withdep_y3)) %>%
+  filter(!is.na(cbcl_withdep_y2)) %>%
+  nrow() 
+
+#46 participants are missing depression outcome data
+#34 participants are missing outcome data at year 3 but not at year 2, can impute 12
+
+dataSub %>% 
+  filter(is.na(cbcl_withdep_y2)) %>%
+  filter(!is.na(cbcl_withdep_y1)) %>%
+  nrow() 
+
+#35 participants are missing outcome data at year 2 but not at year 1
+
+dataSub %>% 
+  filter(is.na(cbcl_withdep_y1)) %>%
+  filter(!is.na(cbcl_withdep_y0)) %>%
+  nrow() 
+#1 participant is missing outcome data at year 1 but not at baseline (y0)
+
+```
+
+BMI
+```{r, explore BMI missingness}
+
+#### Imputing BMI:
+dataSub %>% 
+  filter(is.na(bmi_y0)) %>%
+  filter(!is.na(bmi_y1)) %>%
+  nrow() 
+# 15 participants have BMI missing at y0 (baseline)
+# 8 participants have BMI missing at y0 but not at y1
+# Therefore we can impute 8 participants BMI meaning only 7 participants have missing BMI.
+
+```
+Parental Depression 
+```{r, explore parental dep missingness}
+
+### Imputing parental depression
+dataSub %>% 
+  filter(is.na(parent_dep_y2)) %>%
+  filter(!is.na(parent_dep_y0)) %>%
+  nrow() 
+# 35 participants have missing data at year 2
+# 0 Participants have missing data at y0
+
+# Therefore we can impute 35 participants meaning there is 0 missing parental depression data. 
+
+```
+
+Race missingness
+```{r, race missingness}
+
+### Imputing race_y0
+dataSub %>% 
+ filter(is.na(race_y0)) %>%
+  filter(!is.na(race_18m)) %>%
+  nrow() 
+
+#participants with missing race data at year 0 also had missing race data at all other time points so we cannot impute this variable. 
+
+```
+
+Household income missingness 
+```{r, income missingness}
+dataSub %>% 
+ filter(is.na(household_income_y0)) %>%
+  filter(!is.na(parent_high_ed_y0)) %>%
+  nrow()
+
+#all participants with missing income data also have missing parental education data. 
+
+```
+
+We need to check to see if the variables we are not imputing (e.g., race and household income) predict missing depression outcome data. If so, we will need to acknowledge this as a limitation. 
+
+```{r, check variables not imputing}
+
+auxVars <- c("race_y0" , "household_income_y0")
+
+imputeVars <- c("cbcl_withdep_y3") 
+             
+
+getVars <- function(imputeVars){
+  newAuxVars <- lapply(imputeVars, function(outcome){
+    lapply(auxVars, function(predictor){
+      if( class(dataSub[,outcome]) == "factor" ){
+        family <- "binomial"
+      }else{
+        family <- "gaussian"
+      }
+      formula <- paste0(outcome, " ~ ", predictor)
+      fit <- glm(formula = formula, data = dataSub, family = family)
+      sig <- summary(fit)$coefficients %>%
+        as.data.frame() %>%
+        slice(-1) %>%
+        filter(.[[4]] < 0.05) %>%
+        rownames() 
+      if(is_empty(sig)){
+        sig <- ""
+      }
+      sig
+    }) %>% unlist() %>% unique()
+  }) 
+  return(newAuxVars)
+}
+
+newAuxVars <- getVars(imputeVars)
+newAuxVars <- newAuxVars %>% unlist() %>% unique()
+newAuxVars <- newAuxVars[!newAuxVars %in% ""]
+length(auxVars) == length(newAuxVars) #FALSE
+#Race and income do not predict year 3 depression. 
+
+# Do they predict missingness?
+getVarsMiss <- function(imputeVars){
+  newAuxVars <- lapply(imputeVars, function(outcome){
+    lapply(auxVars, function(predictor){
+      formula <- paste0("is.na(", outcome, ") ~ ", predictor)
+      fit <- glm(formula = formula, data = dataSub, family = "binomial")
+      sig <- summary(fit)$coefficients %>%
+        as.data.frame() %>%
+        slice(-1) %>%
+        filter(.[[4]] < 0.05) %>%
+        rownames() 
+      if(is_empty(sig)){
+        sig <- ""
+      }
+      sig
+    }) %>% unlist() %>% unique()
+  }) 
+}
+newAuxVars <- getVarsMiss(imputeVars)
+newAuxVars <- newAuxVars %>% unlist() %>% unique()
+newAuxVars <- newAuxVars[!newAuxVars %in% ""]
+newAuxVars 
+
+
+#It looks like Asian, Other, race predict missingness in depression outcome measure. We will need to acknowledge this in our discussion. Household income do not predict missingness. 
+
+#How to get stats from this - check later. 
+```
+
+Do the auxilary variables predict missingness? 
+
+```{r, aux loop}
+# Loop through each variable we want to impute to see which auxillary variables predict that variable or missingness.
+
+                   
+auxVars <- c("cbcl_withdep_y0", "cbcl_withdep_y1", "cbcl_withdep_y2","cbcl_anxdep_y1",
+             "cbcl_anxdep_y2", "cbcl_anxdep_y3", "cbcl_anxdep_y0",
+             "parent_dep_y0", "bmi_y0")
+
+imputeVars <- c("cbcl_withdep_y3", "parent_dep_y2","bmi_y1") 
+             
+
+getVars <- function(imputeVars){
+  newAuxVars <- lapply(imputeVars, function(outcome){
+    lapply(auxVars, function(predictor){
+      if( class(dataSub[,outcome]) == "factor" ){
+        family <- "binomial"
+      }else{
+        family <- "gaussian"
+      }
+      formula <- paste0(outcome, " ~ ", predictor)
+      fit <- glm(formula = formula, data = dataSub, family = family)
+      sig <- summary(fit)$coefficients %>%
+        as.data.frame() %>%
+        slice(-1) %>%
+        filter(.[[4]] < 0.05) %>%
+        rownames() 
+      if(is_empty(sig)){
+        sig <- ""
+      }
+      sig
+    }) %>% unlist() %>% unique()
+  }) 
+  return(newAuxVars)
+}
+
+newAuxVars <- getVars(imputeVars)
+newAuxVars <- newAuxVars %>% unlist() %>% unique()
+newAuxVars <- newAuxVars[!newAuxVars %in% ""]
+length(auxVars) == length(newAuxVars) #TRUE
+
+# All auxiliary variables predict a variable we want to impute
+
+# Do they also predict missingness?
+getVarsMiss <- function(imputeVars){
+  newAuxVars <- lapply(imputeVars, function(outcome){
+    lapply(auxVars, function(predictor){
+      formula <- paste0("is.na(", outcome, ") ~ ", predictor)
+      fit <- glm(formula = formula, data = dataSub, family = "binomial")
+      sig <- summary(fit)$coefficients %>%
+        as.data.frame() %>%
+        slice(-1) %>%
+        filter(.[[4]] < 0.05) %>%
+        rownames() 
+      if(is_empty(sig)){
+        sig <- ""
+      }
+      sig
+    }) %>% unlist() %>% unique()
+  }) 
+}
+newAuxVars <- getVarsMiss(imputeVars)
+newAuxVars <- newAuxVars %>% unlist() %>% unique()
+newAuxVars <- newAuxVars[!newAuxVars %in% ""]
+newAuxVars 
+
+# cbcl_withdep_y0" "cbcl_withdep_y2" "cbcl_withdep_y1" "bmi_y0", "cbcl_anxdep_y2" all predict missingness in the variables we want to impute. 
+
+```
+
+## Check correlation between variables. Auxillary vars and variables we want to impute are highly correlated. 
+
+```{r, corr between vars}
+
+# Correlation between aux vars and vars to be imputed 
+library(corrplot)
+corSub <- dataSub %>% 
+  dplyr::select(cbcl_withdep_y0, cbcl_withdep_y1, cbcl_withdep_y2,cbcl_withdep_y3, cbcl_anxdep_y0, cbcl_anxdep_y1, cbcl_anxdep_y2, cbcl_anxdep_y3, parent_dep_y0, parent_dep_y2, bmi_y0, bmi_y1)
+M <- cor(corSub, use = "pairwise.complete.obs")
+corrplot(M)
+
+```
+
+
+## Make dataframe of main variables and auxillary ones only 
+
+```{r, make final df to impute}
+
+mainVars <- c("src_subject_id", 
+               "sex",                       
+               "site_id",         
+              "parent_dep_y2",
+               "rel_family_id",
+               "acs_raked_propensity_score_y0", 
+               "bmi_y1",  
+               "household_income_y0", 
+               "race_y0",
+               "age_years", 
+              "cbcl_withdep_y3",
+              "pt_f"
+               )
+mainVars
+
+#We already have list of aux vars ---> auxVars
+auxVars
+
+#filter dataframe to main vars and aux vars
+
+dataSub <- dataSub %>% 
+  select(mainVars, auxVars) # N = 2726 
+
+colnames(dataSub) #looks good!
+
+#Troubleshooting (16/09/22) - having issues including race and income in imputation model. No good auxillary variables that predict them. 
+
+#See if imputation works when removing individuals with missing race and income data (this removed 193 people)
+
+dataSub <- dataSub %>% # N = 2726 
+  filter(!is.na(household_income_y0)) %>% #2558
+  filter(!is.na(race_y0)) #2533
+  
+colnames(dataSub)
+head(dataSub)#Looks good! 
+
+#Note that all numeric variables have been scaled!!
+
+```
+
+
+#RUNNING THE IMPUTATION 
+
+A small number of imputations is fine when no. of missing data is small.
+But a larger M makes the imputation more reproducible when using a different seed.
+M should be >= 100 * fraction of missing information (FMI).
+It's also possible to do a trial and error approach to see if your estimates differ
+after running the imputation 2-3 times with the same M.
+
+#Imputation set up
+
+Very good tutorials on missing data and mice: 
+- https://statistics.ohlsen-web.de/multiple-imputation-with-mice/ 
+- https://stefvanbuuren.name/fimd/sec-modelform.html
+
+We do not want to use the mice default "massive imputation" where every variable in the dataset is used to predict the missing data. If these variables don't correlate with our variable of interest, they can introduce noise to our estimation. Instead, we will only use the auxillary variables to predict missing data in our target variables, and variables that have a correlation of r=.2.
+
+We specify these settings in the PredMat using the function quickpred. In the prediction matrix, the rows correspond to incomplete target variables, in the order they appear in our dataframe. A value of 1 indicates that the column variable is a predictor to impute the target (row) variable, and a 0 means that it is not used.
+
+```{r, imputation set up}
+
+# first get default predictor matrix
+predMat <- quickpred(dataSub, 
+                      include=auxVars,
+                      exclude=NULL,
+                      mincor = 0.2)
+
+# Rows are variables to be imputed, cols are variables used to impute.
+
+meth <- make.method(dataSub)
+meth
+
+#run the imputation 
+start_time <- Sys.time()
+ModImps <- mice(dataSub, m=100, predictorMatrix=predMat, seed=270795, printFlag=FALSE, method = meth)
+end_time <- Sys.time()
+end_time - start_time
+
+```
+
+#RUN BASIC MODEL
+
+```{r, run basic models using imputed data}
+
+# Run the regression on each imputed dataset (basic model)
+
+MIfit <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 + household_income_y0 + parent_dep_y2
+                            + (1|site_id) + (1|rel_family_id),
+                            control = lmerControl(optimizer ="bobyqa")))
+pooled <- pool(MIfit)
+
+
+# Compare estimates with complete case analysis:
+CCfit <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
+                         + household_income_y0 + parent_dep_y2
+                            + (1|site_id) + (1|rel_family_id),
+                            control = lmerControl(optimizer ="bobyqa"),
+                           data = dataSub,
+                            na.action = na.exclude)
+summary(CCfit)
+summary(pooled)
+
+```
+
+
+##Turn into function 
+
+We will turn the above into a nice function that runs all the models and stores results in a table
+
+```{r, imputation function}
+
+# This works:
+MIfit <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
+                            + (1|site_id) + (1|rel_family_id),
+                            control = lmerControl(optimizer ="bobyqa")))
+
+
+# Instead of using with change ModImpsTotal into a long format and run regression on each imputed dataset using lapply
+
+# First check if a list is the correct object we want:
+MIfit$analyses %>% class()
+
+pool(MIfit)
+pool(MIfit$analyses)
+
+summary(pool(MIfit))
+summary(pool(MIfit$analyses))
+# Yes a list is good.
+
+# --------------------------------------------------------------------------------------
+
+# Convert mice object into a long data frame
+ImpsLongTotal <- complete(ModImps, action = 'long', include = TRUE)
+
+# Split this into a list of dataframes, each item in the list is an imputed dataframe
+ImpsLongTotalList <- split(ImpsLongTotal, ImpsLongTotal$.imp)
+
+# Remove first dataframe in list as this is the non-imputed dataset
+lapply(ImpsLongTotalList, head)
+
+ImpsLongTotalList$`0` # this is the non-imputed dataset
+ImpsLongTotalList <- ImpsLongTotalList[-1]
+
+names(ImpsLongTotalList) # names go from 1 - n, where n is the total number of imputations
+ImpsLongTotalList[1] %>% head() # the first item in the list is now the first imputed data set
+
+# -----------------
+summary(pool(MIfit))
+
+MIfit <- lapply(ImpsLongTotalList, function(imputedData) {
+  form <- "cbcl_withdep_y3 ~ pt_f + age_years + (1|site_id) + (1|rel_family_id)"
+  lmerTest::lmer(formula = form, data = imputedData)
+})
+
+summary(pool(MIfit)) # this gives us the same result as using the "with" function
+
+# -----------------
+# Now let's loop over different outcome variables, exposure and covariates in the model
+
+outcomes <- "cbcl_withdep_y3"
+exposures <- "pt_f"
+covariates <- c("age_years + race_y0", "age_years + race_y0 + bmi_y1 + household_income_y0 + parent_dep_y2")
+weights <- c("", "acs_raked_propensity_score_y0") #only add population strat weight in fully adjusted model 
+modelName <- c("Base_Model", "Fully_Adjusted")
+
+MIfit <- 
+  lapply(outcomes, function(outcome){
+    exposuresList <- lapply(exposures, function(exposure){
+      covarsList <- lapply(covariates, function(covariate){
+        lapply(ImpsLongTotalList, function(imputedData) {
+          form <- paste0(outcome, " ~  + ", exposure, " + ", covariate, "+(1|site_id) + (1|rel_family_id)")
+          lmerTest::lmer(formula = form, data = imputedData,
+                         control = lmerControl(optimizer ="bobyqa"))  
+        })
+      })
+      names(covarsList) <- modelName
+      return(covarsList)
+    })
+    names(exposuresList) <- paste0(exposures, names(exposuresList))
+    return(exposuresList)
+  }) 
+names(MIfit) <- outcomes
+
+MIfit <- MIfit %>% do.call(c, .)  %>% do.call(c, .) # this returns a list of imputed results
+
+lapply(MIfit, function(x){
+  summary(pool(x)) 
+})
+
+# Combine the results into a table in the same format we did for the complete case analysis
+# ie. base and fully adjusted models separately
+# col names: Exposure	Outcome	Covariates	Sample_Size	Standardised Beta	CI_lower	CI_upper	SE	P-value	Significant_covariates
+
+results <- lapply(1:length(MIfit), function(i){
+  results <- summary(pool(MIfit[[i]])) 
+  
+  nMissing <- length(MIfit[[i]][[1]]$na.action) 
+  nTotal <- nrow(ImpsLongTotalList[[1]])
+  n <- nTotal - nMissing 
+  
+  name <- names(MIfit)[i] %>% str_split(., "\\.") %>% unlist()
+  
+  results <- results %>%
+    filter(term == name[2]) %>%
+    mutate(Exposure = term, Outcome = name[1], Covariates = name[3], Sample_Size = n) %>%
+    dplyr::select(c(Exposure, Outcome, Covariates, Sample_Size, Standardised_Beta = estimate,
+                    SE = `std.error`, `P-value` = `p.value`))
+  
+}) %>% do.call(rbind, .)
+
+```
+
+
+
+
+
+
+
+##Export tidied dataframe 
+
+```{r, export data}
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+
+
+saveRDS(dataSub, "data_main_analy.rds")
+```
