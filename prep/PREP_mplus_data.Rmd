@@ -1,0 +1,169 @@
+---
+title: "PREP_mplus_data"
+author: "Niamh MacSweeney"
+date: '2022-09-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Introduction:
+
+The purpose of this script is to prepare a dataframe for our mediation analysis in MPlus to answer Hypotheses 2 and 3 of MacSweeney et al.'s Registered Report. 
+
+We will first load in our predictor (puberty: year 1) outcome (depression: year 3) and covariate data, alongside the mediator (imaging data: year 2).
+
+We will create a confirmatory and exploratory dataframe for males and females separately because we are running independent models. 
+
+Confirmatory df: Contains only the imaging variables identified in our pilot analyses. 
+
+
+Exploratory df: Contains all imaging variables to test for additional mediating variables above and beyond what was identified in pilot analysis. 
+
+#Set up
+```{r, load libraries and set wd}
+
+library(tidyverse)
+library(ggplot2)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
+
+```
+
+#STEP ONE: LOAD DATA + TIDY
+
+```{r, load data}
+
+#puberty
+pds_y1 <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/pds_timing_y1_R4.0.rds")
+  
+#depression
+dep_vars <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/CBCL_dep_all_yrs_R4.0.rds")
+
+#covariates
+covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/covs_main_R4.0.rds")
+
+#imaging
+
+cortical <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/cortical_year2_R4.0.rds")
+  
+subcort <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/subcort_year2_R4.0.rds")
+  
+  
+dti <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/dti_year2_R4.0.rds")
+  
+
+```
+
+##Extract variables of interest before merge
+
+The depression, puberty and covariate variables are already in reduced format so we just need to extract the imaging variables that we will test in our mediation analyses. 
+
+Proposed mediators:
+
+**Hypothesis 2: Global Measures**
+**Global measures**
+H2a: Reduced global cortical volume, surface area, thickness and sulcal depth.
+
+H2b: Reduced global FA
+
+**Hypothesis 3: Regional Measures** 
+**Regional measures**
+H3a: Reduced cortical thickness in temporal regions, namely, the middle temporal gyrus and insula.
+
+H3b: Reduced cortical thickness in frontal regions namely, the lateral orbito-frontal cortex and middle frontal gyri.
+
+H3c: Reduced cortical volume in temporal regions, namely, middle temporal gyrus and bank of the superior temporal sulcus.
+
+H3d: Reduced cortical volume in fronto-parietal regions, namely, the middle frontal and postcentral gyri. 
+
+H3e Reduced FA in the cortico-striatal tract and corpus collosum
+
+H3f: Increased sulcal depth in the pars orbitalis.
+
+H3g: Increased volume in the ventral diencephalon. 
+
+
+```{r, extract imaging variables}
+
+#open R data files from pilot analyses to get ROIs
+#We have four sets of results containing global and regional ROIs
+
+ptImgF <- load("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/revised_pilot/ROIs_pt_brain_females.Rdata")
+  
+ptImgM <- load("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/revised_pilot/ROIs_pt_brain_males.Rdata")
+  
+depImgF <- load("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/revised_pilot/ROIs_dep_brain_females.Rdata") 
+
+depImgM <- load("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/revised_pilot/ROIs_dep_brain_males.Rdata")
+
+
+```
+
+###Get ROI names 
+
+Note (20/09/22): It seems that postcentral surface area was also a ROI in the pilot analysis (ROI_dep_brain_males_regional_results.Rdata analysis) but only postcentral volume was included as an ROI to test at stage 2. I'm not sure how this happened? Given that this ROI does not withstand correction for multiple comparisons, I will not amend stage 1 to include this ROI. If it emerges as a significant mediator in our exploratory analyses, it will be reported as exploratory analyses. 
+```{r, ROI names}
+
+#global measures 
+globalMeds <- c("bl.vol.APARC.total", "bl.sa.APARC.total", #H2a
+                "bl.sulc.APARC.mean", "bl.thk.APARC.mean",
+                "bl.dtifa_allfibers") #H2b
+
+globalMeds
+
+#regional measures
+regionalMeds <- c(	
+                  
+                  "avg.thk.APARC.mdtm", #temporal thickness ROIs (H3a)
+                  "avg.thk.APARC.insula",
+                  "avg.thk.APARC.rrmdfr", #frontal thickness  ROIs (H3b)
+                  "avg.thk.APARC.mobfr",
+                  "avg.thk.APARC.lobfr",
+                  
+                  "avg.vol.APARC.bankssts", #temporal volume ROIs (H3c)
+                  "avg.vol.APARC.mdtm",
+                  "avg.vol.APARC.cdmdfr", #frontal volume ROIs (H3d)
+                  "avg.vol.APARC.postcn",
+                  
+                  
+                  "avg.dtifa_pscs",# FA ROIs H3e
+                  "dtifa_cc",
+                  
+                  "avg.sulc.APARC.parsobis", #H3f
+                  "avg.vol.ASEG.vedc" #H3g
+                  )
+
+regionalMeds
+
+```
+
+###Merge imaging variables and extract ROIs
+
+```{r,merge imaging}
+
+#inspect colnames before merge
+
+head(cortical) #no sex column in dataframes so just merge by subject ID
+head(subcort)
+head(dti)
+
+imgVars <- cortical  %>% 
+  left_join(y=subcort, by= "src_subject_id") #merge 1 (N= 7695)
+
+imgVars <- imgVars %>% 
+  left_join(y=dti, by= "src_subject_id") 
+
+colnames(imgVars)
+  
+  
+```
+
+
+
+
+
+
+
