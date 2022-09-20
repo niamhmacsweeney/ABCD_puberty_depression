@@ -67,7 +67,6 @@ parent_mh <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.da
 #household income info
 demo <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/Mental_Health/pdem02.rds")
 
-
 #import dti for additional DTI motion covariates
 dti <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_dti_p101.rds")
 
@@ -75,7 +74,6 @@ dti <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI
 mri_info <- rio::import("/Volumes/GenScotDepression/data/abcd/release4.0/iii.data/MRI_T_roi/abcd_mri01.rds")
 
 #import cleaned cortical measures to get WBV
-
 cortical <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/cortical_year2_R4.0.rds")
 
 ```
@@ -108,11 +106,11 @@ site <- site %>%
 
 #extract family id, acs stratification weight 
 family <- family %>% 
-  select(src_subject_id, eventname, sex, rel_family_id, acs_raked_propensity_score)
+  select(src_subject_id, eventname, sex, rel_family_id, interview_date, acs_raked_propensity_score)
 
 #extract household income (note: income also available in covs df but var extracted here is more detailed, i.e., has more levels)
 demo <- demo %>% 
-  select(src_subject_id, eventname, demo_comb_income_v2)
+  select(src_subject_id, eventname, interview_date, demo_comb_income_v2, demo_prnt_ed_v2, demo_prtnr_ed_v2)
 
 #extract dti motion covariates
 dti <- dti %>%
@@ -231,7 +229,9 @@ parent_mh_wide <- parent_mh_wide %>%
 demo_wide <- reshape(demo, idvar = "src_subject_id", timevar = "eventname", direction = "wide")
 #rename
 demo_wide <- demo_wide %>% 
-  rename(household_income_y0 = demo_comb_income_v2.baseline_year_1_arm_1)
+  rename(household_income_y0 = demo_comb_income_v2.baseline_year_1_arm_1,
+         parent_high_ed_y0 = demo_prnt_ed_v2.baseline_year_1_arm_1,
+         parent_partner_ed_y0 = demo_prtnr_ed_v2.baseline_year_1_arm_1)
 
 #convert wbv to wide
 wbv_wide <- reshape(WBV, idvar = "src_subject_id", timevar = "eventname", direction = "wide")
@@ -261,6 +261,8 @@ mri_wide <- mri_wide %>%
   select(src_subject_id, sex, scanner_id_y2)
 
 ```
+
+
 
 ##MERGE DATAFRAMES
 
@@ -311,28 +313,54 @@ covs_main <- covs_main %>%
     age_years = interview_age/12 
   )
 
-# #check number of scanner ids: There are 30 different scanners used across 21 sites 
-# scanner_id_tbl <- covs_all %>%
-#   group_by(scanner_id) %>% 
-#   summarise(no_rows = length(scanner_id))
-# print(scanner_id_tbl)
-# 
-# #inspect what household income info is available per wave
-# income <- covs_all %>% 
-#   select(household_income, eventname)
-# 
-# income_tbl <- covs_all %>%
-#   group_by(eventname) %>% 
-#    summarise(no_rows = length(household_income))
-# print(income_tbl)
-# 
-# parent_dep <-  covs_all %>% 
-#   select(asr_scr_depress_r, eventname)
-# 
-# parent_dep_tbl <- covs_all %>%
-#   group_by(eventname) %>% 
-#    summarise(no_rows = length(parent_dep))
-# print(parent_dep_tbl)
+
+#Additional tidying of household income variable
+summary(covs_main$household_income_y0)
+
+#get number of participants per income group
+levels <- covs_main %>% 
+  select(src_subject_id, household_income_y0) %>% 
+  group_by(household_income_y0) %>%
+  summarise(no_rows = length(household_income_y0))
+
+#512 refused to answer (777) and #504 said "I don't know" (999)
+# There were two other NA values
+
+#change "777" and "999" values to NA 
+
+covs_main$household_income_y0[covs_main$household_income_y0 == 777] <- NA
+covs_main$household_income_y0[covs_main$household_income_y0 == 999] <- NA
+
+#check that it worked  -- it did!
+
+levels <- covs_main %>% 
+  select(src_subject_id, household_income_y0) %>% 
+  group_by(household_income_y0) %>%
+  summarise(no_rows = length(household_income_y0))
+
+
+#additional tidying of parental education variable (use as auxillary variable for imputation)
+
+summary(demo_wide)
+#get number of participants per parent ed group
+levels <- covs_main %>% 
+  select(src_subject_id, parent_high_ed_y0) %>% 
+  group_by(parent_high_ed_y0) %>%
+  summarise(no_rows = length(parent_high_ed_y0))
+
+#change "777" (I don't know) to NA 
+covs_main$parent_high_ed_y0[covs_main$parent_high_ed_y0 == 777] <- NA
+
+#get number of participant per partner parent ed group 
+#lots of NAs = 2400 (won't be suitable as an auxillary variable)
+levels <- covs_main %>% 
+  select(src_subject_id, parent_partner_ed_y0) %>% 
+  group_by(parent_partner_ed_y0) %>%
+  summarise(no_rows = length(parent_partner_ed_y0))
+
+#remove partner ed from dataframe
+covs_main <- covs_main %>% 
+  select(- parent_partner_ed_y0)
 
 ```
 
