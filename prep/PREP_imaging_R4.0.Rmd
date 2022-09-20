@@ -200,6 +200,7 @@ t1 <- t1[,!colnames(t1) %in% colnames(cols_omit)]
 
 Generate separate dataframes for Baseline and Year 2 and extract variables of interest
 Note: we are selecting our imaging columns that contain "APARC" as these are the Freesurfer derived metrics we are using. 
+
 ```{r, generate df and extract vars of interest}
 ### Baseline ###
 cortical_y0 <- t1 %>% 
@@ -224,10 +225,14 @@ This is not the most sophisticated approach.
 4. Re-name again so that lh and rh is at the start of variable name (for the purposes of the script and function set up)
 5. Repeat for each metric and then merge to create one df. 
 
+20/09/22: Update code below to generate average measures for year 2 data to use in main analysis for RR
+
+Just change cortical_y0 to cortical_y2 at the start of each chunk
+
 ```{r, reorder data per metric type}
 
 ####thickness
-thk <- cortical_y0 %>%  #extract thk vars only
+thk <- cortical_y2 %>%  #extract thk vars only
   select(contains("thk")) 
 
 m = names(thk)  # Extract column names.
@@ -252,7 +257,7 @@ colnames(thk)
 
 ####sulcal depth
 
-sulc <- cortical_y0 %>% 
+sulc <- cortical_y2 %>% 
   select(contains("sulc")) 
 
 m = names(sulc)  # Extract column names.
@@ -277,7 +282,7 @@ colnames(sulc) #check it worked.
 
 ######surface area
 
-sa <- cortical_y0 %>% 
+sa <- cortical_y2 %>% 
   select(contains("sa")) 
 
 m = names(sa)  # Extract column names.
@@ -301,7 +306,7 @@ colnames(sa) #check it worked
 
 ######volume
 
-vol <- cortical_y0 %>% 
+vol <- cortical_y2 %>% 
   select(contains("vol")) 
 
 m = names(vol)  # Extract column names.
@@ -325,7 +330,7 @@ colnames(vol) #check it worked
 
 #### Extract src_subject_id, WBV and ICV and save as new df (so that final merged dataframe contains the same vars as cortical_y0 just reordered)
 
-remaining_vars <- cortical_y0 %>% 
+remaining_vars <- cortical_y2 %>% 
   select("src_subject_id", "WBV", "ICV")
 
 #####join dataframes together 
@@ -334,9 +339,9 @@ new_order <- cbind(remaining_vars, thk) %>%
   cbind(sulc) %>% 
   cbind(sa) %>% 
   cbind(vol)
-colnames(new_order) #join worked #should have 279 vars for 11760 rows, i.e., it should be identical to cortical_y0 
+colnames(new_order) #join worked #should have 279 vars for 7827 rows, i.e., it should be identical to cortical_y2
 
-cortical_y0 <- new_order #replace old cortical df with new order df
+cortical_y2 <- new_order #replace old cortical df with new order df
 
 ```
 
@@ -345,7 +350,7 @@ cortical_y0 <- new_order #replace old cortical df with new order df
 ```{r, generate average measure across hemispheres}
 
 #generate list of all bilateral cortical measures by removing the unilateral cortical measures + WBV and ICV
-cortical_bilateral_colnames <- names(cortical_y0)[! names(cortical_y0) %in% c("src_subject_id", "bl.vol.APARC.total", "bl.sa.APARC.total", "bl.thk.APARC.mean", "bl.sulc.APARC.mean","WBV", "ICV")] 
+cortical_bilateral_colnames <- names(cortical_y2)[! names(cortical_y2) %in% c("src_subject_id", "bl.vol.APARC.total", "bl.sa.APARC.total", "bl.thk.APARC.mean", "bl.sulc.APARC.mean","WBV", "ICV")] 
 
 
 #make for loop that loops across each pair of measures
@@ -353,7 +358,7 @@ for (i in seq(1, length(cortical_bilateral_colnames), by=2)){
 
 
   ## Average right left hemisphere
-  mean <- rowMeans(cortical_y0[,cortical_bilateral_colnames[c(i, i+ 1)]])
+  mean <- rowMeans(cortical_y2[,cortical_bilateral_colnames[c(i, i+ 1)]])
   cortical_bilateral_colnames[i]
 
   cortical_measure_name <- sub("rh.", "", cortical_bilateral_colnames[i])
@@ -361,34 +366,33 @@ for (i in seq(1, length(cortical_bilateral_colnames), by=2)){
   cortical_measure_name <- paste0("avg.", cortical_measure_name)
 
   ## Save averaged measures to new column
-  cortical_y0[,paste0(cortical_measure_name)] <- mean
+  cortical_y2[,paste0(cortical_measure_name)] <- mean
 
 }
 
-colnames(cortical_y0) #check that it worked
+colnames(cortical_y2) #check that it worked
 
 #double check that average measures were generate correctly 
 
-mean_test1 <- cortical_y0 %>% #extract two cols and get average
+mean_test1 <- cortical_y2 %>% #extract two cols and get average
   select(rh.sulc.APARC.sufr,lh.sulc.APARC.sufr) %>% 
   rowMeans()
 
-mean_test1 == cortical_y0$avg.sulc.APARC.sufr #this should return TRUE for all variables - it does! 
+mean_test1 == cortical_y2$avg.sulc.APARC.sufr #this should return TRUE for all variables - it does! 
 
 #let's test with another variable just to be sure
-mean_test2 <- cortical_y0 %>% #extract two cols and get average
+mean_test2 <- cortical_y2 %>% #extract two cols and get average
   select(rh.sa.APARC.locc,lh.sa.APARC.locc) %>% 
   rowMeans()
 
-mean_test2 == cortical_y0$avg.sa.APARC.locc#this should return TRUE for all variables - it does! 
+mean_test2 == cortical_y2$avg.sa.APARC.locc#this should return TRUE for all variables - it does! 
 
 ```
 
-Select IDs that passed QC check ---- N=11232
+Select IDs that passed QC check ---- 
 
 Note: If the above QC steps have run correctly, the final N you get here should equal the N for t1_ids_pass_y0 etc.
 
-Note, average measures for Year 2 have not been generate yet! 
 
 ```{r, select QC'd IDs}
 
@@ -524,9 +528,9 @@ colnames(dti_y2)=gsub('fiberat_','',colnames(dti_y2))
 
 ```{r, get average measure across two hemispheres for regional measures}
 
-#### Baseline #####
+####  #####
 
-dti_bilateral_colnames <- names(dti_y0)[! names(dti_y0) %in% c("src_subject_id", "bl.dtifa_allfibers", "bl.dtimd_allfibers","dtimd_fmaj", "dtimd_fmin", "dtimd_cc","dtifa_fmaj", "dtifa_fmin", "dtifa_cc" )]
+dti_bilateral_colnames <- names(dti_y2)[! names(dti_y2) %in% c("src_subject_id", "bl.dtifa_allfibers", "bl.dtimd_allfibers","dtimd_fmaj", "dtimd_fmin", "dtimd_cc","dtifa_fmaj", "dtifa_fmin", "dtifa_cc" )]
 
 
 
@@ -534,7 +538,7 @@ for (i in seq(1, length(dti_bilateral_colnames), by=2)){
 
 
   ## Average right left hemisphere
-  mean <- rowMeans(dti_y0[,dti_bilateral_colnames[c(i, i+ 1)]])
+  mean <- rowMeans(dti_y2[,dti_bilateral_colnames[c(i, i+ 1)]])
   dti_bilateral_colnames[i]
 
   DTI_tract_name <- sub("rh.", "", dti_bilateral_colnames[i])
@@ -542,11 +546,11 @@ for (i in seq(1, length(dti_bilateral_colnames), by=2)){
   DTI_tract_name <- paste0("avg.", DTI_tract_name)
 
   ## Save averaged measures to new column
-  dti_y0[,paste0(DTI_tract_name)] <- mean
+  dti_y2[,paste0(DTI_tract_name)] <- mean
 
 }
 
-colnames(dti_y0) #check that it worked
+colnames(dti_y2) #check that it worked
 
 ```
 
@@ -592,36 +596,6 @@ dti_y2_dist <- dti_y2_final %>%
 dti_y2_dist
 ```
 
-IGNORE for pilot analysis: Check for multicollinearity in DTI measures
-
-```{r, check for mutlicollinearity}
-
-
-# #check colinearity with dti variables only 
-# dti_y0_corr <- dti_y0_final %>% 
-#   dplyr::select(contains("dti"))
-# 
-# #issue only with regional measures so remove all fibers
-# dti_y0_corr <- dti_y0_corr %>% 
-#   dplyr::select(-(contains("allfibers")))
-# 
-# #make correlation matrix for fa and md measures separately 
-# 
-# fa_y0 <- dti_y0_corr %>% 
-#     dplyr::select(contains("fa")) #37 variables (36 dti measures, 18 per hemisphere)
-# 
-# fa_y0_corr_mat = cor(fa_y0, method = "pearson", use = "pairwise.complete.obs")
-# 
-# (positions <- subset(as.data.frame(which(cor(fa_y0_corr_mat) > 0.99, arr.ind=TRUE)), row < col)) #seems to be multicolinearity issues. 
-# 
-# #visualise correlation matrix
-# 
-# corrplot(fa_y0_corr_mat, type = "upper", order = "hclust", 
-#          tl.col = "black", tl.srt = 40)
-
-
-```
-
 
 ####Subcortical volume measures (before QC, N =11,736)
 
@@ -664,7 +638,7 @@ Reorder variables
 ```{r, reorder data per metric type}
 
 ####subcortical volume (only metric for subcortical measures)
-subcort_new <- subcort_y0 %>%  #extract vol vars only (i.e., don't select id, WBV, ICV)
+subcort_new <- subcort_y2 %>%  #extract vol vars only (i.e., don't select id, WBV, ICV)
   select(contains("vol")) 
 
 m = names(subcort_new)  # Extract column names.
@@ -688,7 +662,7 @@ subcort_new = subcort_new[,m]
 colnames(subcort_new)
 
 #add back in id, WBV and ICV
-remaining_vars <- subcort_y0 %>% 
+remaining_vars <- subcort_y2 %>% 
   select("src_subject_id", "WBV", "ICV")
 
 #join dataframes 
@@ -696,15 +670,15 @@ remaining_vars <- subcort_y0 %>%
 all <- cbind(subcort_new, remaining_vars)
 colnames(all) #check join worked - it did! 
 
-subcort_y0 <- all #replace old subcort_y0 with reordered dataframe 
-colnames(subcort_y0)
+subcort_y2 <- all #replace old subcort_y2 with reordered dataframe 
+colnames(subcort_y2)
 
 ```
 Generate average for subcortical measures
 
 ```{r, get average for subcortical measures}
 #generate list of all bilateral cortical measures by removing the id + WBV and ICV
-subcort_bilateral_colnames <- names(subcort_y0)[! names(subcort_y0) %in% c("src_subject_id", "WBV", "ICV")] 
+subcort_bilateral_colnames <- names(subcort_y2)[! names(subcort_y2) %in% c("src_subject_id", "WBV", "ICV")] 
 
 
 #make for loop that loops across each pair of measures
@@ -712,7 +686,7 @@ for (i in seq(1, length(subcort_bilateral_colnames), by=2)){
 
 
   ## Average right left hemisphere
-  mean <- rowMeans(subcort_y0[,subcort_bilateral_colnames[c(i, i+ 1)]])
+  mean <- rowMeans(subcort_y2[,subcort_bilateral_colnames[c(i, i+ 1)]])
   subcort_bilateral_colnames[i]
 
   subcort_measure_name <- sub("rh.", "", subcort_bilateral_colnames[i])
@@ -720,29 +694,29 @@ for (i in seq(1, length(subcort_bilateral_colnames), by=2)){
    subcort_measure_name <- paste0("avg.", subcort_measure_name)
 
   ## Save averaged measures to new column
-  subcort_y0[,paste0(subcort_measure_name)] <- mean
+  subcort_y2[,paste0(subcort_measure_name)] <- mean
 
 }
 
-colnames(subcort_y0) #check that it worked
+colnames(subcort_y2) #check that it worked
 
 #double check that average measures were generate correctly 
 
-mean_test1 <- subcort_y0 %>% #extract two cols and get average
+mean_test1 <- subcort_y2 %>% #extract two cols and get average
   select(lh.vol.ASEG.amygdala,rh.vol.ASEG.amygdala) %>% 
   rowMeans()
 
-mean_test1 == subcort_y0$avg.vol.ASEG.amygdala #this should return TRUE for all variables - it does! 
+mean_test1 == subcort_y2$avg.vol.ASEG.amygdala #this should return TRUE for all variables - it does! 
 
 #let's test with another variable just to be sure
-mean_test2 <- subcort_y0 %>% #extract two cols and get average
+mean_test2 <- subcort_y2 %>% #extract two cols and get average
   select(lh.vol.ASEG.caudate,rh.vol.ASEG.caudate) %>% 
   rowMeans()
 
-mean_test2 == subcort_y0$avg.vol.ASEG.caudate#this should return TRUE for all variables - it does! 
+mean_test2 == subcort_y2$avg.vol.ASEG.caudate#this should return TRUE for all variables - it does! 
 ```
 
-Select IDs that passed QC, N=11,232
+Select IDs that passed QC
 
 ```{r, select valid IDs}
 
@@ -781,9 +755,6 @@ subcort_y0_dist
                  bins =30) #all look okay
  subcort_y2_dist
 ```
-Let's look at the final variables for subcortical measures (17 in total, including lh and rh) after QC. Note: subcortical_gv = subcortical grey volume.
-
-
 
 
 ####Check for and remove duplicate or highly similar columns that may have occured due to earlier renaming.  
@@ -818,9 +789,9 @@ Change working directory and save clean file there. Note: clean files should be 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
 
 ###Baseline data ####
-saveRDS(cortical_y0_final,"cortical_baseline_R4.0.rds")
-saveRDS(dti_y0_final,"dti_baseline_R4.0.rds")
-saveRDS(subcort_y0_final,"subcort_baseline_R4.0.rds")
+# saveRDS(cortical_y0_final,"cortical_baseline_R4.0.rds")
+# saveRDS(dti_y0_final,"dti_baseline_R4.0.rds")
+# saveRDS(subcort_y0_final,"subcort_baseline_R4.0.rds")
 # 
 # ###Year 2 data ####
 saveRDS(cortical_y2_final,"cortical_year2_R4.0.rds")
