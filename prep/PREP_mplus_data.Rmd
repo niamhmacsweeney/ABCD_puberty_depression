@@ -32,7 +32,7 @@ setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depressi
 
 ```
 
-#STEP ONE: LOAD DATA + TIDY
+#1: LOAD DATA + TIDY
 
 ```{r, load data}
 
@@ -160,6 +160,377 @@ colnames(imgVars)
   
   
 ```
+
+#Extract mediators 
+
+```{r, extract mediator vars}
+
+mainImgVars <- imgVars %>% #18 variables
+  select(src_subject_id, globalMeds, regionalMeds) 
+
+```
+
+##Generate imaging dataframe for exploratory analyses
+
+This will include the average bilateral measures and the unilateral brain measures.
+The current imaging dataframe has all the individual bilateral measures (i.e., left and right), which we aren't using in the current analyses. 
+
+```{r, exploratory imaging vars}
+
+explImgVars <- imgVars %>% 
+  .[,grep('^avg|^bl|^dti|^src', colnames(.))]  
+  #select cols starting with avg, bl, dti or src_subject 
+  #should give us the cols we want
+
+colnames(explImgVars) #col names look correct! 191 variables
+```
+
+
+
+STEP TWO: MAIN MERGE
+## Main analysis dataframe
+```{r, main df merge}
+
+df <- covs %>% 
+  left_join(y=dep_vars, by= c("src_subject_id", "sex"))
+  
+#merge 2
+df <- df %>% 
+  left_join(y=pds_y1, by= c("src_subject_id", "sex"))
+
+#merge 3 (with imaging)
+
+df <- df %>% 
+  left_join(y=mainImgVars, by= "src_subject_id")
+
+```
+
+###Reduce dataframe to correct sample
+
+We will only include people with complete exposure (puberty) data and who had available year 3 depression data at release 4.0. 
+
+Total N = 5727
+
+```{r, select correct sample}
+
+df <- df %>% 
+  filter(!is.na(pds_tot_all)) %>% #N=10,400
+  filter(!is.na(interview_date_y3)) #N = 5727
+
+```
+
+Note: For our first hypothesis test, we are using multiple imputation to deal with missing data. Following our analysis to identify auxiliary variables that predicted out outcome data and/or missingness in our outcome data, we were unable to find suitable auxiliary variables that predicted race and household income. See script (ANALY_H1_females.Rmd) We therefore removed individuals with missing data for these variables from our analysis. 
+
+For our second and third hypotheses, we will be using FIML to handle missing data, which is the default in R. To keep the sample sizes consistent across all hypotheses, we will remove people with missing race and income data also. 
+
+This results in a final N = 5325 (males and females combined)
+
+```{r, further df filtering}
+
+df <- df %>% #5727
+  filter(!is.na(household_income_y0)) %>% #5371
+  filter(!is.na(race_y0)) #5325
+
+```
+
+##exploratory analysis dataframe
+
+```{r, exploratory df merge}
+
+expl_df <- covs %>% 
+  left_join(y=dep_vars, by= c("src_subject_id", "sex"))
+  
+#merge 2
+expl_df <- expl_df %>% 
+  left_join(y=pds_y1, by= c("src_subject_id", "sex"))
+
+#merge 3 (with imaging)
+
+expl_df <- expl_df %>% 
+  left_join(y=explImgVars, by= "src_subject_id")
+
+```
+
+Reduce to correct sample as per explanation above 
+
+```{r, reduce expl df to correct sample}
+
+expl_df <- expl_df %>% 
+  filter(!is.na(pds_tot_all)) %>% #N=10,400
+  filter(!is.na(interview_date_y3)) %>%  #N = 5727
+    filter(!is.na(household_income_y0)) %>% #5371
+  filter(!is.na(race_y0)) #5325 
+
+colnames(expl_df)
+head(expl_df) #merge and filter looks okay 
+
+```
+
+Remove extra columns that we don't need: 
+
+- remove extra variables NOT used in imputation
+- remove puberty variables.
+
+Note, we will make one large list with all the extra variables and then remove using select function. 
+
+```{r, tidy dataset}
+
+extraVars <- c("site_id_6m", "site_id_y1", "site_id_18m", #no longer need these
+               "site_id_y2", "site_id_y3",
+               "interview_age", "parent_dep_y3",
+               "acs_raked_propensity_score_y1", "bmi_y2",
+               "race_6m", "race_y1", "race_18m",
+               "race_y2", "dti_mean_motion_y0",
+               "interview_date.baseline_year_1_arm_1",
+               "parent_high_ed_y0",
+               "interview_date_y0", "interview_date_y1", "interview_date_y2",  "interview_date_y3",
+               "age_years.y", #extra age variable after merge
+               "pds_m_pt_valid", "pds_f_pt_valid"
+                )
+
+#reduce dataframe by removing 33 extra cols. 
+df <- df %>% 
+  select(-(all_of(extraVars))) #should have 39 cols now. 
+
+colnames(df) #looks good
+
+```
+
+#2: MPLUS DATA prep
+Mplus names can't be longer than 8 characters or else they will be truncated 
+
+## Main analysis
+###Renaming
+```{r, rename for main df for Mplus}
+
+#let's start with imaging
+#remove "avg." prefix and "APARC" and "ASEG" joiners
+
+colnames(df)=gsub('avg.','',colnames(df)) #remove avg. prefix
+colnames(df)=gsub('APARC.','',colnames(df)) #remove APARC
+colnames(df)=gsub('ASEG.','',colnames(df)) # remove ASEG
+colnames(df)=gsub('bl.','',colnames(df)) #remove bl
+colnames(df)=gsub('total','glb',colnames(df)) #shorten total to global to indicate it's a global measure
+colnames(df)=gsub('mean','glb',colnames(df)) #shorten mean to global to indicate global measure. 
+
+#truncate regional metrics: vol = V, thk = T, sa = SA, sulc = SL
+colnames(df)=gsub('vol','V',colnames(df))
+colnames(df)=gsub('thk','T',colnames(df))
+colnames(df)=gsub('sa','SA',colnames(df))
+colnames(df)=gsub('sulc','SL',colnames(df))
+
+#some names are still too long e.g., bankssts and parsobis so need to shorten 
+colnames(df)=gsub('bankssts','bsts',colnames(df))
+colnames(df)=gsub('parsobis','porb',colnames(df))
+
+#finally, shorten the dti measure names 
+colnames(df)=gsub('dtifa_cc','FA.cc',colnames(df))
+colnames(df)=gsub('dtifa_pscs','FA.pscs',colnames(df))
+colnames(df)=gsub('dtifa_allfibers','FA.glb',colnames(df)) #global FA
+colnames(df)=gsub('dti_glb_motion_y2','dti_mot',colnames(df)) #dti motion
+
+#check col names
+colnames(df)
+
+#### non imaging variables 
+
+df <-df %>% 
+  rename( id = src_subject_id, 
+          p_dep_y2 = parent_dep_y2,
+          fam_id = rel_family_id,
+          pws = acs_raked_propensity_score_y0,
+          scnr_id = scanner_id_y2,
+          income = household_income_y0,
+          age = age_years.x,
+          y_dep_y3 = cbcl_withdep_y3,  #youth depression year 3
+          time = eventname,
+          pds_t_m = pds_tot_m,
+          pds_t_f = pds_tot_f,
+          pds_t_al = pds_tot_all,
+          y_dep_y0 = cbcl_withdep_y0, #aux vars needed for FIML
+          y_dep_y1 = cbcl_withdep_y1, 
+          y_dep_y2 = cbcl_withdep_y2,
+          y_anx_y0 = cbcl_anxdep_y0,
+          y_anx_y1 = cbcl_anxdep_y1,
+          y_anx_y2 =cbcl_anxdep_y2, 
+          y_anx_y3 = cbcl_anxdep_y3, 
+          p_dep_y0 = parent_dep_y0, 
+          )
+        
+colnames(df)
+
+```
+###Formating
+All variables need to be numeric and missing values need to be indicated with a * or . or "" (blank space)
+
+Before converting character variables to factors and then numeric, we will get a list of all the factors and values for future reference. 
+
+Note: income is already numeric, described below:
+
+1= Less than $5,000; 2=$5,000 through $11,999; 3=$12,000 through $15,999; 4=$16,000 through $24,999; 5=$25,000 through $34,999; 6=$35,000 through $49,999; 7=$50,000 through $74,999; 8= $75,000 through $99,999; 9=$100,000 through $199,999; 10=$200,000 and greater
+
+N.B: Sex variable labelling: 1= F, 2= M
+```{r, Mplus formatting}
+
+#char vars
+charVars <- c("id", "sex", "site_id",
+              "scnr_id", "time", "race_y0")
+
+#convert character variables to factor
+df <- df %>%
+  mutate_at(charVars, as.factor)
+
+#get levels for sex and race for future reference
+# the other variables aren't likely needed for further interpretation
+
+df %>% 
+  select(sex, race_y0) %>% 
+     sapply(levels)
+#check order of labeling with 
+str(df)
+
+#convert factor variables to numeric 
+df <- df %>% 
+  mutate_at(charVars, as.numeric)
+
+#check 
+str(df) # all variables are either numeric or integer 
+
+summary(df)
+
+### change NA values to -9999
+
+df[is.na(df)] <- -9999
+
+head(df) #looks good!
+
+```
+
+
+##Exploratory analysis 
+
+###Renaming
+Renaming set up should be the same but for some of the imaging vars, the name will be longer than 8 but MPlus should truncate this. If is causes an issue, we can revisit later. 
+
+```{r, rename exploratory df for Mplus}
+
+#first remove extraVars (should have this object in environment already)
+
+expl_df <- expl_df %>% 
+  select(-(all_of(extraVars))) #should have 211 cols
+
+colnames(expl_df) #looks good
+
+#rename imaging vars 
+colnames(expl_df)=gsub('avg.','',colnames(expl_df)) #remove avg. prefix
+colnames(expl_df)=gsub('APARC.','',colnames(expl_df)) #remove APARC
+colnames(expl_df)=gsub('ASEG.','',colnames(expl_df)) # remove ASEG
+colnames(expl_df)=gsub('bl.','',colnames(expl_df)) #remove bl
+colnames(expl_df)=gsub('total','glb',colnames(expl_df)) #shorten total to global to indicate it's a global measure
+colnames(expl_df)=gsub('mean','glb',colnames(expl_df)) #shorten mean to global to indicate global measure. 
+
+#truncate regional metrics: vol = V, thk = T, sa = SA, sulc = SL
+colnames(expl_df)=gsub('vol','V',colnames(expl_df))
+colnames(expl_df)=gsub('thk','T',colnames(expl_df))
+colnames(expl_df)=gsub('sa','SA',colnames(expl_df))
+colnames(expl_df)=gsub('sulc','SL',colnames(expl_df))
+
+#some names are still too long e.g., bankssts and parsobis so need to shorten 
+colnames(expl_df)=gsub('bankssts','bsts',colnames(expl_df))
+colnames(expl_df)=gsub('parsobis','porb',colnames(expl_df))
+
+#finally, shorten the dti measure names 
+colnames(expl_df)=gsub('dtifa_','FA.',colnames(expl_df))
+colnames(expl_df)=gsub('dtimd_','MD.',colnames(expl_df))
+colnames(expl_df)=gsub('FA.allfibers','FA.glb',colnames(expl_df)) #global FA
+colnames(expl_df)=gsub('MD.allfibers','MD.glb',colnames(expl_df))
+colnames(expl_df)=gsub('dti_glb_motion_y2','dti_mot',colnames(expl_df))
+
+#check 
+colnames(expl_df) #looks good!
+
+### non imaging variables 
+
+expl_df <- expl_df %>% 
+  rename( id = src_subject_id, 
+          p_dep_y2 = parent_dep_y2,
+          fam_id = rel_family_id,
+          pws = acs_raked_propensity_score_y0,
+          scnr_id = scanner_id_y2,
+          income = household_income_y0,
+          age = age_years.x,
+          y_dep_y3 = cbcl_withdep_y3,  #youth depression year 3
+          time = eventname,
+          pds_t_m = pds_tot_m,
+          pds_t_f = pds_tot_f,
+          pds_t_al = pds_tot_all,
+          y_dep_y0 = cbcl_withdep_y0, #aux vars needed for FIML
+          y_dep_y1 = cbcl_withdep_y1, 
+          y_dep_y2 = cbcl_withdep_y2,
+          y_anx_y0 = cbcl_anxdep_y0,
+          y_anx_y1 = cbcl_anxdep_y1,
+          y_anx_y2 =cbcl_anxdep_y2, 
+          y_anx_y3 = cbcl_anxdep_y3, 
+          p_dep_y0 = parent_dep_y0)
+        
+colnames(expl_df)
+
+
+```
+
+##Formatting
+```{r, formatting for MPlus}
+
+#char vars
+charVars <- c("id", "sex", "site_id",
+              "scnr_id", "time", "race_y0")
+
+#convert character variables to factor
+expl_df <- expl_df %>%
+  mutate_at(charVars, as.factor) %>% 
+   mutate_at(charVars, as.numeric)
+
+#check 
+str(expl_df)
+colnames(expl_df)
+
+summary(expl_df)
+
+### change NA values to -9999
+
+expl_df[is.na(expl_df)] <- -9999
+
+head(expl_df) #looks good!
+
+```
+
+The data frames are not in the correct format for MPlus
+
+#3: Split by sex 
+
+
+##Main analysis
+```{r, split by sex}
+
+F_df <- df %>% 
+  filter(sex == 1) #females only  N= 2533
+
+M_df <- df %>% 
+  filter(sex == 2) #males only M = 2792
+
+```
+
+##Exploratory analysis
+```{r, split by sex}
+
+F_expl_df <- expl_df %>% 
+  filter(sex == 1) #females only  N= 2533
+
+M_expl_df <- expl_df %>% 
+  filter(sex == 2) #males only M = 2792
+
+```
+
 
 
 
