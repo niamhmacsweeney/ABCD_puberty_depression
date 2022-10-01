@@ -27,6 +27,17 @@ Exploratory df: Contains all imaging variables to test for additional mediating 
 
 library(tidyverse)
 library(ggplot2)
+library(MplusAutomation)
+library(tidySEM)
+library(lavaan)
+
+library(here)
+library(gt)
+library(gtsummary)
+library(mediation)
+library(carData)
+library(plotly)
+library(viridis)
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
 
@@ -288,9 +299,9 @@ extraVars <- c("site_id_6m", "site_id_y1", "site_id_18m", #no longer need these
                "pds_m_pt_valid", "pds_f_pt_valid"
                 )
 
-#reduce dataframe by removing 33 extra cols. 
+#reduce dataframe by removing 23 extra cols. 
 df <- df %>% 
-  select(-(all_of(extraVars))) #should have 39 cols now. 
+  select(-(all_of(extraVars))) #should have 48 cols now. 
 
 colnames(df) #looks good
 
@@ -398,9 +409,9 @@ str(df) # all variables are either numeric or integer
 
 summary(df)
 
-### change NA values to -9999
+### change NA values to 
 
-df[is.na(df)] <- -9999
+df[is.na(df)] <- -9999 
 
 head(df) #looks good!
 
@@ -513,10 +524,13 @@ The data frames are not in the correct format for MPlus
 ```{r, split by sex}
 
 F_df <- df %>% 
-  filter(sex == 1) #females only  N= 2533
+  filter(sex == 1) %>%  #females only  N= 2533
+  select(- c(pt_m, pds_t_m))
 
 M_df <- df %>% 
-  filter(sex == 2) #males only M = 2792
+  filter(sex == 2) %>%  #males only M = 2792
+  select(- c(pt_f, pds_t_f))
+
 
 ```
 
@@ -524,14 +538,111 @@ M_df <- df %>%
 ```{r, split by sex}
 
 F_expl_df <- expl_df %>% 
-  filter(sex == 1) #females only  N= 2533
+  filter(sex == 1) %>%  #females only  N= 2533
+  select(- c(pt_m, pds_t_m))
 
 M_expl_df <- expl_df %>% 
-  filter(sex == 2) #males only M = 2792
+  filter(sex == 2) %>%  #males only M = 2792
+  select(- c(pt_f, pds_t_f))
+
+```
+
+```{r, make data files for Mplus}
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/Mplus_inputs")
+
+female_df <- prepareMplusData(F_df, "female_df.dat")
+
+male_df <- prepareMplusData(M_df, "male_df.dat")
 
 ```
 
 
+
+
+#4: MplusAutomation 
+
+See this paper: https://www.tandfonline.com/doi/full/10.1080/10705511.2017.1402334
+
+Remember to cite this package in paper!
+
+```{r, get list of mediators}
+#need to make new list after earlier renaming
+globalMeds <- c("V.glb", "SA.glb", "SL.glb", "T.glb" ,"FA.glb")
+
+regionalMeds <- c("T.mdtm", "T.insula", "T.rrmdfr" , "T.mobfr" , 
+                  "T.lobfr" , "V.bsts",   "V.mdtm" , "V.cdmdfr", 
+                  "V.postcn", "FA.pscs", "FA.cc", "SL.porb", 
+                  "V.vedc")
+
+```
+
+
+```{r, get variables table with label for Mplus}
+
+#Example mediation model
+test_table <- tribble(
+   ~"Name",      ~"Labels",                                     
+ #--------------|--------------------------------|,
+  "pt_f (X)" , "Pubertal timing (females)"         ,
+  "V.glb (M)" , "Global brain volume"          ,
+  "y_dep_y3 (Y)" , "Youth depresison at year 3"   )
+
+test_table %>% gt()
+
+```
+Females 
+```{r, run Mplus from R}
+
+#we define our model here
+?mplusObject #gives instructions for Mplus syntax
+m1 <- mplusObject(
+  TITLE = 
+    "Females: Global Brain Measures SEM;",
+
+  VARIABLE = 
+  
+    "usevar = 
+      pt_f  V.glb  y_dep_y3;",
+  
+  ANALYSIS =  
+    "bootstrap = 500;  ! set number of bootstrap   draws (small # for demonstration purposes)" , 
+  
+    # y_dep_y3        !!! outcome (Y)
+    # V.glb           !!! mediator (M)
+    # pt_f            !!! predictor (X)
+  MODEL = 
+ 
+  "y_dep_y3 on V.glb pt_f;   !!! Y on M X
+  V.glb on pt_f;             !!! M on X Y
+    
+    
+    Model indirect:
+    y_dep_y3 ind V.glb pt_f;",
+     
+  OUTPUT = 
+    "standardized;",
+  
+  PLOT = "type=plot2;",
+  rdata = F_df)     
+
+?mplusModeler
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/Mplus")
+
+m1_fit <- mplusModeler(m1,
+                modelout = 
+                  "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/Mplus/m1.inp",
+                run = TRUE)
+
+SummaryTable(m1_fit)
+
+```
+
+```{r}
+
+
+test <- lm(y_dep_y3 ~ FA.glb, data = F_df, na.action = na.exclude)
+```
 
 
 

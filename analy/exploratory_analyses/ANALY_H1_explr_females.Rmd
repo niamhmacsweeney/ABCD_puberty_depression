@@ -1,5 +1,5 @@
 ---
-title: "ANALY_H1_females"
+title: "ANALY_H1_explr_females"
 author: "Niamh MacSweeney" Credit to Amelia Edmondson-Stait for the template script
 date: '2022-08-26'
 output: html_document
@@ -27,7 +27,7 @@ library(caret)
 library(mice)
 library(broom.mixed) #so that pool function runs properly
 
-library(sjPlot) # table functions
+
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
 ```
@@ -48,7 +48,7 @@ Predictive mean matching was used for continuous variables and logisitic regress
 
 Covariates were selected that predicted either missingness of variable to be imputed or associated with variable to be imputed. The variables had no less than 40% missing data. This reduces bias towards "missing not at random" (NMAR) and provides more accurate estimates. We will be imputing the outcome and covariates data only. 
 
-Model: Depressive symptoms ~ pubertal timing	
+Model: Depressive symptoms ~ pubertal timing
 
 Fixed covs: age, race/ethnicity, BMI, site, household income, parental current mood, population weighting variable.
 
@@ -86,8 +86,19 @@ Remove variables we don't need/want to impute
 ```{r, tidy up variables}
 
 pds_y1 <- pds_y1 %>% 
-  select (-c("pds_m_pt_valid", "pds_f_pt_valid", "pds_p_ss_female_category" ,"pds_p_ss_male_category", "pds_1_p",        "pds_2_p", "pds_3_p","pds_m5_p",  "pds_m4_p",  "pds_f4_p", "pds_f5b_p", "gonad_avg", "adren_avg", "gonad_f", "gonad_m", "adren_f", "adren_m", "age_years"))
+  select (-c("pds_m_pt_valid", "pds_f_pt_valid"))
 
+#the dep and covs dataframes are in wide format so before merge, check that all of pds variables are definitely from year 1
+#they should be based on earlier QC
+
+pds_y1 %>% 
+  select(eventname) %>% 
+  as.factor() #only one level when converted to factor --- so looks good! 
+
+#remove eventname column before merge because we know that the pds vars are all from year 1
+
+pds_y1 <- pds_y1 %>% 
+  select(- c(eventname, age_years))
 colnames(pds_y1)
 
 
@@ -156,7 +167,7 @@ df <- df %>% #N = 2726
 #remove male specific cols (pds_tot_m and pt_m and pds_tot_all) #should have 43 variables after. 
 
 df <- df %>% 
-  select(-c(pds_tot_m, pds_tot_all, pt_m, gonad_pt_m, adren_pt_m))
+  select(-c(pds_tot_m, pds_tot_all, pt_m))
 
 ```
 
@@ -186,8 +197,7 @@ variables <- c("src_subject_id", #character variable
                "age_years", #continuous score
                "cbcl_withdep_y0", "cbcl_withdep_y1", "cbcl_withdep_y2", "cbcl_withdep_y3", #continuous score
                "cbcl_anxdep_y0", "cbcl_anxdep_y1", "cbcl_anxdep_y2", "cbcl_anxdep_y3", #continuous score
-               "pds_tot_f",  "pt_f", #continuous score
-               "gonad_pt_f", "adren_pt_f"
+               "pds_tot_f",  "pt_f" #continuous score
                )
   
 ```
@@ -545,9 +555,7 @@ mainVars <- c("src_subject_id",
                "race_y0",
                "age_years", 
               "cbcl_withdep_y3",
-              "pt_f",
-              "gonad_pt_f", #pt timing variables to look at in exploratory analyses
-              "adren_pt_f"
+              "pt_f"
                )
 mainVars
 
@@ -572,7 +580,7 @@ dataSub <- dataSub %>% # N = 2726
 colnames(dataSub)
 head(dataSub)#Looks good! 
 
-#Note that all numeric variables, except the acs_raked_propensity_score have been scaled!!
+#Note that all numeric variables have been scaled!!
 
 ```
 
@@ -621,25 +629,19 @@ end_time - start_time
 
 ##Imputed dataframes
 ```{r, imputed models}
-
-#Base model
+# This works:
 MIfitBase <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = lmerControl(optimizer ="bobyqa")))
 
 resMIfitBase <-summary(pool(MIfitBase))
-resMIfitBase
 
-#Full model
 MIfitFull <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 + household_income_y0 + parent_dep_y2
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = lmerControl(optimizer ="bobyqa"),
                             weights = acs_raked_propensity_score_y0))
 
 resMIfitFull <- summary(pool(MIfitFull))
-resMIfitFull
-
-
 ```
 
 ##Complete cases
@@ -652,7 +654,7 @@ CCfitBase <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0
                             na.action = na.exclude,
                        )
 
-CCfitBase
+
 
 CCfitFull <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
                             + household_income_y0 + parent_dep_y2
@@ -663,135 +665,11 @@ CCfitFull <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0
                             na.action = na.exclude
                        )
 
-
 resCCfitFull <- summary(CCfitFull)
 resCCfitFull
 
-TukeyHSD(CCfitFull)
-
-```
-#EXPORT MAIN RESULTS TABLE 
-
-https://lmudge13.github.io/sample_code/mixed_effects.html
-
-```{r, imputed}
-
-CC_res_tbl <- sjPlot::tab_model(CCfitBase, CCfitFull,
-                  show.se = TRUE,
-                  show.df = FALSE,
-                  show.ci = FALSE,
-                  digits = 3,
-                  terms = terms,
-                  title = "Main Effect of Pubertal Timing and Depression",
-                  pred.labels = pred.labels,
-                  dv.labels = c("Base", "Full"),
-                  string.se = "SE",
-                  string.p = "P-Value")
-CC_res_tbl
-
-sjPlot::plot_model(CCfitFull,
-                   axis.labels = c("Pubertal timing", "Age", "Race/Ethnicity (Black)", "Race/Ethnicity (Asian)",
-                                   "Race/Ethnicity (AIAN/NHPI*)", "Race/Ethnicity (Other)", "Race/Ethnicity (Mixed)",
-                                    "Income ($5,000 to $11,999)", "Income ($12,000 to $15,999",
-                                    "Income ($16,000 to $24,999)", "Income ($25,000 to $34,999)",
-                                    "Income ($35,000 to $49,999)", "Income ($50,000 to $74,999)",
-                                    "Income ($75,000 to $99,999)", "Income ($100,000 to $199,999)",
-                                    "Income (>$200,000)", "Parent depression"),
-                   show.values = FALSE,
-                   show.p = TRUE,
-                   title = "Effect of pubertal timing on youth depression")
-
-sjPlot::sjp.lmer
-
-pred.labels <- c("Pubertal timing", "Age", "Race/Ethnicity (Black)", "Race/Ethnicity (Asian)",
-                                   "Race/Ethnicity (AIAN/NHPI*)", "Race/Ethnicity (Other)", "Race/Ethnicity (Mixed)",
-                                    "Income ($5,000 to $11,999)", "Income ($12,000 to $15,999",
-                                    "Income ($16,000 to $24,999)", "Income ($25,000 to $34,999)",
-                                    "Income ($35,000 to $49,999)", "Income ($50,000 to $74,999)",
-                                    "Income ($75,000 to $99,999)", "Income ($100,000 to $199,999)",
-                                    "Income (>$200,000)", "Parent depression")
-terms <- c("pt_f", "age_years", "race_y0Black", "race_y0Asian", "race_y0AIAN/NHPI", "race_y0Other", 
-                            "race_y0Mixed", "household_income_y02", "household_income_y03", "household_income_y04",
-                            "household_income_y05", "household_income_y06", "household_income_y07", "household_income_y08", "household_income_y09", "household_income_y10", "parent_dep_y2")
-                                    
-
-
-
-```
-#EXPLORATORY ANALYSES
-
-1. Use gonadal and adrenal pubertal timing measures as separate predictors 
-
-##gonadal pubertal timing
-
-```{r, gonadal timing}
-
-#imputed dataset
-#Base model
-MIfitBase_gonad <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ gonad_pt_f + age_years + race_y0 
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa")))
-
-resMIfitBase_gonad <-summary(pool(MIfitBase))
-resMIfitBase_gonad
-
-#Full model
-MIfitFull_gonad <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ gonad_pt_f + age_years + race_y0 + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            weights = acs_raked_propensity_score_y0))
-
-resMIfitFull_gonad <- summary(pool(MIfitFull))
-resMIfitFull_gonad
-
-#Complete cases
-
-CCfitBase_explr <- lmerTest::lmer(cbcl_withdep_y3 ~ gonad_pt_f + adren_pt_f + age_years + race_y0 
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            data = dataSub,
-                            na.action = na.exclude,
-                       )
-
-CCfitBase_explr
-
-CCfitFull_explr <- lmerTest::lmer(cbcl_withdep_y3 ~ gonad_pt_f + adren_pt_f  + age_years + race_y0 
-                            + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            weights = acs_raked_propensity_score_y0,
-                            data = dataSub,
-                            na.action = na.exclude
-                       )
-
-
-resCCfitFull_explr <- summary(CCfitFull_explr)
-resCCfitFull_explr
-
-
-
-#show in table 
-
-sjPlot::tab_model(CCfitBase_explr, CCfitFull_explr,
-                  show.se = TRUE,
-                  show.df = FALSE,
-                  show.ci = FALSE,
-                  digits = 3,
-                  terms = c("gonad_pt_f", "adren_pt_f"),
-                  title = "Main effect of gonadal and adrenal timing on youth depression",
-                  pred.labels = c("Gonadal timing", "Adrenal timing"),
-                  dv.labels = c("Base", "Full"),
-                  string.se = "SE",
-                  string.p = "P-Value")
-
-
 ```
 
-
-
-2. Control for Youth depression at year 1
-
-For this exploratory analysis, we will use the complete cases dataframe as we are using youth depression at year 1 as an auxillary variable to predict outcome (year 3 youth depression) 
 
 
 
