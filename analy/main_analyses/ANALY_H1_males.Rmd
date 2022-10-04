@@ -88,20 +88,6 @@ Remove variables we don't need/want to impute
 pds_y1 <- pds_y1 %>% 
   select (-c("pds_m_pt_valid", "pds_f_pt_valid"))
 
-#the dep and covs dataframes are in wide format so before merge, check that all of pds variables are definitely from year 1
-#they should be based on earlier QC
-
-pds_y1 %>% 
-  select(eventname) %>% 
-  as.factor() #only one level when converted to factor --- so looks good! 
-
-#remove eventname column before merge because we know that the pds vars are all from year 1
-
-pds_y1 <- pds_y1 %>% 
-  select(- c(eventname, age_years))
-colnames(pds_y1)
-
-
 ```
 
 ### Merge
@@ -194,7 +180,7 @@ variables <- c("src_subject_id", #character variable
                "race_y0",  "race_6m", "race_y1", "race_18m",  "race_y2", #character variable
                "dti_mean_motion_y0",  "dti_mean_motion_y2",  #continuous score       
                "scanner_id_y2", #character variable
-               "age_years", #continuous score
+               "age_y3", #continuous score
                "cbcl_withdep_y0", "cbcl_withdep_y1", "cbcl_withdep_y2", "cbcl_withdep_y3", #continuous score
                "cbcl_anxdep_y0", "cbcl_anxdep_y1", "cbcl_anxdep_y2", "cbcl_anxdep_y3", #continuous score
                "pds_tot_f",  "pt_f" #continuous score
@@ -555,7 +541,7 @@ mainVars <- c("src_subject_id",
                "bmi_y1",  
                "household_income_y0", 
                "race_y0",
-               "age_years", 
+               "age_y3", 
               "cbcl_withdep_y3",
               "pt_m"
                )
@@ -631,22 +617,58 @@ end_time - start_time
 ##Imputed dataframes
 ```{r, imputed models}
 # This works:
-MIfitBase <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
+MIfitBase <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = lmerControl(optimizer ="bobyqa")))
 
 resMIfitBase <-summary(pool(MIfitBase))
+resMIfitBase
 
-MIfitFull <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 + household_income_y0 + parent_dep_y2
+MIfitFull <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + household_income_y0 + parent_dep_y2
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = lmerControl(optimizer ="bobyqa"),
                             weights = acs_raked_propensity_score_y0))
 
-confint(MIfitFull,
-        oldNames = TRUE)
 
 resMIfitFull <- summary(pool(MIfitFull))
 resMIfitFull
+
+#pasting imputed results here 
+
+#base 
+#               term    estimate  std.error  statistic       df     p.value
+# 1      (Intercept)  0.02364781 0.03016421  0.7839692 2767.193 0.433125258
+# 2             pt_m  0.05480874 0.02013136  2.7225556 2743.300 0.006518892
+# 3           age_y3  0.03550608 0.01914568  1.8545221 2752.197 0.063771390
+# 4     race_y0Black -0.19836128 0.07317689 -2.7107093 2741.532 0.006755784
+# 5     race_y0Asian -0.25655021 0.12687825 -2.0220188 2768.809 0.043270399
+# 6 race_y0AIAN/NHPI -0.02919849 0.26800956 -0.1089457 2717.707 0.913253585
+# 7     race_y0Other  0.03723348 0.11013510  0.3380710 2695.804 0.735336033
+# 8     race_y0Mixed  0.09702783 0.06561207  1.4788107 2711.004 0.139307094
+
+#Full 
+#                      term    estimate  std.error  statistic       df    p.value
+#                (Intercept) 0.22659830 0.13224058  1.7135308 2653.830 0.08673172
+# 2                   pt_m  0.04261869 0.01966111  2.1676646 2736.108 0.03027019
+# 3                 age_y3  0.02845592 0.01860572  1.5294183 2741.997 0.12627612
+# 4           race_y0Black -0.19337443 0.07681970 -2.5172506 2734.668 0.01188420
+# 5           race_y0Asian -0.08698124 0.11572665 -0.7516094 2748.193 0.45235035
+# 6       race_y0AIAN/NHPI  0.06449278 0.24524815  0.2629695 2642.246 0.79259462
+# 7           race_y0Other  0.02868415 0.10574927  0.2712468 2611.526 0.78622268
+# 8           race_y0Mixed  0.07729128 0.07244088  1.0669566 2715.670 0.28608627
+# 9   household_income_y02 -0.37262083 0.17154617 -2.1721315 2681.434 0.02993310
+# 10  household_income_y03 -0.27716998 0.19384668 -1.4298413 2729.349 0.15287704
+# 11  household_income_y04  0.03129478 0.15563460  0.2010785 2617.540 0.84065278
+# 12  household_income_y05 -0.16694274 0.14999297 -1.1130038 2653.708 0.26580762
+# 13  household_income_y06 -0.04415870 0.14135386 -0.3123983 2664.955 0.75476232
+# 14  household_income_y07 -0.18803560 0.13704643 -1.3720576 2665.482 0.17016096
+# 15  household_income_y08 -0.24138182 0.13826577 -1.7457814 2665.859 0.08096414
+# 16  household_income_y09 -0.23501570 0.13518068 -1.7385303 2662.724 0.08223301
+# 17 household_income_y010 -0.25053199 0.14433556 -1.7357606 2660.352 0.08272195
+# 18         parent_dep_y2  0.30351238 0.02024828 14.9895359 2511.578 0.00000000
+
+
+
 
 
 ```
@@ -654,7 +676,7 @@ resMIfitFull
 ##Complete cases
 ```{r, complete case models}
 
-CCfitBase <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
+CCfitBase <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = lmerControl(optimizer ="bobyqa"),
                             data = dataSub,
@@ -663,7 +685,7 @@ CCfitBase <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0
 
 
 
-CCfitFull <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
+CCfitFull <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
                             + household_income_y0 + parent_dep_y2
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = lmerControl(optimizer ="bobyqa"),
@@ -676,6 +698,11 @@ CCfitFull <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0
 resCCfitFull <- summary(CCfitFull)
 resCCfitFull
 
+
+#Plot results 
+
+plot_model(CCfitBase)
+
 ```
 #EXPORT RESULTS TABLE 
 
@@ -686,12 +713,13 @@ sjPlot::tab_model(CCfitBase, CCfitFull,
                   show.df = FALSE,
                   show.ci = FALSE,
                   digits = 3,
-                  terms = "pt_f",
-                  title = "Main Effect of Pubertal Timing and Depression",
-                  pred.labels = "Pubertal Timing",
+                  title = "Males — Main Effect of Pubertal Timing and Depression",
                   dv.labels = c("Base", "Full"),
                   string.se = "SE",
-                  string.p = "P-Value")
+                  string.p = "P-Value", 
+                  file = "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/CC_male_H1res.html")
+
+
 ```
 
 

@@ -1,29 +1,28 @@
 ---
 title: "ANALY_descriptives.Rmd"
 author: "Niamh MacSweeney"
-date: '2022-08-31'
-output: html_document
+date: "2022-08-31"
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(scales) #for pie chart
-library(plyr) #for distribution plots #N.B- make sure to load before tidyverse and dplyr
 library(waffle)
 library(tidyverse)
 library(psych)
 library(ggplot2)
 library(waffle)
 library(ggpubr)
-library(readr)
 library(pbapply)
 library(gridExtra)
 library(sandwich)
 library(stringr)
 library(kableExtra)
 library(gtsummary)
-library(ggrepel)
-library(forcats)
+
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
 ```
@@ -45,21 +44,9 @@ covs <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_pu
 #Tidy data
 ```{r, tidy up variables}
 
-pds_y1 <- pds_y1 %>% 
-  select (-c("pds_m_pt_valid", "pds_f_pt_valid"))
+pds_y1 <- pds_y1 %>%  
+  select (-c("pds_m_pt_valid", "pds_f_pt_valid", "age_years")) #remove extra age column too. 
 
-#the dep and covs dataframes are in wide format so before merge, check that all of pds variables are definitely from year 1
-#they should be based on earlier QC
-
-pds_y1 %>% 
-  select(eventname) %>% 
-  as.factor() #only one level when converted to factor --- so looks good! 
-
-#remove eventname column before merge because we know that the pds vars are all from year 1
-
-pds_y1 <- pds_y1 %>% 
-  select(- c(eventname))
-colnames(pds_y1)
 ```
 
 ## Merge
@@ -115,20 +102,26 @@ final_df <- df %>%
 #all vars including aux vars
 
 main_vars <- c("src_subject_id", #character variable
+               "age_y1",
+               "age_y2",
+               "age_y3",
                "sex",    #character variable                    
                "site_id",  
               "parent_dep_y2", #continuous score
                "acs_raked_propensity_score_y0" , 
-               "bmi_y0", 
+               "bmi_y1", 
                "household_income_y0", #character variable
                "race_y0", 
               "dti_mean_motion_y2",  #continuous score       
                "scanner_id_y2", #character variable
-               "age_years", #continuous score
                "cbcl_withdep_y3", #continuous score
                "pds_tot_all",
               "pt_f",
-              "pt_m" #continuous score
+              "pt_m", #continuous score
+              "gonad_avg",
+              "adren_avg",
+              "pds_p_ss_female_category",
+              "pds_p_ss_male_category"
                )
 
 # main_vars <- c("Study ID" = "src_subject_id", #character variable
@@ -160,22 +153,44 @@ main_df <- final_df[,main_vars]
 
 main_df <- main_df %>% 
   select("src_subject_id", 
-               "sex",
-                "age_years",
+          "sex",
+          "age_y1",
+          "age_y2",
+          "age_y3",
           "pds_tot_all",
-           "cbcl_withdep_y3", 
-            "race_y0",
-            "bmi_y0", 
-            "household_income_y0",
-            "dti_mean_motion_y2",
-              "parent_dep_y2",
-               "acs_raked_propensity_score_y0" , 
-            "site_id", 
-               "scanner_id_y2",
-              "pt_f",
-              "pt_m"
+          "cbcl_withdep_y3", 
+          "race_y0",
+          "bmi_y1", 
+          "household_income_y0",
+          "dti_mean_motion_y2",
+          "parent_dep_y2",
+          "acs_raked_propensity_score_y0" , 
+          "site_id", 
+          "scanner_id_y2",
+          "pt_f",
+          "pt_m",
+         "gonad_avg",
+          "adren_avg",
+          "pds_p_ss_female_category",
+          "pds_p_ss_male_category"
                )
 
+#tidy household income levels 
+str(main_df$household_income_y0)
+summary(main_df$household_income_y0)
+#make factor 
+main_df$household_income_y0 <- as.factor(main_df$household_income_y0)
+main_df$household_income_y0 <- recode_factor(main_df$household_income_y0, 
+                                             "1" = "<$5000",
+                                             "2" = "$5,000-$11,999",
+                                             "3" = "$12,000-$15,999",
+                                             "4" = "$16,000-$24,999",
+                                             "5" = "$25,000-$34,999",
+                                             "6" = "$35,000-$49,999",
+                                             "7" = "$50,000-$74,999",
+                                             "8" = "$75,000-$99,999",
+                                             "9" = "$100,000-$199,999",
+                                             "10" = ">$200,000")
 
 ```
 
@@ -184,28 +199,154 @@ main_df <- main_df %>%
 Make descriptive table
 ```{r, descriptives table}
 
-main_df %>% 
-  select(-c(src_subject_id, site_id, scanner_id_y2, pt_f, pt_m, acs_raked_propensity_score_y0)) %>% 
+des_table <- main_df %>% 
+  select(-c(src_subject_id, site_id, scanner_id_y2, pt_f, pt_m, acs_raked_propensity_score_y0, gonad_avg, adren_avg, 
+            pds_p_ss_female_category, pds_p_ss_male_category)) %>% 
   tbl_summary(
     by = sex,
-    statistic = list(all_continuous() ~ "{mean} ({sd}) [{p_miss}]",
-                     all_categorical() ~ "{n} / {N} ({p}%) [{p_miss}]"),
-    digits = all_continuous() ~ 2,
+    statistic = list(all_continuous() ~ c("{mean} ({sd})"),
+                     all_categorical() ~ c("{n} / {N} ({p}%)")),
+    digits = list(all_continuous() ~ c(2,2,0,0),
+                  all_categorical() ~ c(0,0,2)),
     label = c(cbcl_withdep_y3 ~ "Youth depressive symptoms", pds_tot_all ~  "PDS total score",
-            age_years ~ "Age",
+            age_y1 ~ "Age (Y1)",
+            age_y2 ~ "Age (Y2)",
+            age_y3 ~ "Age (Y3)",
             race_y0 ~ "Race/ethnicity",
             parent_dep_y2 ~ "Parent depressive symptoms",
-            bmi_y0 ~ "BMI",
+            bmi_y1 ~ "BMI (Y1)",
             household_income_y0 ~ "Household income",
             dti_mean_motion_y2 ~ "DTI mean FD"),
     missing_text = "Missing",
-    
-  ) %>% 
-  italicize_levels()
+    type = list (all_continuous() ~ "continuous"),
+    missing = "ifany"
+    ) %>% 
+  bold_labels () %>% 
+  italicize_levels() %>% 
+  add_p() %>% 
+  modify_table_body(
+    dplyr::mutate,
+    label = ifelse(label == "Missing",
+                   "Missing (N)",
+                   label)) %>% 
+   as_gt() %>%             # convert to gt table
+  gt::gtsave(             # save table as image
+    filename = "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/descriptives_tbl.png"
+)
+
 
 ```
 
 #MAKE DISTRIBUTION FIGURES 
+
+##Puberty figs
+
+```{r, puberty figures}
+
+#convert sex variable to factor
+
+colnames(main_df)
+str(main_df)
+
+main_df$sex <- as.factor(main_df$sex)
+
+#plot pds total
+pds_tot <- ggplot(main_df, aes(pds_tot_all))
+
+pds_tot + geom_bar(aes(fill = sex)) +
+  ggtitle("PDS total score") +
+  labs (x = "Total PDS") +
+  theme(plot.title = element_text(face = "bold"))
+pds_tot
+
+
+#make histogram of gonadal and adrenal development within each group 
+gonad_hist <- main_df %>%
+  ggplot(aes(x=gonad_avg, color=sex, fill=sex)) +
+  geom_histogram(bins = 7, alpha = 0.5, position = "identity") +
+  ggtitle("Gonadal score") +
+   labs (x = "Gonadal PDS") +
+  theme(plot.title = element_text(face = "bold"))
+gonad_hist
+
+adren_hist <-  main_df %>%
+  ggplot(aes(x=adren_avg, color=sex, fill=sex)) +
+  geom_histogram(bins = 7, alpha = 0.5, position = "identity") +
+  ggtitle("Adrenal score") +
+   labs (x = "Adrenal PDS") +
+  theme(plot.title = element_text(face = "bold"))
+adren_hist
+
+#PDS category data - there seems to be some missing data in these variables provided by ABCD. 
+#let's check
+summary(main_df$pds_p_ss_female_category)
+  
+#tidy pds category data
+cat_df <- main_df %>% mutate(pds_cat = coalesce(pds_p_ss_female_category, pds_p_ss_male_category)) %>%
+         select(src_subject_id, pds_cat, sex)
+
+str(cat_df)
+cat_df$pds_cat <- as.factor(cat_df$pds_cat) # N = 60 missing
+
+#get levels in factor
+levels <- cat_df %>% 
+  group_by(pds_cat) %>%
+  summarise(no_rows = length(pds_cat))
+
+#rename factor levels 
+cat_df$pds_cat <- recode_factor(cat_df$pds_cat, 
+                      `1` = "Pre",
+                      `2` = "Early",
+                      `3` = "Mid",
+                      `4` = "Late",
+                      `5` = "Post",
+                      `NA` = "NA"
+)
+
+cat_hist <- cat_df %>%
+  drop_na(pds_cat) %>% 
+  ggplot(aes(x = pds_cat, fill = sex)) +
+  geom_bar()  +
+   ggtitle("PDS Category") +
+  labs(x = "") +
+    theme(plot.title = element_text(face = "bold"))
+cat_hist
+
+#with count scores
+cat_hist2 <- cat_df %>%
+  drop_na(pds_cat) %>% 
+  ggplot(aes(x = pds_cat, fill = sex)) +
+  geom_bar(position = "fill") + 
+  geom_text(stat='count', aes(label=..count..), position = "fill", vjust=1.5) +
+   ggtitle("PDS Category") +
+  labs(x = "") +
+    theme(plot.title = element_text(face = "bold"))
+cat_hist2
+
+
+
+  
+```
+
+## Depression figs
+```{r, depression figs}
+
+
+dep_hist <- main_df %>%
+  ggplot(aes(x=cbcl_withdep_y3, color=sex, fill=sex)) +
+  geom_histogram(bins = 7, alpha = 0.3, position = "dodge2") +
+  ggtitle("Youth depressive symptoms") +
+   labs (x = "CBCL Withdrawn/Depressed (raw score)") +
+  theme(plot.title = element_text(face = "bold"))
+dep_hist
+
+```
+
+
+
+
+
+####END OF MAIN SCRIPT #######
 
 Variables:
 
@@ -221,125 +362,141 @@ Variables:
 ## Density plots
 
 ```{r, density plots}
-#create separate df with variables we want to plot
-plot_df <- main_df %>% 
-  select(src_subject_id, sex, pds_tot_all, cbcl_withdep_y3, bmi_y0, household_income_y0, race_y0)
-
-summary(plot_df)
-
-#PDS TOTAL 
-
-#get mean and save as tmp variable mu
-mu <- ddply(plot_df, "sex", summarise, grp.mean=mean(pds_tot_all))
-head(mu)
-
-(pds_plot <- ggplot(main_df, aes(x=pds_tot_all, fill=sex, group=sex)) +
-  geom_density(adjust=4, alpha=.4) +
-     geom_vline(data=mu, aes(xintercept=grp.mean, color=sex),
-             linetype="dashed") +
-  theme_classic()) +
-  labs(title=" Perceived pubertal development density curve",x="Pubertal Development Scale (total score)", y = "density") +
-  scale_fill_brewer(palette="Dark2") 
-
-#CBCL depression
-mu <- ddply(plot_df, "sex", summarise, grp.mean=mean(cbcl_withdep_y3))
-head(mu)
-
-(dep_plot <- ggplot(main_df, aes(x=cbcl_withdep_y3, fill=sex, group=sex)) +
-  geom_density(adjust=4, alpha=.4) +
-     geom_vline(data=mu, aes(xintercept=grp.mean, color=sex),
-             linetype="dashed") + 
-    xlim(0,15) +
-  theme_classic()) +
-   labs(title="Depressive symptoms density curve",x="CBCL Withdrawn Depressed (raw score)", y = "density") +
-    scale_fill_brewer(palette="Dark2")
- 
-#BMI 
-mu <- ddply(plot_df, "sex", summarise, grp.mean=mean(bmi_y0))
-head(mu)
-
-(bmi_plot <- ggplot(main_df, aes(x=bmi_y0, fill=sex, group=sex)) +
-  geom_density(adjust=4, alpha=.4) +
-     geom_vline(data=mu, aes(xintercept=grp.mean, color=sex),
-             linetype="dashed") +
-  theme_classic()) +
-  xlab("Body Mass Index (BMI)") +
-  ylab("density") +
-   labs(title="BMI density curve",x="Body Mass Index (BMI)", y = "density") +
-    scale_fill_brewer(palette="Dark2")
-
-
-des_fig_2 <- 
-#display plots together
-(des_fig <- ggarrange(
-  pds_plot, 
-  ggarrange(dep_plot, bmi_plot, ncol= 2, labels = c("B", "C")),
-               nrow = 2,
-            labels = "A")
-            )
-
-ggarrange(
-  lp,                # First row with line plot
-  # Second row with box and dot plots
-  ggarrange(bxp, dp, ncol = 2, labels = c("B", "C")), 
-  nrow = 2, 
-  labels = "A"       # Label of the line plot
-  ) 
+# #create separate df with variables we want to plot
+# plot_df <- main_df %>% 
+#   select(src_subject_id, sex, pds_tot_all, cbcl_withdep_y3, bmi_y0, household_income_y0, race_y0)
+# 
+# summary(plot_df)
+# 
+# #PDS TOTAL 
+# 
+# #get mean and save as tmp variable mu
+# mu <- ddply(plot_df, "sex", summarise, grp.mean=mean(pds_tot_all))
+# head(mu)
+# 
+# (pds_plot <- ggplot(main_df, aes(x=pds_tot_all, fill=sex, group=sex)) +
+#   geom_density(adjust=4, alpha=.4) +
+#      geom_vline(data=mu, aes(xintercept=grp.mean, color=sex),
+#              linetype="dashed") +
+#   theme_classic()) +
+#   labs(title=" Perceived pubertal development density curve",x="Pubertal Development Scale (total score)", y = "density") +
+#   scale_fill_brewer(palette="Dark2") 
+# 
+# #CBCL depression
+# mu <- ddply(plot_df, "sex", summarise, grp.mean=mean(cbcl_withdep_y3))
+# head(mu)
+# 
+# (dep_plot <- ggplot(main_df, aes(x=cbcl_withdep_y3, fill=sex, group=sex)) +
+#   geom_density(adjust=4, alpha=.4) +
+#      geom_vline(data=mu, aes(xintercept=grp.mean, color=sex),
+#              linetype="dashed") + 
+#     xlim(0,15) +
+#   theme_classic()) +
+#    labs(title="Depressive symptoms density curve",x="CBCL Withdrawn Depressed (raw score)", y = "density") +
+#     scale_fill_brewer(palette="Dark2")
+#  
+# #BMI 
+# mu <- ddply(plot_df, "sex", summarise, grp.mean=mean(bmi_y0))
+# head(mu)
+# 
+# (bmi_plot <- ggplot(main_df, aes(x=bmi_y0, fill=sex, group=sex)) +
+#   geom_density(adjust=4, alpha=.4) +
+#      geom_vline(data=mu, aes(xintercept=grp.mean, color=sex),
+#              linetype="dashed") +
+#   theme_classic()) +
+#   xlab("Body Mass Index (BMI)") +
+#   ylab("density") +
+#    labs(title="BMI density curve",x="Body Mass Index (BMI)", y = "density") +
+#     scale_fill_brewer(palette="Dark2")
+# 
+# 
+# des_fig_2 <- 
+# #display plots together
+# (des_fig <- ggarrange(
+#   pds_plot, 
+#   ggarrange(dep_plot, bmi_plot, ncol= 2, labels = c("B", "C")),
+#                nrow = 2,
+#             labels = "A")
+#             )
+# 
+# ggarrange(
+#   lp,                # First row with line plot
+#   # Second row with box and dot plots
+#   ggarrange(bxp, dp, ncol = 2, labels = c("B", "C")), 
+#   nrow = 2, 
+#   labels = "A"       # Label of the line plot
+#   ) 
 
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ##Waffle charts for Race and income  - waffle charts too complicated. 
 
 Stick to bar chats 
 
 ```{r, bar charts}
-# Data transformation
-plot_df$race_y0 <- as.character(plot_df$race_y0)
-
-race <- plot_df %>% 
-  select(race_y0) %>% #select race variable only to get correct freq. 
-  dplyr::group_by(race_y0) %>% 
-  count() %>% 
-dplyr::ungroup() %>% 
-  mutate(perc = `freq` / sum(`freq`)) %>%
-  arrange(perc) %>%
-  mutate(labels = scales::percent(perc))
-
-race_chart <- ggplot(race, aes(x = "", y = perc, fill = (race_y0)) +
-  geom_col() +
-  geom_text(aes(label = ""),
-            position = position_stack(vjust = 0.5)) +
-  coord_polar(theta = "y") +
-  theme_void()
-)
-
-
-
-
-
-ggplot(race, aes(x = "", y = perc, fill = (race_y0)) +
-       geom_bar(width = 1, stat = "identity") +
-       coord_polar("y", start = 0) +
-       geom_label_repel(aes(label = perc), size=5, show.legend = F, nudge_x = 1) +
-       guides(fill = guide_legend(title = "Group"))
-              )
-       
-
-###code working above this####
-
-
-ggplot(race, aes(values = perc, fill = race_y0)) +
-  geom_waffle(n_rows = 8, size = 0.33, colour = "white") +
-  scale_fill_manual(name = NULL,
-                    values = perc,
-                    labels = label) +
-  coord_equal() +
-  theme_void()
-
-  geom_text(aes(label = labels),
-            position = position_stack(vjust = 0.5)) +
-  coord_polar(theta = "y")
+# # Data transformation
+# plot_df$race_y0 <- as.character(plot_df$race_y0)
+# 
+# race <- plot_df %>% 
+#   select(race_y0) %>% #select race variable only to get correct freq. 
+#   dplyr::group_by(race_y0) %>% 
+#   count() %>% 
+# dplyr::ungroup() %>% 
+#   mutate(perc = `freq` / sum(`freq`)) %>%
+#   arrange(perc) %>%
+#   mutate(labels = scales::percent(perc))
+# 
+# race_chart <- ggplot(race, aes(x = "", y = perc, fill = (race_y0)) +
+#   geom_col() +
+#   geom_text(aes(label = ""),
+#             position = position_stack(vjust = 0.5)) +
+#   coord_polar(theta = "y") +
+#   theme_void()
+# )
+# 
+# 
+# 
+# 
+# 
+# ggplot(race, aes(x = "", y = perc, fill = (race_y0)) +
+#        geom_bar(width = 1, stat = "identity") +
+#        coord_polar("y", start = 0) +
+#        geom_label_repel(aes(label = perc), size=5, show.legend = F, nudge_x = 1) +
+#        guides(fill = guide_legend(title = "Group"))
+#               )
+#        
+# 
+# ###code working above this####
+# 
+# 
+# ggplot(race, aes(values = perc, fill = race_y0)) +
+#   geom_waffle(n_rows = 8, size = 0.33, colour = "white") +
+#   scale_fill_manual(name = NULL,
+#                     values = perc,
+#                     labels = label) +
+#   coord_equal() +
+#   theme_void()
+# 
+#   geom_text(aes(label = labels),
+#             position = position_stack(vjust = 0.5)) +
+#   coord_polar(theta = "y")
   
   
 

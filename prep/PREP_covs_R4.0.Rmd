@@ -22,12 +22,11 @@ This data frame was downloaded from Release 4.0 and the DEAP portal which works 
 Load libraries, set working directory.
 
 ```{r, setup}
-
-library(psych)
-library(tidyverse)
-library(ggstatsplot)
-library(readr)
-library(gridExtra)
+library(dbplyr)
+# library(psych)
+# library(ggstatsplot)
+# #library(readr)
+# library(gridExtra)
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
 getwd()
@@ -89,7 +88,7 @@ MRI info: https://nda.nih.gov/data_structure.html?short_name=abcd_mri01
 ```{r, reduce to variables of interest}
 #rename variables so consistent across scripts and more intuitive
 covs <- covs %>% 
-  rename(eventname = event_name, sex = sex_at_birth, bmi = anthro_bmi_calc)
+  dplyr::rename(eventname = event_name, sex = sex_at_birth, bmi = anthro_bmi_calc)
 colnames(covs)
 
 #extract bmi and race from covs df
@@ -127,7 +126,7 @@ WBV <- cortical %>%
 
 #rename MRI info vars
 mri_info <- mri_info %>%
-  rename(scanner_id = mri_info_deviceserialnumber)
+  dplyr::rename(scanner_id = mri_info_deviceserialnumber)
 #extract MRI info
 mri_info <- mri_info %>%
   select(src_subject_id, eventname, sex, mri_info_visitid, scanner_id, mri_info_studydate)
@@ -203,13 +202,16 @@ site_wide <- site_wide %>%
         site_id_18m = site_id_l.18_month_follow_up_arm_1,
         site_id_y2 = site_id_l.2_year_follow_up_y_arm_1,
         site_id_y3 = site_id_l.3_year_follow_up_y_arm_1,
-        interview_age = interview_age.baseline_year_1_arm_1 #baseline age
+        interview_age_y0 = interview_age.baseline_year_1_arm_1, #baseline age
+        interview_age_y1 = interview_age.1_year_follow_up_y_arm_1,
+        interview_age_y2 = interview_age.2_year_follow_up_y_arm_1,
+        interview_age_y3 = interview_age.3_year_follow_up_y_arm_1
            )
 colnames(site_wide)
 
 #select vars
 site_wide <- site_wide %>% 
-  select(src_subject_id, sex, site_id, site_id_6m, site_id_y1, site_id_18m, site_id_y2, site_id_y3, interview_age)
+  select(src_subject_id, sex, site_id, site_id_6m, site_id_y1, site_id_18m, site_id_y2, site_id_y3, interview_age_y1, interview_age_y2, interview_age_y3)
 
 #convert parent mental health df to wide 
 #no parent depression data available for year 1
@@ -310,9 +312,12 @@ head(covs_main)
 #change age to years instead of months 
 covs_main <- covs_main %>%
   mutate(
-    age_years = interview_age/12 
+    age_y1 = interview_age_y1/12,
+    age_y2 = interview_age_y2/12,
+    age_y3 = interview_age_y3/12
   )
 
+head(covs_main)
 
 #Additional tidying of household income variable
 summary(covs_main$household_income_y0)

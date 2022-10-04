@@ -194,6 +194,7 @@ variables <- c("src_subject_id", #character variable
 
 Make sure variable classes are correct and scale continuous variables - we will scale all continuous variables in the dataframe. 
 
+##Scaling variables
 ```{r, check variable type}
 
 str(df)
@@ -220,7 +221,8 @@ df <- df %>%
 # Get continuous variables we want to z-scale
 conCols <- df[sapply(df, class) == 'numeric']
 conCols <- colnames(conCols)
-conCols <- conCols[!conCols %in% "acs_raked_propensity_score_y0"]
+conCols <- conCols[!conCols %in% c("acs_raked_propensity_score_y0","cbcl_withdep_y3")] 
+#don't standardise outcome as it is count data. 
 
 #make list of factor columns for ease of sorting new df later
 facCols <- df[sapply(df, class) == 'factor']
@@ -543,7 +545,7 @@ mainVars <- c("src_subject_id",
                "bmi_y1",  
                "household_income_y0", 
                "race_y0",
-               "age_years", 
+               "age_y3", 
               "cbcl_withdep_y3",
               "pt_f",
               "gonad_pt_f", #pt timing variables to look at in exploratory analyses
@@ -572,12 +574,49 @@ dataSub <- dataSub %>% # N = 2726
 colnames(dataSub)
 head(dataSub)#Looks good! 
 
-#Note that all numeric variables, except the acs_raked_propensity_score have been scaled!!
+#Note that all numeric variables, except the acs_raked_propensity_score and outcome depression measure have been scaled!!
+
+```
+#RUN COMPLETE CASE ANALYSIS 
+##Complete cases
+```{r, complete case models}
+CCfitBase_test <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 
+                           + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude,
+                       )
+
+resCCfitBase_test <- summary(summary(CCfitBase_test))
+resCCfitBase_test
+
+#save results 
+
+saveRDS(resCCfitBase, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/ resCCfitBase_females.rds")
+
+CCfitFull_test <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 
+                            + household_income_y0 + parent_dep_y2
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE),
+                            family = 'poisson',
+                            weights = acs_raked_propensity_score_y0,
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitFull_test <- summary(CCfitFull_test)
+resCCfitFull_test
+
+saveRDS(resCCfitFull, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/ resCCfitFull_females.rds")
+
+
+check
 
 ```
 
 
-#RUN IMPUTATION 
+#RUN IMPUTATION ANALYSIS
 
 A small number of imputations is fine when no. of missing data is small.
 But a larger M makes the imputation more reproducible when using a different seed.
@@ -623,101 +662,109 @@ end_time - start_time
 ```{r, imputed models}
 
 #Base model
-MIfitBase <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
+MIfitBase <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 
                             + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa")))
+                            control = glmerControl(optCtrl=list(maxfun=1e6), optimizer ='bobyqa'), family = 'poisson'))
 
 resMIfitBase <-summary(pool(MIfitBase))
 resMIfitBase
 
 #Full model
-MIfitFull <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 + household_income_y0 + parent_dep_y2
+MIfitFull <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + household_income_y0 + parent_dep_y2
                             + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
+                            control = glmerControl(optCtrl=list(maxfun=1e6), optimizer ='bobyqa'),
+                            family = 'poisson',
                             weights = acs_raked_propensity_score_y0))
 
 resMIfitFull <- summary(pool(MIfitFull))
 resMIfitFull
 
+#difficulty exporting mice output into tab_model so pasting model summary below 
+
+#Basic 
+# term    estimate  std.error  statistic       df      p.value
+# 1      (Intercept)  0.02365080 0.02860744  0.8267361 2482.917 4.084661e-01
+# 2             pt_f  0.16992299 0.02071613  8.2024506 2498.398 4.440892e-16
+# 3           age_y3  0.05922825 0.02041596  2.9010758 2483.784 3.751544e-03
+# 4     race_y0Black -0.25042609 0.07139221 -3.5077511 2473.958 4.599676e-04
+# 5     race_y0Asian -0.14484718 0.13493746 -1.0734394 2315.850 2.831858e-01
+# 6 race_y0AIAN/NHPI  0.02347283 0.23278019  0.1008369 2519.219 9.196880e-01
+# 7     race_y0Other  0.19028989 0.11030412  1.7251385 2432.874 8.462950e-02
+# 8     race_y0Mixed  0.13174167 0.06492925  2.0290033 2506.722 4.256344e-02
+
+#glmer 
+
+#               term    estimate  std.error  statistic       df      p.value
+# 1      (Intercept) -0.19347256 0.04446141 -4.3514718 2492.549 1.406743e-05
+# 2             pt_f  0.27285215 0.03103482  8.7918072 2497.416 0.000000e+00
+# 3           age_y3  0.10629365 0.03048741  3.4864765 2482.444 4.979267e-04
+# 4     race_y0Black -0.46305655 0.11526766 -4.0172287 2486.054 6.063420e-05
+# 5     race_y0Asian -0.16246400 0.21351430 -0.7609046 2329.442 4.467911e-01
+# 6 race_y0AIAN/NHPI -0.04628665 0.37083059 -0.1248189 2520.750 9.006769e-01
+# 7     race_y0Other  0.21322339 0.16196684  1.3164632 2380.144 1.881454e-01
+# 8     race_y0Mixed  0.18558497 0.09547172  1.9438738 2504.649 5.202253e-02
+
+
+
+#Full 
+#                term      estimate  std.error    statistic       df      p.value
+# 1            (Intercept) -0.0932478065 0.15312683 -0.608957999 2490.999 5.426078e-01
+# 2                   pt_f  0.1421822712 0.02073278  6.857847730 2460.270 8.809842e-12
+# 3                 age_y3  0.0626324702 0.02039761  3.070578307 2432.809 2.160060e-03
+# 4           race_y0Black -0.1829821449 0.07624179 -2.400024398 2460.299 1.646787e-02
+# 5           race_y0Asian -0.0291577157 0.12335327 -0.236375701 2207.586 8.131631e-01
+# 6       race_y0AIAN/NHPI -0.0001971227 0.19559085 -0.001007832 2504.154 9.991959e-01
+# 7           race_y0Other  0.2197200926 0.10796828  2.035042952 2429.748 4.195489e-02
+# 8           race_y0Mixed  0.0302306026 0.07405087  0.408240991 2492.573 6.831318e-01
+# 9   household_income_y02  0.0511836101 0.19660689  0.260334772 2482.475 7.946271e-01
+# 10  household_income_y03  0.0169433920 0.19758978  0.085750345 2450.036 9.316719e-01
+# 11  household_income_y04  0.1906693833 0.18189484  1.048239631 2423.910 2.946327e-01
+# 12  household_income_y05  0.0958820645 0.16872759  0.568265489 2492.018 5.699059e-01
+# 13  household_income_y06  0.2668413492 0.16305930  1.636468110 2476.249 1.018687e-01
+# 14  household_income_y07  0.1464303937 0.15858832  0.923336540 2488.885 3.559214e-01
+# 15  household_income_y08  0.0898458608 0.15990659  0.561864644 2485.086 5.742589e-01
+# 16  household_income_y09  0.1140696513 0.15596058  0.731400518 2490.944 4.646033e-01
+# 17 household_income_y010  0.0872639766 0.16488689  0.529235382 2491.646 5.966893e-01
+# 18         parent_dep_y2  0.2927021699 0.02172556 13.472707568 2239.742 0.000000e+00
+> 
+
+
+
+
+
 
 ```
 
-##Complete cases
-```{r, complete case models}
 
-CCfitBase <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            data = dataSub,
-                            na.action = na.exclude,
-                       )
+#Plot H1
 
-CCfitBase
-
-CCfitFull <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_f + age_years + race_y0 
-                            + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            weights = acs_raked_propensity_score_y0,
-                            data = dataSub,
-                            na.action = na.exclude
-                       )
-
-
-resCCfitFull <- summary(CCfitFull)
-resCCfitFull
-
-TukeyHSD(CCfitFull)
+Make effect sizes 
+```{r}
 
 ```
-#EXPORT MAIN RESULTS TABLE 
+
 
 https://lmudge13.github.io/sample_code/mixed_effects.html
 
-```{r, imputed}
+```{r, complete cases}
 
-CC_res_tbl <- sjPlot::tab_model(CCfitBase, CCfitFull,
+CC_res_tbl <- tab_model(CCfitBase, CCfitFull,
                   show.se = TRUE,
                   show.df = FALSE,
                   show.ci = FALSE,
                   digits = 3,
-                  terms = terms,
-                  title = "Main Effect of Pubertal Timing and Depression",
-                  pred.labels = pred.labels,
+                  title = "Females — Main effect of pubertal timing and depression (complete cases)",
                   dv.labels = c("Base", "Full"),
                   string.se = "SE",
-                  string.p = "P-Value")
-CC_res_tbl
+                  string.p = "P-Value"
+)
 
-sjPlot::plot_model(CCfitFull,
-                   axis.labels = c("Pubertal timing", "Age", "Race/Ethnicity (Black)", "Race/Ethnicity (Asian)",
-                                   "Race/Ethnicity (AIAN/NHPI*)", "Race/Ethnicity (Other)", "Race/Ethnicity (Mixed)",
-                                    "Income ($5,000 to $11,999)", "Income ($12,000 to $15,999",
-                                    "Income ($16,000 to $24,999)", "Income ($25,000 to $34,999)",
-                                    "Income ($35,000 to $49,999)", "Income ($50,000 to $74,999)",
-                                    "Income ($75,000 to $99,999)", "Income ($100,000 to $199,999)",
-                                    "Income (>$200,000)", "Parent depression"),
-                   show.values = FALSE,
-                   show.p = TRUE,
-                   title = "Effect of pubertal timing on youth depression")
-
-sjPlot::sjp.lmer
-
-pred.labels <- c("Pubertal timing", "Age", "Race/Ethnicity (Black)", "Race/Ethnicity (Asian)",
-                                   "Race/Ethnicity (AIAN/NHPI*)", "Race/Ethnicity (Other)", "Race/Ethnicity (Mixed)",
-                                    "Income ($5,000 to $11,999)", "Income ($12,000 to $15,999",
-                                    "Income ($16,000 to $24,999)", "Income ($25,000 to $34,999)",
-                                    "Income ($35,000 to $49,999)", "Income ($50,000 to $74,999)",
-                                    "Income ($75,000 to $99,999)", "Income ($100,000 to $199,999)",
-                                    "Income (>$200,000)", "Parent depression")
-terms <- c("pt_f", "age_years", "race_y0Black", "race_y0Asian", "race_y0AIAN/NHPI", "race_y0Other", 
-                            "race_y0Mixed", "household_income_y02", "household_income_y03", "household_income_y04",
-                            "household_income_y05", "household_income_y06", "household_income_y07", "household_income_y08", "household_income_y09", "household_income_y10", "parent_dep_y2")
-                                    
+#save results 
 
 
 
 ```
+
 #EXPLORATORY ANALYSES
 
 1. Use gonadal and adrenal pubertal timing measures as separate predictors 

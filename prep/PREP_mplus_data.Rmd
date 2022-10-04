@@ -286,16 +286,16 @@ Note, we will make one large list with all the extra variables and then remove u
 
 ```{r, tidy dataset}
 
-extraVars <- c("site_id_6m", "site_id_y1", "site_id_18m", #no longer need these
+extraVars <- c("site_id_6m", "site_id", "site_id_18m", #no longer need these
                "site_id_y2", "site_id_y3",
-               "interview_age", "parent_dep_y3",
+               "parent_dep_y3",
                "acs_raked_propensity_score_y1", "bmi_y2",
                "race_6m", "race_y1", "race_18m",
                "race_y2", "dti_mean_motion_y0",
                "interview_date.baseline_year_1_arm_1",
                "parent_high_ed_y0",
                "interview_date_y0", "interview_date_y1", "interview_date_y2",  "interview_date_y3",
-               "age_years.y", #extra age variable after merge
+               "age_years", "age_y1", #extra age variable after merge
                "pds_m_pt_valid", "pds_f_pt_valid"
                 )
 
@@ -345,16 +345,15 @@ colnames(df)
 
 #### non imaging variables 
 
-df <-df %>% 
-  rename( id = src_subject_id, 
+df <- df %>% 
+  dplyr::rename( id = src_subject_id, 
           p_dep_y2 = parent_dep_y2,
+          site_id = site_id_y1,
           fam_id = rel_family_id,
           pws = acs_raked_propensity_score_y0,
           scnr_id = scanner_id_y2,
           income = household_income_y0,
-          age = age_years.x,
           y_dep_y3 = cbcl_withdep_y3,  #youth depression year 3
-          time = eventname,
           pds_t_m = pds_tot_m,
           pds_t_f = pds_tot_f,
           pds_t_al = pds_tot_all,
@@ -365,7 +364,7 @@ df <-df %>%
           y_anx_y1 = cbcl_anxdep_y1,
           y_anx_y2 =cbcl_anxdep_y2, 
           y_anx_y3 = cbcl_anxdep_y3, 
-          p_dep_y0 = parent_dep_y0, 
+          p_dep_y0 = parent_dep_y0
           )
         
 colnames(df)
@@ -385,7 +384,7 @@ N.B: Sex variable labelling: 1= F, 2= M
 
 #char vars
 charVars <- c("id", "sex", "site_id",
-              "scnr_id", "time", "race_y0")
+              "scnr_id","race_y0")
 
 #convert character variables to factor
 df <- df %>%
@@ -469,9 +468,7 @@ expl_df <- expl_df %>%
           pws = acs_raked_propensity_score_y0,
           scnr_id = scanner_id_y2,
           income = household_income_y0,
-          age = age_years.x,
           y_dep_y3 = cbcl_withdep_y3,  #youth depression year 3
-          time = eventname,
           pds_t_m = pds_tot_m,
           pds_t_f = pds_tot_f,
           pds_t_al = pds_tot_all,
@@ -488,13 +485,34 @@ colnames(expl_df)
 
 
 ```
+#R Export for RR exploratory analyses
+```{r, for use in R}
 
-##Formatting
+F_expl_df <- expl_df %>% 
+  filter(sex == "F") %>%  #females only  N= 2533
+  select(- c(pt_m, pds_t_m))
+
+M_expl_df <- expl_df %>% 
+  filter(sex == "M") %>%  #males only M = 2792
+  select(- c(pt_f, pds_t_f))
+
+#Save RDS files 
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+
+saveRDS(F_expl_df, "explr_analy_F_data.R4.0.rds")
+
+saveRDS(M_expl_df, "explr_analy_M_data.R4.0.rds")
+
+```
+
+
+##Formatting for Mplus
 ```{r, formatting for MPlus}
 
 #char vars
 charVars <- c("id", "sex", "site_id",
-              "scnr_id", "time", "race_y0")
+              "scnr_id", "race_y0")
 
 #convert character variables to factor
 expl_df <- expl_df %>%
@@ -547,6 +565,9 @@ M_expl_df <- expl_df %>%
 
 ```
 
+#Explore data
+
+## Mplus
 ```{r, make data files for Mplus}
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/Mplus_inputs")
@@ -555,10 +576,11 @@ female_df <- prepareMplusData(F_df, "female_df.dat")
 
 male_df <- prepareMplusData(M_df, "male_df.dat")
 
+female_expl_df <- prepareMplusData(F_expl_df, "female_explr_df.dat")
+
+male_expl_df <- prepareMplusData(M_expl_df, "male_explr_df.dat")
+
 ```
-
-
-
 
 #4: MplusAutomation 
 

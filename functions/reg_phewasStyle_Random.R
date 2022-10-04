@@ -20,13 +20,12 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
          mod.dat_long[sh_r,mod.factor]=scale(mod.dat_long[sh_r,mod.factor])
       }
       
-      mod=paste0(mod.dep,'~',mod.covs,'+ (1|site_id_id) + (1|f.eid) +',mod.factor)
+      mod=paste0(mod.dep,'~',mod.covs,'+ (1|scnr_id) + (1|f.eid) +',mod.factor)
       
-      #(1|scanner:f.eid) + (1|family:f.eid)
-      #(1|scanner_id) + (1|scanner_id:rel_family_id) + (1|scanner_id:rel_family_id:f.eid) #scanner, individual within scanner, individual within family within scanner
       
       fit=lmer(as.formula(as.character(mod)),data=mod.dat_long,
-              na.action=na.exclude,control = lmerControl(optimizer ="bobyqa"))
+              na.action=na.exclude,control = lmerControl(optimizer ="bobyqa"),
+              weights = pws)
       # tmp.ci = intervals(fit,which='fixed')$fixed %>% as.data.frame %>% 
       #    dplyr::select(Lower_95CI=lower,Upper_95CI=upper) %>% 
       #    tail(1)
@@ -42,12 +41,15 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
    }else{
       dep.dat=mod.dat_short[,mod.dep]            
       if (length(table(dep.dat))==2){
-         mod=paste0(mod.dep,'~',mod.covs,'+(1|site_id) + (1|rel_family_id) +scale(',mod.factor,')')
+         mod=paste0(mod.dep,'~', mod.factor, '+', mod.covs,'+(1|scnr_id) + (1|fam_id)')
          fit=glmer(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,
-                   control = glmerControl(optimizer ="bobyqa"),family = 'poisson')
+                   control = glmerControl(optimizer ="bobyqa"),family = 'poisson',
+                   weights = pws)
       }else{
-         mod=paste0('scale(',mod.dep,')~',mod.covs,'+(1|site_id) + (1|rel_family_id) +scale(',mod.factor,')')
-         fit=lmer(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,control = lmerControl(optimizer ="bobyqa"))
+         mod=paste0(mod.dep,'~', mod.factor, '+', mod.covs,'+(1|scnr_id) + (1|fam_id)')
+         fit=lmer(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,
+                  control = lmerControl(optimizer ="bobyqa"),
+                  weights = pws)
       }            
       # tmp.ci = confint(fit) %>% as.data.frame %>% 
       #    dplyr::select(Lower_95CI=`2.5 %`,Upper_95CI=`97.5 %`) %>% 

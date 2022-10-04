@@ -411,7 +411,6 @@ PDS score is regressed on age for males and females separately.
 The standardised residual obtained is used as the pubertal timing score.
 
 
-
 ### Pubertal timing total score  (let's still run this so we can compare)
 ```{r, pt PDS total}
 
@@ -449,12 +448,25 @@ org_f_QQplot <- plot(pt_f_lm, which= c(2))
 
 ```
 
-#Gonadal pubertal timing 
+Gonadal and adrenal timing
+```{r, pt gonadal and adrenal average}
 
-```{r, pt gonadal average}
+#generate separate male and female gonadal items before generating timing measure
+
+pds_timing_y1$gonad_m <- NA
+pds_timing_y1$gonad_m <- pds_timing_y1
+
+pds_timing_y1 <- pds_timing_y1 %>% 
+  mutate(gonad_f = case_when(sex == "F" ~ rowMeans(pds_timing_y1[, c("pds_1_p", "pds_f4_p", "pds_f5b_p")])),
+         gonad_m = case_when(sex == "M" ~ rowMeans(pds_timing_y1[, c("pds_1_p", "pds_m4_p", "pds_m5_p")])),
+         adren_f = case_when(sex == "F" ~ rowMeans(pds_timing_y1[, c("pds_2_p", "pds_3_p")])),
+         adren_m = case_when(sex == "M" ~ rowMeans(pds_timing_y1[, c("pds_2_p", "pds_3_p")]))
+         )
+
+#GONADAL TIMING
 
 #males 
-pt_m_lm <- lm(gonad_M ~age_years, na.action=na.exclude, data = M_pds_timing) # create linear model, and specify na.exclude so that df size stays the same.
+pt_m_lm <- lm(gonad_m ~age_years, na.action=na.exclude, data = pds_timing_y1) # create linear model, and specify na.exclude so that df size stays the same.
 summ(pt_m_lm,
      robust = TRUE, #robust standard error = HC3 as per sandwich package
      scale = TRUE,  #scaled beta used
@@ -463,16 +475,15 @@ summ(pt_m_lm,
 #obtain standardised residual = measure of pubertal timing. Save as new variable. 
 #Note: the resid function in lm allows us to have the desired NA values for female rows. 
 
-M_pds_timing$gonad_pt_m <- resid(pt_m_lm)
-summ_g_m <- summary(M_pds_timing$gonad_pt_m)
+pds_timing_y1$gonad_pt_m <- resid(pt_m_lm)
+summ_g_m <- summary(pds_timing_y1$gonad_pt_m)
 summ_g_m
 
 org_m_QQplot <- plot(pt_m_lm, which= c(2)) #get QQplot
 
 
-#### Female pubertal timing linear model ####
-#model summary
-pt_f_lm <- lm(gonad_F ~age_years, na.action=na.exclude, data = F_pds_timing) # create linear model, and specify na.exclude so that df size stays the same.
+#Females
+pt_f_lm <- lm(gonad_f ~age_years, na.action=na.exclude, data = pds_timing_y1) # create linear model, and specify na.exclude so that df size stays the same.
 summ(pt_f_lm,
      robust = TRUE, #robust standard error = HC3 as per sandwich package
      scale = TRUE,  #scaled beta used
@@ -481,17 +492,51 @@ summ(pt_f_lm,
 #obtain standardised residual = measure of pubertal timing. Save as new variable. 
 #Note: the resid function in lm allows us to have the desired NA values for female rows. 
 
-F_pds_timing$gonad_pt_f <- resid(pt_f_lm)
-summ_g_f <- summary(F_pds_timing$gonad_pt_f)
+pds_timing_y1$gonad_pt_f <- resid(pt_f_lm)
+summ_g_f <- summary(pds_timing_y1$gonad_pt_f)
 summ_g_f 
 
 org_m_QQplot <- plot(pt_f_lm, which= c(2)) #get QQplot
 
+## ADRENAL TIMING 
+
+#Males 
+pt_m_lm <- lm(adren_m ~age_years, na.action=na.exclude, data = pds_timing_y1) # create linear model, and specify na.exclude so that df size stays the same.
+summ(pt_m_lm,
+     robust = TRUE, #robust standard error = HC3 as per sandwich package
+     scale = TRUE,  #scaled beta used
+     confint = TRUE, digits = 3) #get confidence intervals. 95% CI by default 
+
+#obtain standardised residual = measure of pubertal timing. Save as new variable. 
+#Note: the resid function in lm allows us to have the desired NA values for female rows. 
+
+pds_timing_y1$adren_pt_m <- resid(pt_m_lm)
+summ_g_m <- summary(pds_timing_y1$adren_pt_m)
+summ_g_m
+
+org_m_QQplot <- plot(pt_m_lm, which= c(2)) #get QQplot
+
+#Females 
+pt_f_lm <- lm(adren_f ~age_years, na.action=na.exclude, data = pds_timing_y1) # create linear model, and specify na.exclude so that df size stays the same.
+summ(pt_f_lm,
+     robust = TRUE, #robust standard error = HC3 as per sandwich package
+     scale = TRUE,  #scaled beta used
+     confint = TRUE, digits = 3) #get confidence intervals. 95% CI by default 
+
+#obtain standardised residual = measure of pubertal timing. Save as new variable. 
+#Note: the resid function in lm allows us to have the desired NA values for female rows. 
+
+pds_timing_y1$adren_pt_f <- resid(pt_f_lm)
+summ_g_f <- summary(pds_timing_y1$adren_pt_f)
+summ_g_f
+
+org_m_QQplot <- plot(pt_f_lm, which= c(2)) #get QQplot
+
+#check new dataframe 
+head(pds_timing_y1)
+
+
 ```
-
-
-
-
 
 STEP 7: Export clean data for Year 1. 
 
