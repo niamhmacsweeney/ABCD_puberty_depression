@@ -38,6 +38,7 @@ library(mediation)
 library(carData)
 library(plotly)
 library(viridis)
+library(iNZightTools) #to create combined categorical vars
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/prep")
 
@@ -127,7 +128,6 @@ globalMeds
 
 #regional measures
 regionalMeds <- c(	
-                  
                   "avg.thk.APARC.mdtm", #temporal thickness ROIs (H3a)
                   "avg.thk.APARC.insula",
                   "avg.thk.APARC.rrmdfr", #frontal thickness  ROIs (H3b)
@@ -148,8 +148,27 @@ regionalMeds <- c(
                   )
 
 regionalMeds
+```
+
+##Exploratory mediators
+
+See scripts ANALY_explr... for exploratory data analysis that was undertaken to identify additional ROIs. 
+
+We undertook exploratory analyses to identify any additional ROIs that were not detected in the pilot analyses. The pilot analyses used baseline imaging data from the full sample while the confirmatory analyses used imaging data from year 2 in ~50% of the sample due to the partial year 3 data release at time of analysis. 
+
+We decided to take a more specific approach to identify potential mediators in our exploratory analyses, such that we only included an ROI as a mediator if it was associated with both depression and puberty at year 3 and year 1 respectively. 
+
+The volume of the accumbens area was the only region that met these criteria in females only. No brain structural measures met these criteria in males. 
+
+
+
+```{r, exploratory mediator}
+
+explrMeds <- c("avg.vol.ASEG.aa")
 
 ```
+
+
 
 ###Merge imaging variables and extract ROIs
 
@@ -174,10 +193,12 @@ colnames(imgVars)
 
 #Extract mediators 
 
+Note: Given that there is only one mediator to test from the exploratory analyses, we will add it to the main MPlus data files. However, we will still generate exploratory dataframe with all brain measures for reference (also, the exploratory data files created here in the MPlus naming format were used as input in the ANALY_explr scripts).
+
 ```{r, extract mediator vars}
 
-mainImgVars <- imgVars %>% #18 variables
-  select(src_subject_id, globalMeds, regionalMeds) 
+mainImgVars <- imgVars %>% #20 variables
+  select(src_subject_id, globalMeds, regionalMeds, explrMeds) 
 
 ```
 
@@ -294,8 +315,15 @@ extraVars <- c("site_id_6m", "site_id", "site_id_18m", #no longer need these
                "race_y2", "dti_mean_motion_y0",
                "interview_date.baseline_year_1_arm_1",
                "parent_high_ed_y0",
-               "interview_date_y0", "interview_date_y1", "interview_date_y2",  "interview_date_y3",
+               "interview_date_y0", "interview_date_y1", "interview_date_y2",
+               "interview_date_y3", 
+               "interview_age_y1", "interview_age_y2", "interview_age_y3",
+               "pds_p_ss_female_category", 
+               "pds_p_ss_male_category",
                "age_years", "age_y1", #extra age variable after merge
+               "pds_tot_m", "pds_tot_f" ,"pds_tot_all", 
+               "pds_1_p", "pds_2_p",  "pds_3_p", "pds_m5_p",    
+               "pds_m4_p", "pds_f4_p","pds_f5b_p",
                "pds_m_pt_valid", "pds_f_pt_valid"
                 )
 
@@ -354,9 +382,6 @@ df <- df %>%
           scnr_id = scanner_id_y2,
           income = household_income_y0,
           y_dep_y3 = cbcl_withdep_y3,  #youth depression year 3
-          pds_t_m = pds_tot_m,
-          pds_t_f = pds_tot_f,
-          pds_t_al = pds_tot_all,
           y_dep_y0 = cbcl_withdep_y0, #aux vars needed for FIML
           y_dep_y1 = cbcl_withdep_y1, 
           y_dep_y2 = cbcl_withdep_y2,
@@ -371,7 +396,10 @@ colnames(df)
 
 ```
 ###Formating
-All variables need to be numeric and missing values need to be indicated with a * or . or "" (blank space)
+
+We also need to create a combined cluster variable for scanner_id and family_id due to issues with multiple clustering variables in MPlus. We will use the combineCatVars variable to do this. This needs to be done before variables are converted to numeric due to function requirements. 
+
+All variables need to be numeric and missing values need to be indicated with "-9999". 
 
 Before converting character variables to factors and then numeric, we will get a list of all the factors and values for future reference. 
 
@@ -380,11 +408,29 @@ Note: income is already numeric, described below:
 1= Less than $5,000; 2=$5,000 through $11,999; 3=$12,000 through $15,999; 4=$16,000 through $24,999; 5=$25,000 through $34,999; 6=$35,000 through $49,999; 7=$50,000 through $74,999; 8= $75,000 through $99,999; 9=$100,000 through $199,999; 10=$200,000 and greater
 
 N.B: Sex variable labelling: 1= F, 2= M
+
 ```{r, Mplus formatting}
+
+#Create cluster variable
+
+df$fam_id <- as.character((df$fam_id)) #make fam id character var
+
+df <- combineCatVars(df, 
+                     vars = c("scnr_id", "fam_id"),
+                     sep = "_",
+                     keep_empty = TRUE)
+head(df) #check new var looks okay
+str(df)
+
+#rename cluster variable so it short enough for MPlus! 
+#N.B. c_vars = scnr_id_fam_id
+
+df <- df %>% 
+  rename(c_vars = scnr_id_fam_id)
 
 #char vars
 charVars <- c("id", "sex", "site_id",
-              "scnr_id","race_y0")
+              "scnr_id", "fam_id", "race_y0", "c_vars")
 
 #convert character variables to factor
 df <- df %>%
@@ -408,11 +454,13 @@ str(df) # all variables are either numeric or integer
 
 summary(df)
 
+
 ### change NA values to 
 
 df[is.na(df)] <- -9999 
 
 head(df) #looks good!
+
 
 ```
 
@@ -469,9 +517,6 @@ expl_df <- expl_df %>%
           scnr_id = scanner_id_y2,
           income = household_income_y0,
           y_dep_y3 = cbcl_withdep_y3,  #youth depression year 3
-          pds_t_m = pds_tot_m,
-          pds_t_f = pds_tot_f,
-          pds_t_al = pds_tot_all,
           y_dep_y0 = cbcl_withdep_y0, #aux vars needed for FIML
           y_dep_y1 = cbcl_withdep_y1, 
           y_dep_y2 = cbcl_withdep_y2,
@@ -485,16 +530,16 @@ colnames(expl_df)
 
 
 ```
-#R Export for RR exploratory analyses
+###R Export for RR exploratory analyses
 ```{r, for use in R}
 
 F_expl_df <- expl_df %>% 
   filter(sex == "F") %>%  #females only  N= 2533
-  select(- c(pt_m, pds_t_m))
+  select(- c(pt_m))
 
 M_expl_df <- expl_df %>% 
   filter(sex == "M") %>%  #males only M = 2792
-  select(- c(pt_f, pds_t_f))
+  select(- c(pt_f))
 
 #Save RDS files 
 
@@ -507,11 +552,11 @@ saveRDS(M_expl_df, "explr_analy_M_data.R4.0.rds")
 ```
 
 
-##Formatting for Mplus
+###Formatting for Mplus
 ```{r, formatting for MPlus}
 
 #char vars
-charVars <- c("id", "sex", "site_id",
+charVars <- c("id", "sex", "site_id_y1",
               "scnr_id", "race_y0")
 
 #convert character variables to factor
@@ -543,11 +588,11 @@ The data frames are not in the correct format for MPlus
 
 F_df <- df %>% 
   filter(sex == 1) %>%  #females only  N= 2533
-  select(- c(pt_m, pds_t_m))
+  select(- c(pt_m))
 
 M_df <- df %>% 
   filter(sex == 2) %>%  #males only M = 2792
-  select(- c(pt_f, pds_t_f))
+  select(- c(pt_f))
 
 
 ```
@@ -557,11 +602,11 @@ M_df <- df %>%
 
 F_expl_df <- expl_df %>% 
   filter(sex == 1) %>%  #females only  N= 2533
-  select(- c(pt_m, pds_t_m))
+  select(- c(pt_m))
 
 M_expl_df <- expl_df %>% 
   filter(sex == 2) %>%  #males only M = 2792
-  select(- c(pt_f, pds_t_f))
+  select(- c(pt_f))
 
 ```
 
@@ -581,6 +626,52 @@ female_expl_df <- prepareMplusData(F_expl_df, "female_explr_df.dat")
 male_expl_df <- prepareMplusData(M_expl_df, "male_explr_df.dat")
 
 ```
+
+############# END OF MAIN SCRIPT ###############
+
+#Column ordering for Mplus 
+
+```{r}
+
+custom_glimpse <- function(x) {
+  data.frame(
+    col_name = colnames(x),
+    col_index = 1:ncol(x),
+    col_class = sapply(x, class),
+    row.names = NULL
+  )
+}
+
+x = F_df
+
+female_codebook <- custom_glimpse(x)
+female_codebook
+
+write.csv(female_codebook,"/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/FemaleMplusCodebook.csv", row.names = TRUE)
+
+#males
+
+custom_glimpse <- function(y) {
+  data.frame(
+    col_name = colnames(y),
+    col_index = 1:ncol(y),
+    col_class = sapply(y, class),
+    row.names = NULL
+  )
+}
+
+y = M_df
+
+male_codebook <- custom_glimpse(y)
+male_codebook
+
+write.csv(male_codebook,"/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/MaleMplusCodebook.csv", row.names = TRUE)
+
+```
+
+
+
+
 
 #4: MplusAutomation 
 

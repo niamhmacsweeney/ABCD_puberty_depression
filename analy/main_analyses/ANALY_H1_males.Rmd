@@ -190,6 +190,7 @@ variables <- c("src_subject_id", #character variable
 
 Make sure variable classes are correct and scale continuous variables - we will scale all continuous variables in the dataframe. 
 
+##Scaling variables
 ```{r, check variable type}
 
 str(df)
@@ -216,7 +217,9 @@ df <- df %>%
 # Get continuous variables we want to z-scale
 conCols <- df[sapply(df, class) == 'numeric']
 conCols <- colnames(conCols)
-conCols <- conCols[!conCols %in% "acs_raked_propensity_score_y0"]
+conCols <- conCols[!conCols %in% c("acs_raked_propensity_score_y0","cbcl_withdep_y3")]
+#don't standardise outcome as it is count data.
+
 
 #make list of factor columns for ease of sorting new df later
 facCols <- df[sapply(df, class) == 'factor']
@@ -569,6 +572,65 @@ head(dataSub)#Looks good!
 #Note that all numeric variables except the acs_ranked propensity score have been scaled!!
 
 ```
+#RUN COMPLETE CASES
+
+```{r, complete case models}
+
+CCfitBase <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer ="bobyqa"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude,
+                       )
+
+resCCfitBase_males <- summary(summary(CCfitBase))
+resCCfitBase_males
+
+#check residuals 
+hist(resid(CCfitBase))
+
+
+saveRDS(resCCfitBase_males, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/ resCCfitBase_males.rds")
+
+
+CCfitFull <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + bmi_y1
+                            + household_income_y0 + parent_dep_y2
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            weights = acs_raked_propensity_score_y0,
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+
+resCCfitFull_males  <- summary(CCfitFull)
+resCCfitFull_males 
+
+saveRDS(resCCfitFull_males, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/ resCCfitFull_males.rds")
+
+#Plot results 
+
+plot_model(CCfitFull)
+
+```
+#EXPORT RESULTS TABLE 
+
+```{r, imputed}
+
+results_table <- sjPlot::tab_model(CCfitBase, CCfitFull,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  digits = 3,
+                  title = "Males — Main Effect of Pubertal Timing and Depression",
+                  dv.labels = c("Base", "Full"),
+                  string.se = "SE",
+                  string.p = "P-Value")
+
+results_table
+```
 
 
 #RUN IMPUTATION 
@@ -673,54 +735,6 @@ resMIfitFull
 
 ```
 
-##Complete cases
-```{r, complete case models}
-
-CCfitBase <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            data = dataSub,
-                            na.action = na.exclude,
-                       )
-
-
-
-CCfitFull <- lmerTest::lmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
-                            + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            weights = acs_raked_propensity_score_y0,
-                            data = dataSub,
-                            na.action = na.exclude
-                       )
-
-
-resCCfitFull <- summary(CCfitFull)
-resCCfitFull
-
-
-#Plot results 
-
-plot_model(CCfitBase)
-
-```
-#EXPORT RESULTS TABLE 
-
-```{r, imputed}
-
-sjPlot::tab_model(CCfitBase, CCfitFull,
-                  show.se = TRUE,
-                  show.df = FALSE,
-                  show.ci = FALSE,
-                  digits = 3,
-                  title = "Males — Main Effect of Pubertal Timing and Depression",
-                  dv.labels = c("Base", "Full"),
-                  string.se = "SE",
-                  string.p = "P-Value", 
-                  file = "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/CC_male_H1res.html")
-
-
-```
 
 
 

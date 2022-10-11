@@ -1,5 +1,5 @@
 ---
-title: "ANALY_H1_females"
+title: "ANALY_H1_males"
 author: "Niamh MacSweeney" Credit to Amelia Edmondson-Stait for the template script
 date: '2022-08-26'
 output: html_document
@@ -36,7 +36,7 @@ setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depressi
 
 ## Introduction
 
-SCRIPT FOR FEMALES
+SCRIPT FOR MALES
 
 This script runs the linear mixed effects model to test Hypothesis 1 in our main analysis. 
 
@@ -148,17 +148,17 @@ df <- df %>%
 
 We will do imputation separately for males and females so we need to split the dataframe by sex. 
 
-Total N for females = 2726
+Total N for males = 3001
 
 ```{r, get females only}
 
-df <- df %>% #N = 2726
-  filter(sex == "F")
+df <- df %>% #N = 3001
+  filter(sex == "M")
 
-#remove male specific cols (pds_tot_m and pt_m and pds_tot_all) #should have 43 variables after. 
+#remove female specific cols (pds_tot_f and pt_f and pds_tot_all)
 
 df <- df %>% 
-  select(-c(pds_tot_m, pds_tot_all, pt_m, gonad_pt_m, adren_pt_m))
+  select(-c(pds_tot_f, pds_tot_all, pt_f, gonad_pt_f, adren_pt_f))
 
 ```
 
@@ -188,8 +188,8 @@ variables <- c("src_subject_id", #character variable
                "age_years", #continuous score
                "cbcl_withdep_y0", "cbcl_withdep_y1", "cbcl_withdep_y2", "cbcl_withdep_y3", #continuous score
                "cbcl_anxdep_y0", "cbcl_anxdep_y1", "cbcl_anxdep_y2", "cbcl_anxdep_y3", #continuous score
-               "pds_tot_f",  "pt_f", #continuous score
-               "gonad_pt_f", "adren_pt_f"
+               "pds_tot_m",  "pt_m", #continuous score
+               "gonad_pt_m", "adren_pt_m"
                )
   
 ```
@@ -223,7 +223,7 @@ df <- df %>%
 # Get continuous variables we want to z-scale
 conCols <- df[sapply(df, class) == 'numeric']
 conCols <- colnames(conCols)
-conCols <- conCols[!conCols %in% c("acs_raked_propensity_score_y0","cbcl_withdep_y3")] 
+conCols <- conCols[!conCols %in% c("acs_raked_propensity_score_y0","cbcl_withdep_y3", "cbcl_withdep_y1")] 
 #don't standardise outcome as it is count data. 
 
 #make list of factor columns for ease of sorting new df later
@@ -286,8 +286,8 @@ colnames(dataSub)[propNA > 0.40]
 ##Variables to impute:
 
 - youth depression year 3 (NA =46)
-- BMI (NA=51)
-- parental mood (NA=35)
+- BMI_y1 (NA=43)
+- parental mood_y2 (NA=38)
 
 ##Variables NOT imputed:
 - household income - this info only available at baseline (looked at parental education as an aux variable but all participants with missing income data also have missing education data!)
@@ -310,20 +310,21 @@ dataSub %>%
   nrow() 
 
 #46 participants are missing depression outcome data
-#34 participants are missing outcome data at year 3 but not at year 2, can impute 12
+#26 participants are missing outcome data at year 3 but not at year 2, can impute 20
 
 dataSub %>% 
   filter(is.na(cbcl_withdep_y2)) %>%
   filter(!is.na(cbcl_withdep_y1)) %>%
   nrow() 
 
-#35 participants are missing outcome data at year 2 but not at year 1
+#41 participants are missing outcome data at year 2 but not at year 1
 
 dataSub %>% 
   filter(is.na(cbcl_withdep_y1)) %>%
   filter(!is.na(cbcl_withdep_y0)) %>%
   nrow() 
-#1 participant is missing outcome data at year 1 but not at baseline (y0)
+#0 participants are missing outcome data at year 1 but not at baseline (y0)
+
 
 ```
 
@@ -332,12 +333,11 @@ BMI
 
 #### Imputing BMI:
 dataSub %>% 
-  filter(is.na(bmi_y0)) %>%
-  filter(!is.na(bmi_y1)) %>%
+  filter(is.na(bmi_y1)) %>%
+  filter(!is.na(bmi_y0)) %>%
   nrow() 
-# 15 participants have BMI missing at y0 (baseline)
-# 8 participants have BMI missing at y0 but not at y1
-# Therefore we can impute 8 participants BMI meaning only 7 participants have missing BMI.
+# 43 participants have BMI missing at y1
+# 41 participants have BMI missing at y1 but not at y0
 
 ```
 Parental Depression 
@@ -348,14 +348,14 @@ dataSub %>%
   filter(is.na(parent_dep_y2)) %>%
   filter(!is.na(parent_dep_y0)) %>%
   nrow() 
-# 35 participants have missing data at year 2
+# 38 participants have missing data at year 2
 # 0 Participants have missing data at y0
 
-# Therefore we can impute 35 participants meaning there is 0 missing parental depression data. 
+# Therefore we can impute 38 participants meaning there is 0 missing parental depression data.
 
 ```
 
-Race missingness
+Race missingness - we will not impute
 ```{r, race missingness}
 
 ### Imputing race_y0
@@ -368,14 +368,13 @@ dataSub %>%
 
 ```
 
-Household income missingness 
+Household income missingness = we will not impute to keep consistent with female dataframe. 
 ```{r, income missingness}
 dataSub %>% 
  filter(is.na(household_income_y0)) %>%
   filter(!is.na(parent_high_ed_y0)) %>%
   nrow()
 
-#all participants with missing income data also have missing parental education data. 
 
 ```
 
@@ -442,9 +441,11 @@ newAuxVars <- newAuxVars[!newAuxVars %in% ""]
 newAuxVars 
 
 
-#It looks like Asian, Other, race predict missingness in depression outcome measure. We will need to acknowledge this in our discussion. Household income do not predict missingness. 
+#It looks like certain (higher) bands of household income predict missingness in outcome measure:  
 
-#How to get stats from this - check later. 
+#Namely, income categories 07, 08 and 09:
+
+#7=$50,000 through $74,999; 8= $75,000 through $99,999; 9=$100,000 through $199,999
 ```
 
 Do the auxilary variables predict missingness? 
@@ -453,9 +454,11 @@ Do the auxilary variables predict missingness?
 # Loop through each variable we want to impute to see which auxillary variables predict that variable or missingness.
 
                    
-auxVars <- c("cbcl_withdep_y0", "cbcl_withdep_y1", "cbcl_withdep_y2","cbcl_anxdep_y1",
-             "cbcl_anxdep_y2", "cbcl_anxdep_y3", "cbcl_anxdep_y0",
+auxVars <- c("cbcl_withdep_y0", "cbcl_withdep_y2",
+             "cbcl_anxdep_y1", "cbcl_anxdep_y2", "cbcl_anxdep_y3", "cbcl_anxdep_y0",
              "parent_dep_y0", "bmi_y0")
+
+#remove " for exploratory analyses. 
 
 imputeVars <- c("cbcl_withdep_y3", "parent_dep_y2","bmi_y1") 
              
@@ -516,7 +519,8 @@ newAuxVars <- newAuxVars %>% unlist() %>% unique()
 newAuxVars <- newAuxVars[!newAuxVars %in% ""]
 newAuxVars 
 
-# cbcl_withdep_y0" "cbcl_withdep_y2" "cbcl_withdep_y1" "bmi_y0", "cbcl_anxdep_y2" all predict missingness in the variables we want to impute. 
+
+# cbcl_withdep_y0" "cbcl_withdep_y1" "bmi_y0" predict missingness in the variables we want to impute. 
 
 ```
 
@@ -549,9 +553,10 @@ mainVars <- c("src_subject_id",
                "race_y0",
                "age_y3", 
               "cbcl_withdep_y3",
-              "pt_f",
-              "gonad_pt_f", #pt timing variables to look at in exploratory analyses
-              "adren_pt_f"
+              "cbcl_withdep_y1",
+              "pt_m",
+              "gonad_pt_m", #pt timing variables to look at in exploratory analyses
+              "adren_pt_m"
                )
 mainVars
 
@@ -565,9 +570,6 @@ dataSub <- dataSub %>%
 
 colnames(dataSub) #looks good!
 
-#Troubleshooting (16/09/22) - having issues including race and income in imputation model. No good auxillary variables that predict them. 
-
-#See if imputation works when removing individuals with missing race and income data (this removed 193 people)
 
 dataSub <- dataSub %>% # N = 2726 
   filter(!is.na(household_income_y0)) %>% #2558
@@ -615,9 +617,9 @@ allVarNames <-  c("src_subject_id",
                "race_y0",
                "age_y3", 
               "cbcl_withdep_y3",
-              "pt_f",
-              "gonad_pt_f", #pt timing variables to look at in exploratory analyses
-              "adren_pt_f",
+              "pt_m",
+              "gonad_pt_m", #pt timing variables to look at in exploratory analyses
+              "adren_pt_m",
              "cbcl_withdep_y0", "cbcl_withdep_y1", "cbcl_withdep_y2","cbcl_anxdep_y1", #Aux vars
              "cbcl_anxdep_y2", "cbcl_anxdep_y3", "cbcl_anxdep_y0",
              "parent_dep_y0", "bmi_y0"
@@ -660,11 +662,10 @@ label(dataSub) #working
 ```
 
 
-
 #RUN COMPLETE CASE ANALYSIS 
 ##Complete cases
 ```{r, complete case models}
-CCfitBase <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 
+CCfitBase <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
                            + (1|site_id_y1) + (1|rel_family_id),
                             control = glmerControl(calc.derivs = FALSE, optimizer = "bobyqa"),
                             family = 'poisson',
@@ -680,10 +681,10 @@ hist(resid(CCfitBase))
 
 #save results 
 
-saveRDS(resCCfitBase,"/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitBase_females.rds")
+saveRDS(resCCfitBase,"/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitBase_males.rds")
 
 
-CCfitFull <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + bmi_y1
+CCfitFull <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + bmi_y1
                             + household_income_y0 + parent_dep_y2
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
@@ -700,11 +701,11 @@ hist(resid(CCfitFull))
 
 #the above is working with no singularity issues
 
-saveRDS(resCCfitFull, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitFull_females.rds")
+saveRDS(resCCfitFull, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitFull_males.rds")
 
 
 #Run with population weight
-CCfitFull_weight <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + bmi_y1
+CCfitFull_weight <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + bmi_y1
                             + household_income_y0 + parent_dep_y2
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = glmerControl(calc.derivs = FALSE, optimizer = "Nelder_Mead"),
@@ -717,7 +718,7 @@ CCfitFull_weight <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + bmi_y1
 resCCfitFull_weight <- summary(CCfitFull_weight)
 resCCfitFull_weight
 
-saveRDS(resCCfitFull_weight, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/sensitivity_analysis/resCCfitFull_weights_females.rds")
+saveRDS(resCCfitFull_weight, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/sensitivity_analysis/resCCfitFull_weights_males.rds")
 
 #Export results as a table 
 
@@ -727,7 +728,7 @@ library(dplyr)
 test_tbl <- CCfitBase %>% 
   tidy() 
 
-write.table(test_tbl,"/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitBase_females.txt", sep="\t",row.names=FALSE)
+write.table(test_tbl,"/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitBase_males.txt", sep="\t",row.names=FALSE)
   
 ```
 
@@ -742,12 +743,12 @@ CC_res_tbl_main <- tab_model(CCfitBase, CCfitFull,
                   show.ci = FALSE,
                   show.est = TRUE,
                   digits = 3,
-                  title = "Females: Effect of pubertal timing on youth depression",
+                  title = "Males: Effect of pubertal timing on youth depression",
                   auto.label = TRUE,
                   dv.labels = c("Base", "Full"),
                   string.se = "SE",
                   string.p = "P-Value",
-                  file = "Females_CC_res_tbl_main.html"
+                  file = "Males_CC_res_tbl_main.html"
 ) 
 
 CC_res_tbl_main
@@ -759,12 +760,12 @@ CC_res_tbl_weight_comp <- tab_model(CCfitBase, CCfitFull, CCfitFull_weight,
                   show.df = FALSE,
                   show.ci = FALSE,
                   digits = 3,
-                  title = "Females: Effect of pubertal timing on youth depression",
+                  title = "Males: Effect of pubertal timing on youth depression",
                   auto.label = TRUE,
                   dv.labels = c("Base", "Full", "Full (weighted)"),
                   string.se = "SE",
                   string.p = "P-Value",
-                  file = "Females_CC_res_tbl_weight_comp.html"
+                  file = "Males_CC_res_tbl_weight_comp.html"
 ) 
 
 
@@ -780,18 +781,84 @@ Helpful tutorial: https://cran.r-project.org/web/packages/sjPlot/vignettes/plot_
 https://www.dataquest.io/blog/tutorial-poisson-regression-in-r/
 
 ```{r, plot CC}
-#Base
-effectSizePlotFemalesBase <- plot_model(CCfitBase, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
-effectSizePlotFemalesBase
+
+effectSizePlotMalesBase <- plot_model(CCfitBase, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
+effectSizePlotMalesBase
 
 #Full
-effectSizePlotFemalesFull <- plot_model(CCfitFull, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
-effectSizePlotFemalesFull
 
-
+effectSizePlotMales <- plot_model(CCfitFull, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
+effectSizePlotMales
 
 ```
 
+
+#SENSITIVITY ANALYSIS 
+
+##IMPUTATION 
+
+A small number of imputations is fine when no. of missing data is small.
+But a larger M makes the imputation more reproducible when using a different seed.
+M should be >= 100 * fraction of missing information (FMI).
+It's also possible to do a trial and error approach to see if your estimates differ
+after running the imputation 2-3 times with the same M.
+
+#Imputation set up
+
+Very good tutorials on missing data and mice: 
+- https://statistics.ohlsen-web.de/multiple-imputation-with-mice/ 
+- https://stefvanbuuren.name/fimd/sec-modelform.html
+
+We do not want to use the mice default "massive imputation" where every variable in the dataset is used to predict the missing data. If these variables don't correlate with our variable of interest, they can introduce noise to our estimation. Instead, we will only use the auxillary variables to predict missing data in our target variables, and variables that have a correlation of r=.2.
+
+We specify these settings in the PredMat using the function quickpred. In the prediction matrix, the rows correspond to incomplete target variables, in the order they appear in our dataframe. A value of 1 indicates that the column variable is a predictor to impute the target (row) variable, and a 0 means that it is not used.
+
+```{r, imputation set up}
+
+# first get default predictor matrix
+predMat <- quickpred(dataSub, 
+                      include=auxVars,
+                      exclude=NULL,
+                      mincor = 0.2)
+
+# Rows are variables to be imputed, cols are variables used to impute.
+
+meth <- make.method(dataSub)
+meth
+
+#run the imputation 
+start_time <- Sys.time()
+ModImps <- mice(dataSub, m=100, predictorMatrix=predMat, seed=270795, printFlag=FALSE, method = meth)
+end_time <- Sys.time()
+end_time - start_time
+
+```
+
+
+##RUN IMPUTED MODELS
+
+###Imputed dataframes
+```{r, imputed models}
+
+#Base model
+MIfitBase <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
+                                              + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(optCtrl=list(maxfun=1e6), optimizer ='bobyqa'), family = 'poisson'))
+
+resMIfitBase <-summary(pool(MIfitBase))
+resMIfitBase
+
+#Full model
+MIfitFull <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + bmi_y1 + household_income_y0 +
+                                              parent_dep_y2 + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(optCtrl=list(maxfun=1e6), optimizer ='bobyqa'),
+                            family = 'poisson'
+                            ))
+
+resMIfitFull <- summary(pool(MIfitFull))
+resMIfitFull
+
+```
 
 
 #Plot H1
@@ -807,41 +874,11 @@ https://lmudge13.github.io/sample_code/mixed_effects.html
 
 #EXPLORATORY ANALYSES
 
-1. Use gonadal and adrenal pubertal timing measures as separate predictors.
+1. Use gonadal and adrenal pubertal timing measures as separate predictors 
 
-We will run this analysis with complete cases only. 
-
-##Gonadal pubertal timing
+##gonadal pubertal timing
 
 ```{r, gonadal timing}
-
-
-CCfitFull_gonad <- glmer(cbcl_withdep_y3 ~ adren_pt_f + gonad_pt_f + age_y3 + race_y0 + bmi_y1
-                            + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
-                            family = 'poisson',
-                            data = dataSub,
-                            na.action = na.exclude
-                       )
-
-resCCfitFull_gonad <- summary(CCfitFull_gonad)
-resCCfitFull_gonad
-
-#check residuals 
-hist(resid(CCfitFull))
-
-#the above is working with no singularity issues
-
-saveRDS(resCCfitFull, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitFull_females.rds")
-
-
-
-
-
-
-
-
 
 #imputed dataset
 #Base model
@@ -910,70 +947,9 @@ sjPlot::tab_model(CCfitBase_explr, CCfitFull_explr,
 
 For this exploratory analysis, we will use the complete cases dataframe as we are using youth depression at year 1 as an auxillary variable to predict outcome (year 3 youth depression) 
 
+```{r, growth in depressive symptoms}
 
-#SENSITIVITY ANALYSIS 
 
-##IMPUTATION 
-
-A small number of imputations is fine when no. of missing data is small.
-But a larger M makes the imputation more reproducible when using a different seed.
-M should be >= 100 * fraction of missing information (FMI).
-It's also possible to do a trial and error approach to see if your estimates differ
-after running the imputation 2-3 times with the same M.
-
-#Imputation set up
-
-Very good tutorials on missing data and mice: 
-- https://statistics.ohlsen-web.de/multiple-imputation-with-mice/ 
-- https://stefvanbuuren.name/fimd/sec-modelform.html
-
-We do not want to use the mice default "massive imputation" where every variable in the dataset is used to predict the missing data. If these variables don't correlate with our variable of interest, they can introduce noise to our estimation. Instead, we will only use the auxillary variables to predict missing data in our target variables, and variables that have a correlation of r=.2.
-
-We specify these settings in the PredMat using the function quickpred. In the prediction matrix, the rows correspond to incomplete target variables, in the order they appear in our dataframe. A value of 1 indicates that the column variable is a predictor to impute the target (row) variable, and a 0 means that it is not used.
-
-```{r, imputation set up}
-
-# first get default predictor matrix
-predMat <- quickpred(dataSub, 
-                      include=auxVars,
-                      exclude=NULL,
-                      mincor = 0.2)
-
-# Rows are variables to be imputed, cols are variables used to impute.
-
-meth <- make.method(dataSub)
-meth
-
-#run the imputation 
-start_time <- Sys.time()
-ModImps <- mice(dataSub, m=100, predictorMatrix=predMat, seed=270795, printFlag=FALSE, method = meth)
-end_time <- Sys.time()
-end_time - start_time
-
-```
-
-##Run imputed models
-
-###Imputed dataframes
-```{r, imputed models}
-
-#Base model
-MIfitBase <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = glmerControl(optCtrl=list(maxfun=1e6), optimizer ='bobyqa'), family = 'poisson'))
-
-resMIfitBase <-summary(pool(MIfitBase))
-resMIfitBase
-
-#Full model
-MIfitFull <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = glmerControl(optCtrl=list(maxfun=1e6), optimizer ='bobyqa'),
-                            family = 'poisson',
-                            weights = acs_raked_propensity_score_y0))
-
-resMIfitFull <- summary(pool(MIfitFull))
-resMIfitFull
 
 ```
 
