@@ -1,0 +1,334 @@
+---
+title: "ANALY_explr_dep_brain_females"
+author: "Niamh MacSweeney" Credit to X. Shen for function templates.
+date: "03/10/2022"
+output: github_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+ABCD Exploratory Analysis Script - Depression ~ Brain Structure -> Females
+
+#Introduction
+
+The purpose of this script is to re-run our pilot analyses (see ANALY_pilot... scripts) but using the same timepoints for our main analysis, pubertal timing (Y1) and depression (Y3), and imaging (Y2) to identify other brain regions that may act as mediators that were not detected in the pilot analysis. 
+------------------------------------------------------------------------
+
+####Workflow
+
+1.  Setup: Load data, merge to create master dataframe.
+2.  Pilot prep: Split into males and females.
+3.  Set up  function
+4.  Run models
+
+####STEP 1: SETUP Load libraries and set wd
+
+```{r, load libraries, set wd}
+
+
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(nlme)
+library(psych)
+library(ggplot2)
+library(readr)
+library(pbapply)
+library(gridExtra)
+library(sandwich)
+library(stringr)
+library(kableExtra)
+#library(epiDisplay)
+library(gmodels)
+library(caret)
+
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
+```
+
+Load data cleaned and tided data
+
+```{r,load data}
+
+#Cleaned data in MPlus format 
+
+targetdata <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/explr_analy_F_data.R4.0.rds")
+
+
+```
+## Adjust variable names 
+
+Mplus files need to be less than 8 chars in length so we will need to add tags back onto the subcortical measure so that we can adjust for multiple comparisons in batches (e.g., cortical, subcortical etc.) 
+
+```{r, edit subcortical names}
+
+subcortVars <- c("V.aa", "V.amygdala",
+                  "V.caudate", "V.hpus", 
+                  "V.pallidum","V.putamen",
+                  "V.tp", "V.vedc"
+                  )
+
+targetdata <- targetdata %>% 
+  rename(Vsc.aa = V.aa,
+         Vsc.amygdala = V.amygdala,
+         Vsc.caudate = V.caudate,
+         Vsc.hpus = V.hpus,
+         Vsc.pallidum = V.pallidum,
+        Vsc.putamen = V.putamen,
+        Vsc.tp = V.tp,
+        Vsc.vedc = V.vedc)
+  
+
+```
+
+####STEP 2: Model set up We are using X.Shen's reg_phewasStyle_Random.R function to run the mixed effects models for both unilateral and bilateral brain regions. Note that we will use an average measure across the left and right hemispheres for bilateral brain regions. 
+
+We need to change "src_subject_id" to "f.eid" so that function will run.
+
+```{r, colnames}
+
+
+colnames(targetdata)[1]='f.eid'
+colnames(targetdata) #check it worked
+
+#check for duplicate columns
+unique_names <- unique(colnames(targetdata)) #no duplicates 
+
+#rename site_id_y1 to site_id (should have 21 sites)
+targetdata <- targetdata %>% 
+  rename(site_id = site_id_y1)
+colnames(targetdata)
+
+```
+
+Define Basic Model for pilot analysis
+
+IV: Depressive symptoms
+
+DV: Brain Measures
+
+Covariates: Fixed = age, race/ethnicity; dti mean motion for (DTI models)
+
+Random: family ID, scanner ID.
+
+Set categorical variables
+
+```{r, set categorical variables}
+
+targetdata$race_y0 = as.factor(targetdata$race_y0)
+targetdata$income = as.factor(targetdata$income)
+targetdata$fam_id = as.factor(targetdata$fam_id)
+targetdata$scnr_id = as.factor(targetdata$scnr_id)
+targetdata$sex= as.factor(targetdata$sex)
+targetdata$f.eid = as.factor(targetdata$f.eid)
+targetdata$site_id = as.factor(targetdata$site_id)
+str(targetdata)
+
+```
+
+##Define function 
+
+
+```{r, function}
+
+source('/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/functions/reg_phewasStyle_GLMM_outcome_brain.R')
+
+```
+
+Define variables:
+
+- scale 
+
+```{r, scale vars}
+targetdata=targetdata
+colnames(targetdata)
+
+#scale all numeric except population weighting variables and depression variable (outcome)
+
+
+#change integer variables to numeric for ease of scaling later 
+intCols <- targetdata[sapply(targetdata, class) == 'integer']
+intCols <- colnames(intCols)
+
+targetdata <- targetdata %>% 
+  mutate_at(intCols, as.numeric)
+
+# Get continuous variables we want to z-scale
+conCols <- targetdata[sapply(targetdata, class) == 'numeric']
+conCols <- colnames(conCols)
+conCols <- conCols[!conCols %in% c("pws","y_dep_y3")] 
+#don't standardise outcome as it is count data. pws = population weighting variable
+
+#make list of factor columns for ease of sorting new df later
+facCols <- targetdata[sapply(targetdata, class) == 'factor']
+facCols <- colnames(facCols)
+
+# Factorise character variables, z-scale continuous, 
+targetdata <- targetdata %>%
+  mutate_at(facCols, as.factor) %>% 
+  mutate_at(conCols, scale) %>% 
+  mutate_at(conCols, as.numeric)
+
+str(targetdata)
+head(targetdata)
+summary(targetdata)
+
+
+```
+
+Set up outcome (dependent variable): Brain measures
+
+```{r, set up DVs}
+#select imaging vars
+ls.dep.fs.short=colnames(targetdata)[grep('^V\\.|^SA\\.|^T\\.|^SL\\.|^Vsc\\.|^FA\\.|^MD\\.',colnames(targetdata))]
+ls.dep.all = ls.dep.fs.short
+ls.dep.all=ls.dep.all[!duplicated(ls.dep.all)]
+
+```
+
+Set up Independent Variable (or factor): Brain measures
+
+```{r, set up IVs}
+
+ls.factor=colnames(targetdata)[grep('^pt_f',colnames(targetdata))]
+```
+
+Combine DVs and IVs so that we get a list of the DV and IV
+
+```{r, combine DVs and IVs}
+
+ls.dep.factor.combo=expand.grid(ls.dep.all,ls.factor,stringsAsFactors = F)
+
+```
+
+##Set up covariates:
+For this exploratory analyses, we are running the fully adjusted model:
+
+Fixed covs: age, race/ethnicity, BMI, site, household income, parental current mood, population weighting variable.
+
+Random: family, site
+
+
+```{r, set up covs}
+
+ls.models=data.frame(dependent=ls.dep.factor.combo$Var1,
+                     factor=ls.dep.factor.combo$Var2,
+                     covs='',stringsAsFactors = F)
+
+ls.models$covs=paste0(c('age_y2','race_y0'),collapse='+') 
+#just list fixed covariates here. Random effects are specified in function
+
+#add dti mean motion (fd) as cov for dti models
+ls.models$covs[grepl('FA\\.|MD\\.',ls.models$dependent)]=paste0(ls.models$covs[grepl('FA\\.|MD\\.',ls.models$dependent)],'+dti_mot')
+
+
+```
+
+#### STEP 4: Specify models
+
+USER: Make sure that the model names specified below match the model names defined in function. 
+
+```{r, specify models}
+
+ls.models$model.est=''
+ls.models$model.est[grep('hemi',ls.models$covs)]='bilateral' #we are defining here for purposes of function but we are not using the bilateral elements as we have used an average measure - therefore, the model will use lme models for all other cases. 
+ls.models$model.est[ls.models$model.est=='']='lme'
+
+
+```
+
+Divide models into bulk measures and individual regions
+
+Bulk (global) measures
+
+```{r, bulk measures}
+ls.model.bulk=ls.models[grep('\\.glb',ls.models$dependent),]
+ls.model.bulk$p_batch=1
+
+```
+
+Individual regions
+
+```{r, individual regions}
+
+ls.model.region=ls.models[!grepl('\\.glb',ls.models$dependent),] 
+
+ls.model.region$p_batch=99999
+target.model=ls.model.region
+ls.dep.cate=c('T\\.','V\\.','SA\\.','SL\\.', 'Vsc\\.', 'FA\\.','MD\\.') #Vsc = subcortical measures
+
+cate.no = 1
+for (dep in ls.dep.cate){
+        loc = grepl(dep,target.model$dependent)
+        target.model$p_batch[loc]=cate.no
+        cate.no=cate.no+1
+}
+
+ls.model.region=target.model
+
+
+#Don't control for WBV in exploratory analyses - that uses basic model. 
+# # individual region models add whole brain volume as a covariate
+# ls.model.region.covWholeB=ls.model.region
+# ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)]=
+#       paste0(ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)],'+WBV')
+
+
+```
+
+#### STEP 5: Run Models
+
+We do not have any dat_long data in this analysis due to using average measures for bilateral brain regions but specifying it here is fine, it just won't be called by the function. 
+
+```{r, run models}
+
+#Global (bulk) models
+result.females.pt_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata, correctByFactor = T)
+
+#Regional (Individual) models
+result.females.pt_brain.region=reg_phewasStyle(ls.model.region,dat_short=targetdata, correctByFactor = T)
+
+
+#add TRUE column if p.corrected < 0.002 which means that all values of ≤0.001
+
+#global results - 
+result.females.pt_brain.bulk$Sig <- as.numeric((as.character(result.females.pt_brain.bulk[,"p.corrected"]))) < 0.002
+
+
+#regional results
+result.females.pt_brain.region$Sig <- as.numeric((as.character(result.females.pt_brain.region[,"p.corrected"]))) < 0.002
+
+#Save as R.Data file
+save(result.females.pt_brain.bulk,result.females.pt_brain.region,file='/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/females_pt_brain_explr.RData')
+
+#Save results as .csv files
+
+#global results
+write.csv(result.females.pt_brain.bulk, file = '/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/sig.females.pt.brain.bulk.csv')
+
+#regional results 
+write.csv(result.females.pt_brain.region, file = '/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/sig.females.pt.brain.regional.csv')
+
+```
+
+
+Double check function outputs -- looks good! 
+```{r, test function}
+
+CCfitBase <- lmer(SA.glb ~ pt_f + age_y3 + race_y0
+                            + (1|site_id) + (1|fam_id),
+                            control = lmerControl(optimizer ="bobyqa"),
+                            data = targetdata,
+                            na.action = na.exclude
+                       )
+summary(CCfitBase)
+
+```
+
+
+ \#\#\#\#\#\#\#\#\#\#\#\#\#\# End of Script \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#

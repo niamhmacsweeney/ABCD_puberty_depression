@@ -42,15 +42,18 @@ run_model <- function(ls.mod,mod.dat_short,mod.dat_long){
       dep.dat=mod.dat_short[,mod.dep]            
       if (length(table(dep.dat))==2){
          mod=paste0(mod.dep,'~', mod.factor, '+', mod.covs,'+(1|scnr_id) + (1|fam_id)')
-         fit=glmer(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,
-                   control = glmerControl(optimizer ="bobyqa"),family = 'poisson',
-                   weights = pws)
-      }else{
+         fit=lmer(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,
+                   control = lmerControl(optimizer ="bobyqa")
+         )
+         
+               }else{
          mod=paste0(mod.dep,'~', mod.factor, '+', mod.covs,'+(1|scnr_id) + (1|fam_id)')
          fit=lmer(as.formula(as.character(mod)),data=mod.dat_short,na.action=na.exclude,
-                  control = lmerControl(optimizer ="bobyqa"),
-                  weights = pws)
-      }            
+                  control = lmerControl(optimizer ="bobyqa")
+                  )
+               } 
+      
+      #(1|fam_id)
       # tmp.ci = confint(fit) %>% as.data.frame %>% 
       #    dplyr::select(Lower_95CI=`2.5 %`,Upper_95CI=`97.5 %`) %>% 
       #    tail(1)
