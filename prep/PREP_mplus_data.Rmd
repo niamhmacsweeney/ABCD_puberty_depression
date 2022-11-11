@@ -117,6 +117,12 @@ depImgM <- load("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_pubert
 ###Get ROI names 
 
 Note (20/09/22): It seems that postcentral surface area was also a ROI in the pilot analysis (ROI_dep_brain_males_regional_results.Rdata analysis) but only postcentral volume was included as an ROI to test at stage 2. I'm not sure how this happened? Given that this ROI does not withstand correction for multiple comparisons, I will not amend stage 1 to include this ROI. If it emerges as a significant mediator in our exploratory analyses, it will be reported as exploratory analyses. 
+
+
+
+
+
+
 ```{r, ROI names}
 
 #global measures 
@@ -146,8 +152,8 @@ regionalMeds <- c(
                   "avg.sulc.APARC.parsobis", #H3f
                   "avg.vol.ASEG.vedc" #H3g
                   )
-
 regionalMeds
+
 ```
 
 ##Exploratory mediators
@@ -327,9 +333,9 @@ extraVars <- c("site_id_6m", "site_id", "site_id_18m", #no longer need these
                "pds_m_pt_valid", "pds_f_pt_valid"
                 )
 
-#reduce dataframe by removing 23 extra cols. 
+#reduce dataframe by removing extra cols. 
 df <- df %>% 
-  select(-(all_of(extraVars))) #should have 48 cols now. 
+  select(-(all_of(extraVars))) 
 
 colnames(df) #looks good
 
@@ -411,26 +417,26 @@ N.B: Sex variable labelling: 1= F, 2= M
 
 ```{r, Mplus formatting}
 
-#Create cluster variable
-
+# #Create cluster variable
+# 
 df$fam_id <- as.character((df$fam_id)) #make fam id character var
-
-df <- combineCatVars(df, 
-                     vars = c("scnr_id", "fam_id"),
-                     sep = "_",
-                     keep_empty = TRUE)
-head(df) #check new var looks okay
-str(df)
-
-#rename cluster variable so it short enough for MPlus! 
-#N.B. c_vars = scnr_id_fam_id
-
-df <- df %>% 
-  rename(c_vars = scnr_id_fam_id)
+# 
+# df <- combineCatVars(df, 
+#                      vars = c("scnr_id", "fam_id"),
+#                      sep = "_",
+#                      keep_empty = TRUE)
+# head(df) #check new var looks okay
+# str(df)
+# 
+# #rename cluster variable so it short enough for MPlus! 
+# #N.B. c_vars = scnr_id_fam_id
+# 
+# df <- df %>% 
+#   rename(c_vars = scnr_id_fam_id)
 
 #char vars
 charVars <- c("id", "sex", "site_id",
-              "scnr_id", "fam_id", "race_y0", "c_vars")
+              "scnr_id", "fam_id", "race_y0")
 
 #convert character variables to factor
 df <- df %>%
@@ -463,6 +469,41 @@ head(df) #looks good!
 
 
 ```
+##Export data files in R format
+
+```{r, }
+#females
+F_df <- df %>% 
+  filter(sex == 1) %>%  #females only  N= 2533
+  select(- c(pt_m))
+
+#males
+M_df <- df %>% 
+  filter(sex == 2) %>%  #males only M = 2792
+  select(- c(pt_f))
+
+#whole sample
+```
+
+
+```{r, save RDS files }
+#Save RDS files 
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+
+saveRDS(F_df, "female_df_2022_10_12.R4.0.rds")
+
+saveRDS(M_df, "male_df_2022_10_12.R4.0.rds")
+
+saveRDS(df, "full_sample_df_2022_10_12.R4.0.rds")
+
+
+```
+
+
+
+
+
 
 
 ##Exploratory analysis 
@@ -576,6 +617,23 @@ expl_df[is.na(expl_df)] <- -9999
 
 head(expl_df) #looks good!
 
+F_expl_df <- expl_df %>% 
+  filter(sex == 1) %>%  #females only  N= 2533 N.B - sex = 1 for females
+  select(- c(pt_m))
+
+M_expl_df <- expl_df %>% 
+  filter(sex == 2) %>%  #males only M = 2792 N.B. sex = 2 for males 
+  select(- c(pt_f))
+
+
+#Save RDS files with Mplus formatting (ID = numeric value)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
+
+saveRDS(F_expl_df, "explr_analy_F_Mplus_data.R4.0.rds")
+
+saveRDS(M_expl_df, "explr_analy_M_Mplusdata.R4.0.rds")
+
 ```
 
 The data frames are not in the correct format for MPlus
@@ -627,7 +685,135 @@ male_expl_df <- prepareMplusData(M_expl_df, "male_explr_df.dat")
 
 ```
 
+##Exploratory Mediation dataframe 
+
+Note (17/10/22): For ease of data cleaning, we will include the exploratory mediators here and then create a separate dataframe that includes both the confirmatory and exploratory mediators. 
+
+The exploratory mediators were determined by running the PT~ brain and Dep~ brain associations using the follow up data waves PT Year 1, brain Year 2, and dep year 3. See "ANALY_explr_..." scripts for associated code. 
+
+- In this dataframe, we need all the variables included in the confirmatory analysis dataframe, plus the extra exploratory ROIs, and the random factor clustering variable. 
+
+Let's do this separately for females and males
+
+
+##Females
+```{r, females exploratory mediation}
+
+#Load a random factor clustering variable that we will use in MPlus. This was created in Stata by J.A. 
+clusterVar <- load("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/judith_files/sex_1.Rdata")
+
+#keep id and cluster variable only 
+clusterVar <- sex_1 %>% 
+  select(id, c)
+
+#note, exploratory variables
+explorMeds <- c("T.paracn", "T.rrmdfr", "T.insula", "V.sufr", "T.cdmdfr", "V.paracn",
+          "V.rrmdfr", "T.sufr", "V.insula" , "V.cdmdfr", "T.lingual", "V.bsts", 
+          "V.pc", "V.supl", "V.aa", "T.supl", "T.ifpl", "V.mdtm", "V.fusiform",# pt regional ROIs
+          "T.glb", "V.glb", "V.vedc", #only male pt ROI = vedc
+          "SL.bsts", "SL.precn", "V.sm", "MD.ifo", #F dep ROIs
+          "SA.mobfr", "V.aa", "V.pallidum", "V.tp" #M dep ROIs
+          )
+
+confirmMeds <- c("V.glb", "SA.glb", "SL.glb", "T.glb", "FA.glb", "T.mdtm", "T.insula", "T.rrmdfr",
+                 "T.mobfr", "T.lobfr", "V.bsts", "V.mdtm", "V.cdmdfr", "V.postcn","FA.pscs", "FA.cc", 
+                 "SL.porb", "V.vedc")
+
+
+
+```
+
+Merge with exploratory data frame 
+
+N.B- This dataframe is in Mplus format so missing values at -9999 and all variables are numeric in type. 
+
+```{r, merge females}
+
+F_expl_df <- F_expl_df %>% 
+  left_join(y=clusterVar, by= "id") #looks good. Should have 227 vars
+
+#main non imaging vars - create list to make variable extraction easier below
+
+mainVars <- colnames(F_expl_df[1:36]) # extract non imaging vars
+mainVars #looks good 
+
+cluster <- "c"
+
+#make main list with all vars needed 
+allVars <- c(mainVars, confirmMeds, explorMeds, cluster) #85 vars
+
+allVars <- unique(allVars) #remove 8 duplicate ROIs between confirmatory and exploratory. Should have 76
+allVars
+
+F_expl_df <- F_expl_df[, allVars] #subset to get vars needed
+
+```
+
+##Males
+
+N.B. Sex = 2 and missing data are = -9999 so we very careful to change missing values back to NA if using this dataframe outside of MPlus. 
+
+```{r, generate exploratory mediation df}
+
+#Load a random factor clustering variable that we will use in MPlus. This was created in Stata by J.A. 
+clusterVar <- load("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/judith_files/sex_2.Rdata")
+
+#keep id and cluster variable only 
+clusterVar <- sex_2 %>% 
+  select(id, c)
+
+#note, exploratory variables
+explorMeds <- c("T.paracn", "T.rrmdfr", "T.insula", "V.sufr", "T.cdmdfr", "V.paracn",
+          "V.rrmdfr", "T.sufr", "V.insula" , "V.cdmdfr", "T.lingual", "V.bsts", 
+          "V.pc", "V.supl", "V.aa", "T.supl", "T.ifpl", "V.mdtm", "V.fusiform",# pt regional ROIs
+          "T.glb", "V.glb", "V.vedc", #only male pt ROI = vedc
+          "SL.bsts", "SL.precn", "V.sm", "MD.ifo", #F dep ROIs
+          "SA.mobfr", "V.aa", "V.pallidum", "V.tp" #M dep ROIs
+          )
+
+confirmMeds <- c("V.glb", "SA.glb", "SL.glb", "T.glb", "FA.glb", "T.mdtm", "T.insula", "T.rrmdfr",
+                 "T.mobfr", "T.lobfr", "V.bsts", "V.mdtm", "V.cdmdfr", "V.postcn","FA.pscs", "FA.cc", 
+                 "SL.porb", "V.vedc")
+
+
+M_expl_df <- M_expl_df %>% 
+  left_join(y=clusterVar, by= "id") #looks good. Should have 227 vars
+
+#main non imaging vars - create list to make variable extraction easier below
+
+mainVars <- colnames(M_expl_df[1:36]) # extract non imaging vars
+mainVars #looks good 
+
+cluster <- "c"
+
+#make main list with all vars needed 
+allVars <- c(mainVars, confirmMeds, explorMeds, cluster) #85 vars
+
+allVars <- unique(allVars) #remove 8 duplicate ROIs between confirmatory and exploratory. Should have 76
+allVars
+
+M_expl_df <- M_expl_df[, allVars] #subset to get vars needed
+head(M_expl_df) #looks good to go! 
+
+
+
+```
+##Export .dat files 
+
+```{r, export .dat files}
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data/Mplus_inputs")
+
+femalesExplMed <- prepareMplusData(F_expl_df, "fExplMed.dat")
+malesExplMed <- prepareMplusData(M_expl_df, "mExplMed.dat")
+
+
+```
+
+
+
 ############# END OF MAIN SCRIPT ###############
+
 
 #Column ordering for Mplus 
 
@@ -758,6 +944,12 @@ test <- lm(y_dep_y3 ~ FA.glb, data = F_df, na.action = na.exclude)
 ```
 
 
+```{r, check dat files}
+
+datFile <- readLines("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/med_preprocess/sex_1.dat", 
+           n=10)
+
+```
 
 
 

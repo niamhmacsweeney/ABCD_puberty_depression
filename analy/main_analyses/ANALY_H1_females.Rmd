@@ -142,8 +142,6 @@ df <- df %>%
   filter(!is.na(interview_date_y3)) #N = 5727
 
 ```
-
-
 ### Split by sex
 
 We will do imputation separately for males and females so we need to split the dataframe by sex. 
@@ -159,6 +157,8 @@ df <- df %>% #N = 2726
 
 df <- df %>% 
   select(-c(pds_tot_m, pds_tot_all, pt_m, gonad_pt_m, adren_pt_m))
+
+df_unstd <- df
 
 ```
 
@@ -565,15 +565,6 @@ dataSub <- dataSub %>%
 
 colnames(dataSub) #looks good!
 
-#Troubleshooting (16/09/22) - having issues including race and income in imputation model. No good auxillary variables that predict them. 
-
-#See if imputation works when removing individuals with missing race and income data (this removed 193 people)
-
-dataSub <- dataSub %>% # N = 2726 
-  filter(!is.na(household_income_y0)) %>% #2558
-  filter(!is.na(race_y0)) #2533
-  
-colnames(dataSub)
 head(dataSub)#Looks good! 
 
 #Note that all numeric variables, except the acs_raked_propensity_score and outcome depression measure have been scaled!!
@@ -699,35 +690,12 @@ resCCfitFull
 hist(resid(CCfitFull))
 
 #the above is working with no singularity issues
+#Tried to compare models using ANOVA but won't work because the models differed in size due to missing data on some of the extra covariates. Given that we are more interested in whether the addition of covariates attentuates the main effect rather than looking at the amount of variance explained by the addition of these variables, we will not explore further at the moment. 
 
 saveRDS(resCCfitFull, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitFull_females.rds")
 
 
-#Run with population weight
-CCfitFull_weight <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + bmi_y1
-                            + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = glmerControl(calc.derivs = FALSE, optimizer = "Nelder_Mead"),
-                            family = 'poisson',
-                            weights = acs_raked_propensity_score_y0,
-                            data = dataSub,
-                            na.action = na.exclude
-                       )
 
-resCCfitFull_weight <- summary(CCfitFull_weight)
-resCCfitFull_weight
-
-saveRDS(resCCfitFull_weight, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/sensitivity_analysis/resCCfitFull_weights_females.rds")
-
-#Export results as a table 
-
-library(broom.mixed)
-library(dplyr)
-
-test_tbl <- CCfitBase %>% 
-  tidy() 
-
-write.table(test_tbl,"/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitBase_females.txt", sep="\t",row.names=FALSE)
   
 ```
 
@@ -752,28 +720,12 @@ CC_res_tbl_main <- tab_model(CCfitBase, CCfitFull,
 
 CC_res_tbl_main
 
-#with population weight - model comparision for sensitivity analyses (supps)
 
-CC_res_tbl_weight_comp <- tab_model(CCfitBase, CCfitFull, CCfitFull_weight,
-                  show.se = TRUE,
-                  show.df = FALSE,
-                  show.ci = FALSE,
-                  digits = 3,
-                  title = "Females: Effect of pubertal timing on youth depression",
-                  auto.label = TRUE,
-                  dv.labels = c("Base", "Full", "Full (weighted)"),
-                  string.se = "SE",
-                  string.p = "P-Value",
-                  file = "Females_CC_res_tbl_weight_comp.html"
-) 
-
-
-CC_res_tbl_weight_comp
 
 
 ```
 
-#PLOT CC
+## Plot results 
 
 Helpful tutorial: https://cran.r-project.org/web/packages/sjPlot/vignettes/plot_model_estimates.html
 
@@ -792,31 +744,39 @@ effectSizePlotFemalesFull
 
 ```
 
-
-
-#Plot H1
-
-Make effect sizes 
-```{r}
-
-```
-
-
-https://lmudge13.github.io/sample_code/mixed_effects.html
+see https://lmudge13.github.io/sample_code/mixed_effects.html
 
 
 #EXPLORATORY ANALYSES
 
-1. Use gonadal and adrenal pubertal timing measures as separate predictors.
+##1. Use gonadal and adrenal pubertal timing measures as separate predictors.
 
 We will run this analysis with complete cases only. 
-
-##Gonadal pubertal timing
 
 ```{r, gonadal timing}
 
 
-CCfitFull_gonad <- glmer(cbcl_withdep_y3 ~ adren_pt_f + gonad_pt_f + age_y3 + race_y0 + bmi_y1
+#plot distribution - not really normally distributed so use Spearman rank correlation. 
+gonad_dist <- hist(df_unstd$gonad_pt_f)
+adren_dist <- hist(df_unstd$adren_pt_f)
+
+cor(df_unstd$gonad_pt_f, df_unstd$adren_pt_f, method = "spearman") #correlation = 0.6 
+
+
+#beta = 0.23023
+CCfitBase_ad <- glmer(cbcl_withdep_y3 ~ adren_pt_f + age_y3 + race_y0
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitBase_ad <- summary(CCfitBase_ad)
+resCCfitBase_ad
+
+#adrenal: beta = 0.16501 
+CCfitFull_ad <- glmer(cbcl_withdep_y3 ~ adren_pt_f + age_y3 + race_y0 + bmi_y1
                             + household_income_y0 + parent_dep_y2
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
@@ -825,95 +785,173 @@ CCfitFull_gonad <- glmer(cbcl_withdep_y3 ~ adren_pt_f + gonad_pt_f + age_y3 + ra
                             na.action = na.exclude
                        )
 
-resCCfitFull_gonad <- summary(CCfitFull_gonad)
-resCCfitFull_gonad
+resCCfitFull_ad <- summary(CCfitFull_ad)
+resCCfitFull_ad
 
 #check residuals 
-hist(resid(CCfitFull))
+hist(resid(resCCfitFull_ad))
 
-#the above is working with no singularity issues
-
-saveRDS(resCCfitFull, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitFull_females.rds")
-
-
-
-
-
-
-
-
-
-#imputed dataset
-#Base model
-MIfitBase_gonad <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ gonad_pt_f + age_years + race_y0 
+#beta = .24
+CCfitBase_gon <- glmer(cbcl_withdep_y3 ~ gonad_pt_f + age_y3 + race_y0
                             + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa")))
-
-resMIfitBase_gonad <-summary(pool(MIfitBase))
-resMIfitBase_gonad
-
-#Full model
-MIfitFull_gonad <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ gonad_pt_f + age_years + race_y0 + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            weights = acs_raked_propensity_score_y0))
-
-resMIfitFull_gonad <- summary(pool(MIfitFull))
-resMIfitFull_gonad
-
-#Complete cases
-
-CCfitBase_explr <- lmerTest::lmer(cbcl_withdep_y3 ~ gonad_pt_f + adren_pt_f + age_years + race_y0 
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            data = dataSub,
-                            na.action = na.exclude,
-                       )
-
-CCfitBase_explr
-
-CCfitFull_explr <- lmerTest::lmer(cbcl_withdep_y3 ~ gonad_pt_f + adren_pt_f  + age_years + race_y0 
-                            + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            weights = acs_raked_propensity_score_y0,
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
                             data = dataSub,
                             na.action = na.exclude
                        )
 
-
-resCCfitFull_explr <- summary(CCfitFull_explr)
-resCCfitFull_explr
-
+resCCfitBase_gon <- summary(CCfitBase_gon)
+resCCfitBase_gon
 
 
-#show in table 
+#Beta: 0.17480  
+CCfitFull_gon <- glmer(cbcl_withdep_y3 ~ gonad_pt_f + age_y3 + race_y0 + bmi_y1
+                            + household_income_y0 + parent_dep_y2
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
 
-sjPlot::tab_model(CCfitBase_explr, CCfitFull_explr,
+resCCfitFull_gon <- summary(CCfitFull_gon)
+resCCfitFull_gon
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/tables")
+#make tables for gonad and adrenal just as we did for main pt variable
+
+#adrenal
+res_tbl_adrenal <- tab_model(CCfitBase_ad, CCfitFull_ad,
                   show.se = TRUE,
                   show.df = FALSE,
                   show.ci = FALSE,
+                  show.est = TRUE,
                   digits = 3,
-                  terms = c("gonad_pt_f", "adren_pt_f"),
-                  title = "Main effect of gonadal and adrenal timing on youth depression",
-                  pred.labels = c("Gonadal timing", "Adrenal timing"),
+                  title = "Females: Effect of adrenal pubertal timing on youth depression",
+                  auto.label = TRUE,
                   dv.labels = c("Base", "Full"),
                   string.se = "SE",
-                  string.p = "P-Value")
+                  string.p = "P-Value",
+                  file = "Females_adrenal_timing.html"
+) 
+
+res_tbl_adrenal
+
+#gonadal table 
+
+res_tbl_gonadal <- tab_model(CCfitBase_gon, CCfitFull_gon,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  show.est = TRUE,
+                  digits = 3,
+                  title = "Females: Effect of gonadal pubertal timing on youth depression",
+                  auto.label = TRUE,
+                  dv.labels = c("Base", "Full"),
+                  string.se = "SE",
+                  string.p = "P-Value",
+                  file = "Females_gonadal_timing.html"
+) 
+
+res_tbl_gonadal
+
+#model with both variables 
+
+CCfitBase_adGon <- glmer(cbcl_withdep_y3 ~ gonad_pt_f + adren_pt_f + age_y3 + race_y0 
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitBase_adGon<- summary(CCfitBase_adGon)
+resCCfitBase_adGon
+
+#make table 
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/tables")
+res_tbl_adGon <- tab_model(CCfitBase_adGon,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  show.est = TRUE,
+                  digits = 3,
+                  title = "Females: Effect of gonadal pubertal timing on youth depression, controlling for adrenal timing",
+                  auto.label = TRUE,
+                  dv.labels = "Base",
+                  string.se = "SE",
+                  string.p = "P-Value",
+                  file = "Females_gonadal_adrenal_timing.html"
+) 
+
+res_tbl_adGon
+
+
+```
+
+## 2. Control for Youth depression at year 1
+
+For this exploratory analysis, we will use the complete cases dataframe as we are using youth depression at year 1 as an auxillary variable to predict outcome (year 3 youth depression).
+
+```{r, control for yout dep at year 1}
+
+#beta = .156
+CCfitBaseYDepY1 <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + cbcl_withdep_y1
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitBaseYDepY1<- summary(CCfitBaseYDepY1)
+resCCfitBaseYDepY1
+
+saveRDS(resCCfitBaseYDepY1, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/resCCfitBaseYDepY1_females.rds")
+
+#beta = .1597
+CCfitFullYDepY1 <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + cbcl_withdep_y1 
+                         + household_income_y0 + parent_dep_y2 + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitFullYDepY1<- summary(CCfitFullYDepY1)
+resCCfitFullYDepY1
+
+saveRDS(resCCfitFullYDepY1, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/resCCfitFullYDepY1_females.rds")
+
+```
+
+Export as table 
+```{r, control for yout dep at year 1}
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/tables")
+
+
+cov_earlier_dep_tbl <- sjPlot::tab_model(CCfitBaseYDepY1, CCfitFullYDepY1,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  show.est = TRUE,
+                  digits = 3,
+                  title = "Females: Effect of pubertal timing on youth depression controlling for earlier youth depression",
+                  auto.label = TRUE,
+                  dv.labels = c("Base", "Full"),
+                  string.se = "SE",
+                  string.p = "P-Value",
+                  file = "Females_cov_earlier_dep_tbl.html")
+cov_earlier_dep_tbl
 
 
 ```
 
 
-
-2. Control for Youth depression at year 1
-
-For this exploratory analysis, we will use the complete cases dataframe as we are using youth depression at year 1 as an auxillary variable to predict outcome (year 3 youth depression) 
-
-
 #SENSITIVITY ANALYSIS 
 
-##IMPUTATION 
+## 1. Imputation
 
 A small number of imputations is fine when no. of missing data is small.
 But a larger M makes the imputation more reproducible when using a different seed.
@@ -921,7 +959,7 @@ M should be >= 100 * fraction of missing information (FMI).
 It's also possible to do a trial and error approach to see if your estimates differ
 after running the imputation 2-3 times with the same M.
 
-#Imputation set up
+###Imputation set up
 
 Very good tutorials on missing data and mice: 
 - https://statistics.ohlsen-web.de/multiple-imputation-with-mice/ 
@@ -930,6 +968,23 @@ Very good tutorials on missing data and mice:
 We do not want to use the mice default "massive imputation" where every variable in the dataset is used to predict the missing data. If these variables don't correlate with our variable of interest, they can introduce noise to our estimation. Instead, we will only use the auxillary variables to predict missing data in our target variables, and variables that have a correlation of r=.2.
 
 We specify these settings in the PredMat using the function quickpred. In the prediction matrix, the rows correspond to incomplete target variables, in the order they appear in our dataframe. A value of 1 indicates that the column variable is a predictor to impute the target (row) variable, and a 0 means that it is not used.
+
+```{r, missing data info}
+
+#get missing data info using final cleaned dataframe
+colnames(dataSub)
+
+#missing outcome only variable to impute in base model 
+sum(is.na(dataSub$cbcl_withdep_y3)) #42
+
+missing <- dataSub %>% 
+  select(c(src_subject_id, cbcl_withdep_y3, bmi_y1, parent_dep_y2))
+  sum(!complete.cases(missing)) #107 missing in full model. 
+  
+```
+
+
+
 
 ```{r, imputation set up}
 
@@ -952,37 +1007,100 @@ end_time - start_time
 
 ```
 
-##Run imputed models
+###Run imputed models
 
-###Imputed dataframes
+Imputed dataframes
 ```{r, imputed models}
 
 #Base model
 MIfitBase <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 
                             + (1|site_id_y1) + (1|rel_family_id),
-                            control = glmerControl(optCtrl=list(maxfun=1e6), optimizer ='bobyqa'), family = 'poisson'))
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "bobyqa"),
+                            family = 'poisson'))
 
 resMIfitBase <-summary(pool(MIfitBase))
 resMIfitBase
 
+
 #Full model
-MIfitFull <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + household_income_y0 + parent_dep_y2
+MIfitFull <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + bmi_y1 + household_income_y0 + parent_dep_y2
                             + (1|site_id_y1) + (1|rel_family_id),
-                            control = glmerControl(optCtrl=list(maxfun=1e6), optimizer ='bobyqa'),
-                            family = 'poisson',
-                            weights = acs_raked_propensity_score_y0))
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "bobyqa"),
+                            family = 'poisson'))
 
 resMIfitFull <- summary(pool(MIfitFull))
 resMIfitFull
 
 ```
+Export results as tables for supplementary info
+
+Note: The tab_model function does not work with the imputed dataframe output so we cannot use this to generate the tables like we did for the complete cases. We will use KableExtra instead. 
+
+This is a known issue with tab_model and has been raised with the package developers: https://stackoverflow.com/questions/70329387/r-use-mice-mipo-data-frame-object-with-sjplot-tab-model
+
+```{r, export MI results as table}
+
+#base
+tblMIfitBase <- kbl(resMIfitBase) %>% 
+  kable_styling()
+tblMIfitBase 
+
+write.csv(resMIfitBase, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/sensitivity_analysis/resMIfitBase_females.csv")
+
+#full 
+tblMIfitFull <- kbl(resMIfitFull) %>% 
+  kable_styling()
+tblMIfitFull
+
+write.csv(resMIfitFull, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/sensitivity_analysis/resMIfitFull_females.csv")
+
+
+
+```
+
+
+## 2. Population weight 
+
+```{r, population weight}
+
+#Run with population weight
+CCfitFull_weight <- glmer(cbcl_withdep_y3 ~ pt_f + age_y3 + race_y0 + bmi_y1
+                            + household_income_y0 + parent_dep_y2
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "Nelder_Mead"),
+                            family = 'poisson',
+                            weights = acs_raked_propensity_score_y0,
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitFull_weight <- summary(CCfitFull_weight)
+resCCfitFull_weight
+
+saveRDS(resCCfitFull_weight, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/sensitivity_analysis/resCCfitFull_weights_females.rds")
+
+#with population weight - model comparision for sensitivity analyses (supps)
+
+CC_res_tbl_weight_comp <- tab_model(CCfitBase, CCfitFull, CCfitFull_weight,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  digits = 3,
+                  title = "Females: Effect of pubertal timing on youth depression",
+                  auto.label = TRUE,
+                  dv.labels = c("Base", "Full", "Full (weighted)"),
+                  string.se = "SE",
+                  string.p = "P-Value",
+                  file = "Females_CC_res_tbl_weight_comp.html"
+) 
+
+
+CC_res_tbl_weight_comp
 
 
 
 
-
-
-
+```
 
 ##Export tidied dataframe 
 

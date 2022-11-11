@@ -1,0 +1,15 @@
+------Begin Mplus Model Run: 14Oct2022 09:34:46------
+Run options:
+	Recursive (run models in subdirectories): FALSE
+	Show output on console: FALSE
+	Replace existing outfile: modifiedDate
+------
+Skipping model because output file is newer than input file: /Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3/male_H3a.inp
+Skipping model because output file is newer than input file: /Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3/male_H3b.inp
+Skipping model because output file is newer than input file: /Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3/male_H3c.inp
+Currently running model: male_H3d.inp
+Skipping model because output file is newer than input file: /Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3/male_H3e.inp
+Skipping model because output file is newer than input file: /Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3/male_H3f.inp
+Currently running model: male_H3g.inp
+
+------End Mplus Model Run: 14Oct2022 09:34:58------

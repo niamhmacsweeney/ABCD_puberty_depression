@@ -1,0 +1,155 @@
+---
+title: "Brain Heatmaps for manuscript"
+author: Niamh MacSweeney"
+date: "21/10/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction 
+
+We will use this script to visualise the brain associations for our Puberty-Depression RR.
+
+#Set Up
+
+Load in packages
+```{r, ggseg}
+
+library(tidyverse)
+library(ggseg)
+library(gridExtra)
+library(hrbrthemes) #nice ggplot themes
+library(gcookbook)
+
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs")
+
+
+```
+#General introduction to GGSEG - what can it help us do?
+
+## hemisphere stacking
+we can stack hemisphere if we want
+
+```{r, stacked}
+ggseg(position="stacked")
+```
+Now we want to colour in our segmentated area
+
+```{r, fill}
+#here we see the novelty of the underlying code, basically works like a GGplot syntax :) 
+ggseg(mapping=aes(fill=region))
+      
+
+```
+
+```{r, fill}
+#we can also colour and fill but avoid showing the legend from prev. figure and add in a title :) 
+ggseg(mapping=aes(fill=region), position="stacked", show.legend = F) +
+  ggtitle("first atlas")
+  
+  # +theme_darkbrain() #can add this on if you want a dark background
+```
+So this atlas quite nicely helps us view cortical areas. But what about subcortical? Well there is the ASEG
+subcortical atlas
+
+```{r, ASEG/SUBCORT}
+ggseg(atlas=aseg,mapping=aes(fill=region)) +
+  ggtitle("Automatic subcortical segmentation")
+```
+
+#Visualise ROIs 
+
+##Pubertal timing ~ Brain associations that were significant at p (FDR corrected) ≤0.001
+
+###FEMALES
+Group by cortical measurement type:
+
+1. Cortical thickness
+2. Cortical volume
+3. Sulcal Depth 
+4. Subcortical regions - ventral diencephalon. 
+
+
+### Cortical thickness; region, beta value (standardised)
+PDS-Brain
+
+paracentral -0.12
+rostral middle frontal -0.11
+insula -0.10
+caudal middle frontal -0.09
+superior frontal -0.09
+lingual -0.08
+inferior parietal -0.08
+superior parietal -0.08
+
+### Volume, region, beta value (standardised)
+bankssts	-0.09
+caudal middle frontal -0.09
+insula -0.09
+paracentral	-0.09
+precuneus	-0.09
+rostral middle frontal	-0.09
+superior frontal	-0.09
+superior parietal	-0.08
+middle temporal	-0.08
+fusiform	-0.08
+
+
+## Subcortical - not available in ggseg parcellation. 
+Accumbens area	-0.09
+
+
+###Males
+Only significant associations is ventral diecephalon (0.08)
+
+
+```{R, add results}
+#make dataframe with regions, Beta values and group type
+ptCorticalResults = tibble(
+              region=c("paracentral", "rostral middle frontal", "insula", "caudal middle frontal", "superior frontal",
+                       "lingual", "inferior parietal", "superior parietal", 
+                       "bankssts", "caudal middle frontal", "insula", "paracentral", "precuneus", 
+                       "rostral middle frontal", "superior frontal", "superior parietal", "middle temporal",
+                       "fusiform"),
+              beta= c(-0.12,  -0.11, -0.10, -0.09, -0.09, -0.08, -0.08, -0.08,  -0.09, -0.09, -0.09, -0.09, -0.09,
+                      -0.09,	-0.09, -0.08, -0.08, -0.08),
+              group = c("thickness", "thickness", "thickness","thickness","thickness",
+                        "thickness", "thickness", "thickness", 
+                        "volume", "volume", "volume", "volume", "volume",
+                        "volume", "volume", "volume", "volume", "volume")
+              )
+    #stringsAsFactors = FALSE
+
+
+```
+
+Plot
+```{r, plot puberty ROIs}
+
+###Cortical ROIs #####
+#via ggseg
+ptCorticalResults %>% 
+  group_by(group) %>% 
+  ggseg(atlas = dk, 
+      colour = "black",
+      size = .2, 
+      hemi = "right",
+      position = "stacked",
+      mapping = aes(fill = beta)) +
+  scale_fill_gradient(low="deepskyblue",high="midnightblue") +
+  labs(title = "Females: Cortical regions associated with earlier pubertal timing") +
+  theme_custombrain(plot.background = "white",text.colour = "black", text.size = 10, text.family = "mono") +
+  theme(plot.margin=unit(c(2,2,2,3),'mm'),
+        plot.title = element_text(lineheight=1, face="bold", vjust=2, hjust=0.5,size=12)) +
+  facet_wrap(~group)
+ggsave("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/females_expl_PT_cortical_ROI_heatmap.png")
+
+
+```
+
+
+

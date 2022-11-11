@@ -1,5 +1,5 @@
 ---
-title: "ANALY_H1_females"
+title: "ANALY_H1_males"
 author: "Niamh MacSweeney" Credit to Amelia Edmondson-Stait for the template script
 date: '2022-08-26'
 output: html_document
@@ -20,14 +20,16 @@ library(gridExtra)
 library(sandwich)
 library(stringr)
 library(kableExtra)
+library(dplyr)
 
 library(gmodels)
 library(caret)
 
 library(mice)
 library(broom.mixed) #so that pool function runs properly
-
+library(Hmisc)
 library(sjPlot) # table functions
+
 
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/analy")
 ```
@@ -36,9 +38,15 @@ setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depressi
 
 SCRIPT FOR MALES
 
-This script runs the linear mixed effects model to test Hypothesis 1 in our main analysis. 
 
-The bulk of this script deals with imputing missing data. 
+The bulk of this script deals with exploring missing data. We ran multiple imputation as a sensitivity analysis (see section in script outline).
+
+
+High level overview:
+1. Main (complete cases) analysis - runs the linear mixed effects model to test Hypothesis 1 in our main analysis
+2. Exploratory analysis — Gonadal and adrenal timing measures
+3. Sensitivity analysis: Multiple imputation. 
+
 
 We imputed missing data for individuals with PDS data (predictor)
 
@@ -50,7 +58,7 @@ Covariates were selected that predicted either missingness of variable to be imp
 
 Model: Depressive symptoms ~ pubertal timing	
 
-Fixed covs: age, race/ethnicity, BMI, site, household income, parental current mood, population weighting variable.
+Fixed covs: age, race/ethnicity, BMI, site, household income, parental current mood.
 
 Random: family, site
 
@@ -86,7 +94,10 @@ Remove variables we don't need/want to impute
 ```{r, tidy up variables}
 
 pds_y1 <- pds_y1 %>% 
-  select (-c("pds_m_pt_valid", "pds_f_pt_valid"))
+  select (-c("pds_m_pt_valid", "pds_f_pt_valid", "pds_p_ss_female_category" ,"pds_p_ss_male_category", "pds_1_p",        "pds_2_p", "pds_3_p","pds_m5_p",  "pds_m4_p",  "pds_f4_p", "pds_f5b_p", "gonad_avg", "adren_avg", "gonad_f", "gonad_m", "adren_f", "adren_m", "age_years"))
+
+colnames(pds_y1)
+
 
 ```
 
@@ -143,7 +154,7 @@ df <- df %>%
 
 We will do imputation separately for males and females so we need to split the dataframe by sex. 
 
-Total N for Males = 3001
+Total N for males = 3001
 
 ```{r, get females only}
 
@@ -153,7 +164,9 @@ df <- df %>% #N = 3001
 #remove female specific cols (pds_tot_f and pt_f and pds_tot_all)
 
 df <- df %>% 
-  select(-c(pds_tot_f, pds_tot_all, pt_f))
+  select(-c(pds_tot_f, pds_tot_all, pt_f, gonad_pt_f, adren_pt_f))
+
+df_unstd <- df #save a unstandardised df before continuing 
 
 ```
 
@@ -180,10 +193,11 @@ variables <- c("src_subject_id", #character variable
                "race_y0",  "race_6m", "race_y1", "race_18m",  "race_y2", #character variable
                "dti_mean_motion_y0",  "dti_mean_motion_y2",  #continuous score       
                "scanner_id_y2", #character variable
-               "age_y3", #continuous score
+               "age_years", #continuous score
                "cbcl_withdep_y0", "cbcl_withdep_y1", "cbcl_withdep_y2", "cbcl_withdep_y3", #continuous score
                "cbcl_anxdep_y0", "cbcl_anxdep_y1", "cbcl_anxdep_y2", "cbcl_anxdep_y3", #continuous score
-               "pds_tot_f",  "pt_f" #continuous score
+               "pds_tot_m",  "pt_m", #continuous score
+               "gonad_pt_m", "adren_pt_m"
                )
   
 ```
@@ -217,9 +231,8 @@ df <- df %>%
 # Get continuous variables we want to z-scale
 conCols <- df[sapply(df, class) == 'numeric']
 conCols <- colnames(conCols)
-conCols <- conCols[!conCols %in% c("acs_raked_propensity_score_y0","cbcl_withdep_y3")]
-#don't standardise outcome as it is count data.
-
+conCols <- conCols[!conCols %in% c("acs_raked_propensity_score_y0","cbcl_withdep_y3", "cbcl_withdep_y1")] 
+#don't standardise outcome as it is count data. 
 
 #make list of factor columns for ease of sorting new df later
 facCols <- df[sapply(df, class) == 'factor']
@@ -263,6 +276,7 @@ dataSub %>%
 
 We will only impute variables with less than 40% missing data.
 
+
 Variables with missing data that is >40%
 - parent_dep_y3 = 100%
 
@@ -270,8 +284,6 @@ We won't be able to use parental year 3 depression as a covariate due to it not 
 
 
 ```{r, % missing}
-
-summary(dataSub)
 
 # Which variables have <= 40% missing:
 propNA <- round(colSums(is.na(dataSub))/nrow(dataSub), 3) ;propNA
@@ -321,6 +333,7 @@ dataSub %>%
   nrow() 
 #0 participants are missing outcome data at year 1 but not at baseline (y0)
 
+
 ```
 
 BMI
@@ -346,7 +359,7 @@ dataSub %>%
 # 38 participants have missing data at year 2
 # 0 Participants have missing data at y0
 
-# Therefore we can impute 38 participants meaning there is 0 missing parental depression data. 
+# Therefore we can impute 38 participants meaning there is 0 missing parental depression data.
 
 ```
 
@@ -370,7 +383,6 @@ dataSub %>%
   filter(!is.na(parent_high_ed_y0)) %>%
   nrow()
 
-#only 1 participant with missing income data has present parental education data. 
 
 ```
 
@@ -450,9 +462,11 @@ Do the auxilary variables predict missingness?
 # Loop through each variable we want to impute to see which auxillary variables predict that variable or missingness.
 
                    
-auxVars <- c("cbcl_withdep_y0", "cbcl_withdep_y1", "cbcl_withdep_y2","cbcl_anxdep_y1",
-             "cbcl_anxdep_y2", "cbcl_anxdep_y3", "cbcl_anxdep_y0",
+auxVars <- c("cbcl_withdep_y0", "cbcl_withdep_y2",
+             "cbcl_anxdep_y1", "cbcl_anxdep_y2", "cbcl_anxdep_y3", "cbcl_anxdep_y0",
              "parent_dep_y0", "bmi_y0")
+
+#remove " for exploratory analyses. 
 
 imputeVars <- c("cbcl_withdep_y3", "parent_dep_y2","bmi_y1") 
              
@@ -513,6 +527,7 @@ newAuxVars <- newAuxVars %>% unlist() %>% unique()
 newAuxVars <- newAuxVars[!newAuxVars %in% ""]
 newAuxVars 
 
+
 # cbcl_withdep_y0" "cbcl_withdep_y1" "bmi_y0" predict missingness in the variables we want to impute. 
 
 ```
@@ -546,7 +561,10 @@ mainVars <- c("src_subject_id",
                "race_y0",
                "age_y3", 
               "cbcl_withdep_y3",
-              "pt_m"
+              "cbcl_withdep_y1",
+              "pt_m",
+              "gonad_pt_m", #pt timing variables to look at in exploratory analyses
+              "adren_pt_m"
                )
 mainVars
 
@@ -556,84 +574,393 @@ auxVars
 #filter dataframe to main vars and aux vars
 
 dataSub <- dataSub %>% 
-  select(mainVars, auxVars) # N = 3001, 21 variables 
+  select(mainVars, auxVars) # N = 2726 
 
 colnames(dataSub) #looks good!
 
-#We are not imputing race and income so reduce dataframe to participants with complete cases for these variables. 
 
-dataSub <- dataSub %>% # N = 3001
-  filter(!is.na(household_income_y0)) %>% 
-  filter(!is.na(race_y0)) #2792
+dataSub <- dataSub %>% # N = 2726 
+  filter(!is.na(household_income_y0)) %>% #2558
+  filter(!is.na(race_y0)) #2533
   
 colnames(dataSub)
 head(dataSub)#Looks good! 
 
-#Note that all numeric variables except the acs_ranked propensity score have been scaled!!
+#Note that all numeric variables, except the acs_raked_propensity_score and outcome depression measure have been scaled!!
 
 ```
-#RUN COMPLETE CASES
 
+##label variables 
+```{r, label variables}
+
+#tidy household income levels 
+str(dataSub$household_income_y0)
+summary(dataSub$household_income_y0)
+#make factor 
+dataSub$household_income_y0 <- as.factor(dataSub$household_income_y0)
+dataSub$household_income_y0 <- recode_factor(dataSub$household_income_y0, 
+                                             "1" = "<$5000",
+                                             "2" = "$5,000-$11,999",
+                                             "3" = "$12,000-$15,999",
+                                             "4" = "$16,000-$24,999",
+                                             "5" = "$25,000-$34,999",
+                                             "6" = "$35,000-$49,999",
+                                             "7" = "$50,000-$74,999",
+                                             "8" = "$75,000-$99,999",
+                                             "9" = "$100,000-$199,999",
+                                             "10" = ">$200,000")
+
+#coding of race variable should be okay with new labels. 
+
+#label main variables 
+
+allVarNames <-  c("src_subject_id", 
+               "sex",                       
+               "site_id_y1",         
+              "parent_dep_y2",
+               "rel_family_id",
+               "acs_raked_propensity_score_y0", 
+               "bmi_y1",  
+               "household_income_y0", 
+               "race_y0",
+               "age_y3", 
+              "cbcl_withdep_y3",
+              "cbcl_withdep_y1",
+              "pt_m",
+              "gonad_pt_m", #pt timing variables to look at in exploratory analyses
+              "adren_pt_m",
+             "cbcl_withdep_y0", "cbcl_withdep_y2",  "cbcl_anxdep_y1", #Aux vars
+             "cbcl_anxdep_y2", "cbcl_anxdep_y3", "cbcl_anxdep_y0",
+             "parent_dep_y0", "bmi_y0"
+             )
+
+allVarLabels <-  c("ID", 
+               "Sex",                       
+               "Site ID",         
+              "Parent depressive symptoms",
+               "Family ID",
+               "Population weighting score", 
+               "BMI",  
+               "Household income", 
+               "Race",
+               "Age", 
+              "Youth depressive symptoms",
+               "Youth depressive symptoms (Y1)",
+              "Pubertal timing",
+              "Gonadal pubertal timing", #pt timing variables to look at in exploratory analyses
+              "Adrenal pubertal timing",
+             "Youth depressive symptoms (baseline)", #aux variables 
+             "Youth depressive symptoms (Y2)",
+             "Youth anxiety symptoms (Y1)", 
+             "Youth anxiety symptoms (Y2)",
+             "Youth anxiety symptoms (Y3)",
+             "Youth anxiety symptoms (baseline)",
+             "Parent depressive symptoms (baseline)",
+             "BMI (baseline)"
+             )
+
+library(Hmisc)
+library(labelled)
+dataSub <- set_variable_labels(dataSub,         # Assign labels to data frame variables
+                             .labels = allVarLabels)
+label(dataSub) #working
+
+#tidy factor variable labels 
+
+
+
+```
+
+
+#RUN COMPLETE CASE ANALYSIS 
+##Complete cases
 ```{r, complete case models}
-
 CCfitBase <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = glmerControl(calc.derivs = FALSE, optimizer ="bobyqa"),
+                           + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "bobyqa"),
                             family = 'poisson',
                             data = dataSub,
                             na.action = na.exclude,
                        )
 
-resCCfitBase_males <- summary(summary(CCfitBase))
-resCCfitBase_males
+resCCfitBase <- summary(summary(CCfitBase))
+resCCfitBase
 
 #check residuals 
 hist(resid(CCfitBase))
 
+#save results 
 
-saveRDS(resCCfitBase_males, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/ resCCfitBase_males.rds")
+saveRDS(resCCfitBase,"/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitBase_males.rds")
 
 
 CCfitFull <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + bmi_y1
                             + household_income_y0 + parent_dep_y2
                             + (1|site_id_y1) + (1|rel_family_id),
                             control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
-                            weights = acs_raked_propensity_score_y0,
                             family = 'poisson',
                             data = dataSub,
                             na.action = na.exclude
                        )
 
+resCCfitFull <- summary(CCfitFull)
+resCCfitFull 
 
-resCCfitFull_males  <- summary(CCfitFull)
-resCCfitFull_males 
+#check residuals 
+hist(resid(CCfitFull))
 
-saveRDS(resCCfitFull_males, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/ resCCfitFull_males.rds")
+#the above is working with no singularity issues
 
-#Plot results 
+saveRDS(resCCfitFull, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/main_analysis/resCCfitFull_males.rds")
 
-plot_model(CCfitFull)
 
+  
 ```
-#EXPORT RESULTS TABLE 
 
-```{r, imputed}
 
-results_table <- sjPlot::tab_model(CCfitBase, CCfitFull,
+```{r, make tables}
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/tables")
+
+#main analysis 
+CC_res_tbl_main <- tab_model(CCfitBase, CCfitFull,
                   show.se = TRUE,
                   show.df = FALSE,
                   show.ci = FALSE,
+                  show.est = TRUE,
                   digits = 3,
-                  title = "Males — Main Effect of Pubertal Timing and Depression",
+                  title = "Males: Effect of pubertal timing on youth depression",
+                  auto.label = TRUE,
                   dv.labels = c("Base", "Full"),
                   string.se = "SE",
-                  string.p = "P-Value")
+                  string.p = "P-Value",
+                  file = "Males_CC_res_tbl_main.html"
+) 
 
-results_table
+CC_res_tbl_main
+
+```
+
+#PLOT CC
+
+Helpful tutorial: https://cran.r-project.org/web/packages/sjPlot/vignettes/plot_model_estimates.html
+
+https://www.dataquest.io/blog/tutorial-poisson-regression-in-r/
+
+```{r, plot CC}
+
+effectSizePlotMalesBase <- plot_model(CCfitBase, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
+effectSizePlotMalesBase
+
+#Full
+
+effectSizePlotMales <- plot_model(CCfitFull, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
+effectSizePlotMales
+
+```
+#EXPLORATORY ANALYSES
+
+##1. Use gonadal and adrenal pubertal timing measures as separate predictors 
+
+```{r, gonadal timing}
+
+#plot distribution - not normally distributed so use Spearman rank correlation. 
+gonad_dist <- hist(df_unstd$gonad_pt_m)
+adren_dist <- hist(df_unstd$adren_pt_m)
+
+cor(df_unstd$gonad_pt_m, df_unstd$adren_pt_m, method = "spearman") #correlation = 0.44
+
+#adrenal: beta = 0.10
+CCfitBase_ad <- glmer(cbcl_withdep_y3 ~ adren_pt_m + age_y3 + race_y0 
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitBase_ad <- summary(CCfitBase_ad)
+resCCfitBase_ad
+
+#beta = .05
+CCfitFull_ad <- glmer(cbcl_withdep_y3 ~ adren_pt_m + age_y3 + race_y0 + bmi_y1
+                            + household_income_y0 + parent_dep_y2
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitFull_ad <- summary(CCfitFull_ad)
+resCCfitFull_ad
+
+#check residuals 
+hist(resid(resCCfitFull_ad))
+
+#gonadal: 0.04
+CCfitBase_gon <- glmer(cbcl_withdep_y3 ~ gonad_pt_m + age_y3 + race_y0
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitBase_gon <- summary(CCfitBase_gon)
+resCCfitBase_gon
+
+#beta = 0.02 
+CCfitFull_gon <- glmer(cbcl_withdep_y3 ~ gonad_pt_m + age_y3 + race_y0 + bmi_y1
+                            + household_income_y0 + parent_dep_y2
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitFull_gon <- summary(CCfitFull_gon)
+resCCfitFull_gon
+
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/tables")
+#make tables for gonad and adrenal just as we did for main pt variable
+
+#adrenal
+res_tbl_adrenal <- tab_model(CCfitBase_ad, CCfitFull_ad,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  show.est = TRUE,
+                  digits = 3,
+                  title = "Males: Effect of adrenal pubertal timing on youth depression",
+                  auto.label = TRUE,
+                  dv.labels = c("Base", "Full"),
+                  string.se = "SE",
+                  string.p = "P-Value",
+                  file = "Males_adrenal_timing.html"
+) 
+
+res_tbl_adrenal
+
+#gonadal table 
+
+res_tbl_gonadal <- tab_model(CCfitBase_gon, CCfitFull_gon,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  show.est = TRUE,
+                  digits = 3,
+                  title = "Males: Effect of gonadal pubertal timing on youth depression",
+                  auto.label = TRUE,
+                  dv.labels = c("Base", "Full"),
+                  string.se = "SE",
+                  string.p = "P-Value",
+                  file = "Males_gonadal_timing.html"
+) 
+
+res_tbl_gonadal
+
+
+#model with both variables 
+
+CCfitBase_adGon <- glmer(cbcl_withdep_y3 ~ gonad_pt_m + adren_pt_m + age_y3 + race_y0 
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitBase_adGon<- summary(CCfitBase_adGon)
+resCCfitBase_adGon
+
+#make table 
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/tables")
+res_tbl_adGon <- tab_model(CCfitBase_adGon,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  show.est = TRUE,
+                  digits = 3,
+                  title = "Males: Effect of gonadarcheal timing on youth depression, controlling for adrenarcheal timing",
+                  auto.label = TRUE,
+                  dv.labels = "Base",
+                  string.se = "SE",
+                  string.p = "P-Value",
+                  file = "Males_gonadal_adrenal_timing.html"
+) 
+
+res_tbl_adGon
+
+```
+
+## 2. Control for Youth depression at year 1
+
+For this exploratory analysis, we will use the complete cases dataframe as we are using youth depression at year 1 as an auxillary variable to predict outcome (year 3 youth depression) 
+
+```{r, growth in depressive symptoms}
+
+CCfitBaseYDepY1 <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + cbcl_withdep_y1
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitBaseYDepY1<- summary(CCfitBaseYDepY1)
+resCCfitBaseYDepY1
+
+saveRDS(resCCfitBaseYDepY1, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/resCCfitBaseYDepY1_males.rds")
+
+CCfitFullYDepY1 <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + cbcl_withdep_y1 
+                         + household_income_y0 + parent_dep_y2 + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "nloptwrap"),
+                            family = 'poisson',
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitFullYDepY1<- summary(CCfitFullYDepY1)
+resCCfitFullYDepY1
+
+saveRDS(resCCfitFullYDepY1, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/resCCfitFullYDepY1_males.rds")
+
+
 ```
 
 
-#RUN IMPUTATION 
+Export as table 
+```{r, control for yout dep at year 1}
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/tables")
+
+
+cov_earlier_dep_tbl <- sjPlot::tab_model(CCfitBaseYDepY1, CCfitFullYDepY1,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  show.est = TRUE,
+                  digits = 3,
+                  title = "Males: Effect of pubertal timing on youth depression controlling for earlier youth depression",
+                  auto.label = TRUE,
+                  dv.labels = c("Base", "Full"),
+                  string.se = "SE",
+                  string.p = "P-Value",
+                  file = "Males_cov_earlier_dep_tbl.html")
+cov_earlier_dep_tbl
+
+
+```
+
+
+
+
+
+#SENSITIVITY ANALYSIS 
+
+##1. Imputation
 
 A small number of imputations is fine when no. of missing data is small.
 But a larger M makes the imputation more reproducible when using a different seed.
@@ -651,6 +978,20 @@ We do not want to use the mice default "massive imputation" where every variable
 
 We specify these settings in the PredMat using the function quickpred. In the prediction matrix, the rows correspond to incomplete target variables, in the order they appear in our dataframe. A value of 1 indicates that the column variable is a predictor to impute the target (row) variable, and a 0 means that it is not used.
 
+```{r, missing data info}
+
+#get missing data info using final cleaned dataframe
+colnames(dataSub)
+
+#missing outcome only variable to impute in base model 
+sum(is.na(dataSub$cbcl_withdep_y3)) #40
+
+missing <- dataSub %>% 
+  select(c(src_subject_id, cbcl_withdep_y3, bmi_y1, parent_dep_y2))
+  sum(!complete.cases(missing)) #89 missing in full model. 
+  
+```
+
 ```{r, imputation set up}
 
 # first get default predictor matrix
@@ -658,7 +999,6 @@ predMat <- quickpred(dataSub,
                       include=auxVars,
                       exclude=NULL,
                       mincor = 0.2)
-predMat
 
 # Rows are variables to be imputed, cols are variables used to impute.
 
@@ -674,74 +1014,101 @@ end_time - start_time
 ```
 
 
-#RUN MODELS
+##Run imputed models
 
-##Imputed dataframes
 ```{r, imputed models}
-# This works:
-MIfitBase <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
+
+#Base model
+MIfitBase <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 
                             + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa")))
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "bobyqa"),
+                            family = 'poisson'))
 
 resMIfitBase <-summary(pool(MIfitBase))
 resMIfitBase
 
-MIfitFull <- with(data = ModImps, exp = lmerTest::lmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + household_income_y0 + parent_dep_y2
-                            + (1|site_id_y1) + (1|rel_family_id),
-                            control = lmerControl(optimizer ="bobyqa"),
-                            weights = acs_raked_propensity_score_y0))
-
+#Full model
+MIfitFull <- with(data = ModImps, exp = glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + bmi_y1 +
+                                              household_income_y0 + parent_dep_y2 + (1|site_id_y1) +
+                                              (1|rel_family_id),
+                                              control = glmerControl(calc.derivs = FALSE, 
+                                                                     optimizer = "bobyqa"),
+                                              family = 'poisson'))
 
 resMIfitFull <- summary(pool(MIfitFull))
 resMIfitFull
 
-#pasting imputed results here 
+```
+Export results as tables for supplementary info
 
-#base 
-#               term    estimate  std.error  statistic       df     p.value
-# 1      (Intercept)  0.02364781 0.03016421  0.7839692 2767.193 0.433125258
-# 2             pt_m  0.05480874 0.02013136  2.7225556 2743.300 0.006518892
-# 3           age_y3  0.03550608 0.01914568  1.8545221 2752.197 0.063771390
-# 4     race_y0Black -0.19836128 0.07317689 -2.7107093 2741.532 0.006755784
-# 5     race_y0Asian -0.25655021 0.12687825 -2.0220188 2768.809 0.043270399
-# 6 race_y0AIAN/NHPI -0.02919849 0.26800956 -0.1089457 2717.707 0.913253585
-# 7     race_y0Other  0.03723348 0.11013510  0.3380710 2695.804 0.735336033
-# 8     race_y0Mixed  0.09702783 0.06561207  1.4788107 2711.004 0.139307094
+Note: The tab_model function does not work with the imputed dataframe output so we cannot use this to generate the tables like we did for the complete cases. We will use KableExtra instead. 
 
-#Full 
-#                      term    estimate  std.error  statistic       df    p.value
-#                (Intercept) 0.22659830 0.13224058  1.7135308 2653.830 0.08673172
-# 2                   pt_m  0.04261869 0.01966111  2.1676646 2736.108 0.03027019
-# 3                 age_y3  0.02845592 0.01860572  1.5294183 2741.997 0.12627612
-# 4           race_y0Black -0.19337443 0.07681970 -2.5172506 2734.668 0.01188420
-# 5           race_y0Asian -0.08698124 0.11572665 -0.7516094 2748.193 0.45235035
-# 6       race_y0AIAN/NHPI  0.06449278 0.24524815  0.2629695 2642.246 0.79259462
-# 7           race_y0Other  0.02868415 0.10574927  0.2712468 2611.526 0.78622268
-# 8           race_y0Mixed  0.07729128 0.07244088  1.0669566 2715.670 0.28608627
-# 9   household_income_y02 -0.37262083 0.17154617 -2.1721315 2681.434 0.02993310
-# 10  household_income_y03 -0.27716998 0.19384668 -1.4298413 2729.349 0.15287704
-# 11  household_income_y04  0.03129478 0.15563460  0.2010785 2617.540 0.84065278
-# 12  household_income_y05 -0.16694274 0.14999297 -1.1130038 2653.708 0.26580762
-# 13  household_income_y06 -0.04415870 0.14135386 -0.3123983 2664.955 0.75476232
-# 14  household_income_y07 -0.18803560 0.13704643 -1.3720576 2665.482 0.17016096
-# 15  household_income_y08 -0.24138182 0.13826577 -1.7457814 2665.859 0.08096414
-# 16  household_income_y09 -0.23501570 0.13518068 -1.7385303 2662.724 0.08223301
-# 17 household_income_y010 -0.25053199 0.14433556 -1.7357606 2660.352 0.08272195
-# 18         parent_dep_y2  0.30351238 0.02024828 14.9895359 2511.578 0.00000000
+This is a known issue with tab_model and has been raised with the package developers: https://stackoverflow.com/questions/70329387/r-use-mice-mipo-data-frame-object-with-sjplot-tab-model
+
+```{r, export MI results as table}
+
+#base
+tblMIfitBase <- kbl(resMIfitBase) %>% 
+  kable_styling()
+tblMIfitBase 
+
+write.csv(resMIfitBase, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/sensitivity_analysis/resMIfitBase_males.csv")
+
+#full 
+tblMIfitFull <- kbl(resMIfitFull) %>% 
+  kable_styling()
+tblMIfitFull
+
+write.csv(resMIfitFull, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/sensitivity_analysis/resMIfitFull_males.csv")
+
+```
 
 
+## 2. With population weight 
+
+```{r, add population weight}
+
+#Run with population weight
+CCfitFull_weight <- glmer(cbcl_withdep_y3 ~ pt_m + age_y3 + race_y0 + bmi_y1
+                            + household_income_y0 + parent_dep_y2
+                            + (1|site_id_y1) + (1|rel_family_id),
+                            control = glmerControl(calc.derivs = FALSE, optimizer = "Nelder_Mead"),
+                            family = 'poisson',
+                            weights = acs_raked_propensity_score_y0,
+                            data = dataSub,
+                            na.action = na.exclude
+                       )
+
+resCCfitFull_weight <- summary(CCfitFull_weight)
+resCCfitFull_weight
+
+saveRDS(resCCfitFull_weight, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/sensitivity_analysis/resCCfitFull_weights_males.rds")
+
+#with population weight - model comparision for sensitivity analyses (supps)
+
+setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/figs/tables")
+
+CC_res_tbl_weight_comp <- tab_model(CCfitBase, CCfitFull, CCfitFull_weight,
+                  show.se = TRUE,
+                  show.df = FALSE,
+                  show.ci = FALSE,
+                  digits = 3,
+                  title = "Males: Effect of pubertal timing on youth depression",
+                  auto.label = TRUE,
+                  dv.labels = c("Base", "Full", "Full (weighted)"),
+                  string.se = "SE",
+                  string.p = "P-Value",
+                  file = "Males_CC_res_tbl_weight_comp.html"
+) 
+
+
+CC_res_tbl_weight_comp
 
 
 
 ```
 
-
-
-
-
-
-
-
+https://lmudge13.github.io/sample_code/mixed_effects.html
 
 ##Export tidied dataframe 
 
@@ -749,5 +1116,5 @@ resMIfitFull
 setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/data")
 
 
-saveRDS(dataSub, "data_main_analy_males.rds")
+saveRDS(dataSub, "data_main_analy.rds")
 ```

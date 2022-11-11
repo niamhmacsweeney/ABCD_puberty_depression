@@ -140,7 +140,7 @@ source('/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depress
 
 ```
 
-Define variables:
+#STEP 3: Define variables:
 
 - scale 
 
@@ -272,18 +272,16 @@ for (dep in ls.dep.cate){
 ls.model.region=target.model
 
 
-#Don't control for WBV in exploratory analyses - that uses basic model. 
-# # individual region models add whole brain volume as a covariate
-# ls.model.region.covWholeB=ls.model.region
-# ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)]=
-#       paste0(ls.model.region.covWholeB$covs[grep('thk\\.|sa\\.|vol\\.APARC|sulc\\.|vol\\.ASEG',ls.model.region.covWholeB$dependent)],'+WBV')
+#Check impact of WBV. 
+# for individual cortical and subcort region models add whole brain volume as a covariate
+ls.model.region.covWholeB=ls.model.region
+ls.model.region.covWholeB$covs[!grepl('FA\\.|MD\\.',ls.model.region.covWholeB$dependent)]=
+      paste0(ls.model.region.covWholeB$covs[!grepl('FA\\.|MD\\.', ls.model.region.covWholeB$dependent)],'+ WBV')
 
 
 ```
 
 #### STEP 5: Run Models
-
-We do not have any dat_long data in this analysis due to using average measures for bilateral brain regions but specifying it here is fine, it just won't be called by the function. 
 
 ```{r, run models}
 
@@ -292,6 +290,9 @@ result.females.pt_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata,
 
 #Regional (Individual) models
 result.females.pt_brain.region=reg_phewasStyle(ls.model.region,dat_short=targetdata, correctByFactor = T)
+
+#covary for WBV
+result.females.pt_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata, correctByFactor = T)
 
 
 #add TRUE column if p.corrected < 0.002 which means that all values of ≤0.001
@@ -304,7 +305,7 @@ result.females.pt_brain.bulk$Sig <- as.numeric((as.character(result.females.pt_b
 result.females.pt_brain.region$Sig <- as.numeric((as.character(result.females.pt_brain.region[,"p.corrected"]))) < 0.002
 
 #Save as R.Data file
-save(result.females.pt_brain.bulk,result.females.pt_brain.region,file='/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/females_pt_brain_explr.RData')
+save(result.females.pt_brain.bulk,result.females.pt_brain.region, result.females.pt_brain.region.covWholeB, file='/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/females_pt_brain_explr.RData')
 
 #Save results as .csv files
 
@@ -314,14 +315,19 @@ write.csv(result.females.pt_brain.bulk, file = '/Volumes/GenScotDepression/users
 #regional results 
 write.csv(result.females.pt_brain.region, file = '/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/sig.females.pt.brain.regional.csv')
 
+#regional results + WBV
+write.csv(result.females.pt_brain.region.covWholeB, file = '/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/sig.females.pt.brain.regional.covWholeB.csv')
+
+
+
 ```
 
 
 Double check function outputs -- looks good! 
 ```{r, test function}
 
-CCfitBase <- lmer(SA.glb ~ pt_f + age_y3 + race_y0
-                            + (1|site_id) + (1|fam_id),
+CCfitBase <- lmer(Vsc.aa ~ pt_f + age_y3 + race_y0
+                            + (1|scnr_id) + (1|fam_id),
                             control = lmerControl(optimizer ="bobyqa"),
                             data = targetdata,
                             na.action = na.exclude

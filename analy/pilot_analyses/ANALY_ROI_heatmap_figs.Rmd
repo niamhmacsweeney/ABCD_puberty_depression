@@ -44,8 +44,8 @@ Now we want to colour in our segmentated area
 
 ```{r, fill}
 #here we see the novelty of the underlying code, basically works like a GGplot syntax :) 
-ggseg(mapping=aes(fill=region), position="stacked")
-
+ggseg(mapping=aes(fill=region))
+      
 
 ```
 

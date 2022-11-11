@@ -1,0 +1,99 @@
+---
+title: "ANALY_H2_females"
+author: "Niamh MacSweeney"
+date: "2022-10-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(plyr)
+library(tidyverse)
+library(MplusAutomation)
+library(BiocManager) #to read gh5 outputs
+```
+
+# Introduction:
+
+The purpose of this script is to run mediation analysis for H2 and H3 of our registered report which will test whether global and regional brain measures, respectively, mediate the association between earlier pubertal timing and increased depressive symptoms. 
+
+I followed the steps in this MPLusAutomation vignette: https://cran.r-project.org/web/packages/MplusAutomation/vignettes/vignette.html to run the MPlus input files in batches. We could have also used a template file to loop over the input files but given the relatively small number of input files, the input files were created in MPlus manually and then ran in R using MPlusAutomation package. 
+
+MPlusAutomation also makes extracting model summary statistics and visualising outputs much easier. 
+
+
+Inputs:
+Mplus input files are located in a directory 
+
+```{r, run H2}
+
+runModels("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/females/H2", 
+          replaceOutfile="modifiedDate")
+
+#extract all model output info from 
+H2Output <- readModels(
+            "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/females/H2",
+             recursive=TRUE)
+
+#isolate model fit summary stats
+H2summaryStats <- readModels(
+  "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/females/H2",
+  what = "summaries")
+
+H2estimates <- readModels(
+  "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/females/H2",
+  what = "parameters") 
+
+#our main outcome of interest is the indirect effects 
+H2indirect <- readModels(
+  "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/females/H2",
+  what = "indirect") 
+
+H2aResults <- H2indirect$female_H2a.out$indirect$unstandardized
+H2aResults
+
+#save list elements as dataframe
+overall <- as.data.frame(H2aResults$overall)
+overall$intervening <- NA #match cols before making master df
+
+specific <- as.data.frame(H2aResults$specific)
+specific$summary <- NA
+
+H2aAll <- rbind(overall, specific)
+H2aAll$Hypothesis <- "H2a"
+
+#make new col called model which will show either summary (total, direct, indirect) or mediating variable
+
+H2aAll <- H2aAll %>% mutate(model = coalesce(summary, intervening)) %>%
+         select(-c(summary, intervening))
+
+### H2b ####
+
+H2bResults <- H2indirect$female_H2b.out$indirect$unstandardized
+H2bResults     
+
+#save list elements as dataframe
+overall <- as.data.frame(H2bResults$overall)
+overall$intervening <- NA #match cols before making master df
+
+specific <- as.data.frame(H2bResults$specific)
+specific$summary <- NA
+
+H2bAll <- rbind(overall, specific)
+H2bAll$Hypothesis <- "H2b"
+
+
+#make new col called model which will show either summary (total, direct, indirect) or mediating variable
+
+H2bAll <- H2bAll %>% mutate(model = coalesce(summary, intervening)) %>%
+         select(-c(summary, intervening))
+
+H2resultsAll <- rbind(H2aAll, H2bAll)
+
+#save as csv
+
+write.csv(H2resultsAll, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MPlusAuto/females/results_tables/H2femaleResults.csv", row.names=TRUE)
+
+
+
+```

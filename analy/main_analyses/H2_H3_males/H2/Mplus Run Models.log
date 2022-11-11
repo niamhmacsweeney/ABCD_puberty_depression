@@ -1,0 +1,10 @@
+------Begin Mplus Model Run: 14Oct2022 08:46:39------
+Run options:
+	Recursive (run models in subdirectories): FALSE
+	Show output on console: FALSE
+	Replace existing outfile: modifiedDate
+------
+Currently running model: male_H2a.inp
+Skipping model because output file is newer than input file: /Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H2/male_H2b.inp
+
+------End Mplus Model Run: 14Oct2022 08:46:46------

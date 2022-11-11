@@ -87,9 +87,7 @@ targetdata <- targetdata %>%
 ```
 
 
-
-
-####STEP 2: Model set up We are using X.Shen's reg_phewasStyle_Random.R function to run the mixed effects models for both unilateral and bilateral brain regions. Note that we will use an average measure across the left and right hemispheres for bilateral brain regions. 
+####STEP 2: Model set up We are using reg_phewasStyle_GLMM.R function to run the mixed effects models. 
 
 We need to change "src_subject_id" to "f.eid" so that function will run.
 
@@ -142,7 +140,7 @@ source('/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depress
 
 ```
 
-Define variables:
+#STEP 3: Define variables:
 
 - scale 
 
@@ -151,7 +149,6 @@ targetdata=targetdata
 colnames(targetdata)
 
 #scale all numeric except population weighting variables and depression variable (outcome)
-
 
 #change integer variables to numeric for ease of scaling later 
 intCols <- targetdata[sapply(targetdata, class) == 'integer']
@@ -274,10 +271,10 @@ for (fac in ls.factor.cate){
 
 ls.model.region=target.model
 
-# # individual region models add whole brain volume as a covariate
-# ls.model.region.covWholeB=ls.model.region
-# ls.model.region.covWholeB$covs[!grepl('\\.glb',ls.model.region.covWholeB$factor)]=
-#       paste0(ls.model.region.covWholeB$covs[!grepl('\\.glb',ls.model.region.covWholeB$factor)],'+ WBV')
+# individual region models add whole brain volume as a covariate
+ls.model.region.covWholeB=ls.model.region
+ls.model.region.covWholeB$covs[!grepl('\\.glb|FA\\.|MD\\.',ls.model.region.covWholeB$factor)]=
+      paste0(ls.model.region.covWholeB$covs[!grepl('\\.glb|FA\\.|MD\\.',ls.model.region.covWholeB$factor)],'+ WBV')
 
 
 ```
@@ -293,6 +290,10 @@ result.females.dep_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata
 
 #Regional (Individual) models
 result.females.dep_brain.region=reg_phewasStyle(ls.model.region,dat_short=targetdata, correctByFactor = T)
+
+#controlling for WBV
+result.females.dep_brain.region.covWholeB=reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata, correctByFactor = T)
+
 
 
 #add TRUE column if nominal p.corrected < 0.06 which means that all values of ≤0.05
@@ -315,23 +316,79 @@ write.csv(result.females.dep_brain.bulk, file = '/Volumes/GenScotDepression/user
 #regional results
 write.csv(result.females.dep_brain.region, file = '/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/sig.females.dep.brain.regional.csv')
 
+# Covary for whole brain — regional results 
+write.csv(result.females.dep_brain.region.covWholeB, file = '/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/sig.females.dep.brain.regional.covWholeB.csv')
+
 ```
 
 ###Cross check models by running individually 
 
 ```{r, check models}
 
-CCfitBase <- glmer(y_dep_y3 ~ FA.glb + age_y3 + race_y0 
-                            + (1|site_id) + (1|fam_id),
+CCfitBase <- glmer(y_dep_y3 ~ Vsc.aa + age_y3 + race_y0 
+                            + (1|scnr_id) + (1|fam_id),
                             control = glmerControl(calc.derivs = FALSE, optimizer ="bobyqa"),
                             family = 'poisson',
                             data = targetdata,
                             na.action = na.exclude,
                        )
 
+#beta = -0.105
 resCCfitBase <- summary(summary(CCfitBase))
 resCCfitBase
 
 ```
+
+### Troubleshooting ###
+
+```{r, load files needed}
+
+load("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/females_dep_brain_explr.RData")
+
+```
+
+
+to do - test mediation of brain regions outside of MPlus 
+
+
+```{r, load}
+
+load("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/judith_files/sex_1.RData")
+
+#change NAs from -9999 to NA
+sex_1[sex_1 == -9999] <- NA
+summary(sex_1) #this worked
+
+#standardise variables 
+
+sex_1$Vaa_stan <- scale(sex_1$Vaa)
+sex_1$age_y3_stan <- scale(sex_1$age_y3)
+
+   
+
+#test model 
+#beta = -0.001 with race included and unstandardised vars 
+#beta = -0.09 with standardised brain and age vars - this effect is the same as the main explr models run above. 
+#It looks like the cluster variable is causing issues in MPlus. Need to talk to Judith about this. 
+
+modTest <- glmer(y_dep_y3 ~ Vaa_stan + age_y3_stan
+                 + (1|scnr_id) + (1|fam_id),
+                 control = glmerControl(calc.derivs = FALSE, optimizer ="Nelder_Mead"),
+                 family = 'poisson',
+                 data = sex_1,
+                 na.action = na.exclude,
+                       )
+
+resmodTest<- summary(summary(modTest))
+resmodTest
+
+modTest1 <- lmer (pt_f ~ Vaa + age_y3 + race_y0 
+                            + (1|site_id) + (1|fam_id),
+                            data = sex_1,
+                            na.action = na.exclude,
+                       )
+resmodTest1 <- summary(modTest1)
+
+control = glmerControl(calc.derivs = FALSE, optimizer ="bobyqa")
 
  \#\#\#\#\#\#\#\#\#\#\#\#\#\# End of Script \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#

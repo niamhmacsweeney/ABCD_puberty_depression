@@ -1,0 +1,108 @@
+Title: Males: H3c cortical volume temporal
+Mplus file written by Stat/Transfer
+
+!  The following variables were converted:
+!    id : id
+!    sex : sex
+!    site_id : site_id
+!    p_dep_y0 : p_dep_y0
+!    p_dep_y2 : p_dep_y2
+!    fam_id : fam_id
+!    pws : pws
+!    bmi_y0 : bmi_y0
+!    bmi_y1 : bmi_y1
+!    race_y0 : race_y0
+!    dti_mot : dti_mot
+!    scnr_id : scnr_id
+!    WBV : wbv
+!    ICV : icv
+!    income : income
+!    age_y2 : age_y2
+!    age_y3 : age_y3
+!    y_dep_y0 : y_dep_y0
+!    y_dep_y1 : y_dep_y1
+!    y_dep_y2 : y_dep_y2
+!    y_dep_y3 : y_dep_y3
+!    y_anx_y0 : y_anx_y0
+!    y_anx_y1 : y_anx_y1
+!    y_anx_y2 : y_anx_y2
+!    y_anx_y3 : y_anx_y3
+!    gonad_avg : gonad_avg
+!    adren_avg : adren_avg
+!    pt_m : pt_m
+!    pt_f : pt_f
+!    gonad_f : gonad_f
+!    gonad_m : gonad_m
+!    adren_f : adren_f
+!    adren_m : adren_m
+!    gonad_pt_m : gonad_pt_m
+!    gonad_pt_f : gonad_pt_f
+!    adren_pt_m : adren_pt_m
+!    adren_pt_f : adren_pt_f
+!    Vglb : v.glb
+!    SAglb : sa.glb
+!    SLglb : sl.glb
+!    Tglb : t.glb
+!    FAglb : fa.glb
+!    Tmdtm : t.mdtm
+!    Tinsula : t.insula
+!    Trrmdfr : t.rrmdfr
+!    Tmobfr : t.mobfr
+!    Tlobfr : t.lobfr
+!    Vbsts : v.bsts
+!    Vmdtm : v.mdtm
+!    Vcdmdfr : v.cdmdfr
+!    Vpostcn : v.postcn
+!    FApscs : fa.pscs
+!    FAcc : fa.cc
+!    SLporb : sl.porb
+!    Vvedc : v.vedc
+!    Vaa : v.aa
+!    c : group(fam_id scnr_id)
+
+Data:
+   File is /Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/sex_2.dat;
+   listwise = on;
+
+Variable:
+   Names are     ID          SEX         SITE_ID     P_DEP_Y0    P_DEP_Y2    FAM_ID      
+     PWS         BMI_Y0      BMI_Y1      RACE_Y0     DTI_MOT     SCNR_ID     
+     WBV         ICV         INCOME      AGE_Y2      AGE_Y3      Y_DEP_Y0    
+     Y_DEP_Y1    Y_DEP_Y2    Y_DEP_Y3    Y_ANX_Y0    Y_ANX_Y1    Y_ANX_Y2    
+     Y_ANX_Y3    GONAD_AV    ADREN_AV    PT_M        PT_F        GONAD_F     
+     GONAD_M     ADREN_F     ADREN_M     GONAD_PT    GONAD_P0    ADREN_PT    
+     ADREN_P0    VGLB        SAGLB       SLGLB       TGLB        FAGLB       
+     TMDTM       TINSULA     TRRMDFR     TMOBFR      TLOBFR      VBSTS       
+     VMDTM       VCDMDFR     VPOSTCN     FAPSCS      FACC        SLPORB      
+     VVEDC       VAA         C  ;        
+   Missing are . ;
+
+usevariables =  Y_DEP_Y3 PT_M AGE_Y3 RACE_Y0 VBSTS VMDTM ; 
+
+count = Y_DEP_Y3(P); !Poisson distribution
+cluster = C ;
+idvariable = ID ;
+ 
+Define: 
+standardize pt_m AGE_Y3 VBSTS VMDTM  ;
+
+ANALYSIS: 
+processors = 2 (starts);
+
+TYPE=COMPLEX; 
+!estimator = ML;
+BOOTSTRAP = 1000; 
+
+MODEL:
+Y_DEP_Y3 ON VBSTS VMDTM  ;
+Y_DEP_Y3 ON PT_M AGE_Y3 RACE_Y0;
+VBSTS VMDTM  ON PT_M AGE_Y3 RACE_Y0;
+MODEL INDIRECT:
+Y_DEP_Y3 IND PT_M ;
+ 
+output:
+      sampstat  
+      cinterval(bootstrap);
+
+plot:
+type = plot3;

@@ -26,7 +26,7 @@ The purpose of this script is to re-run our pilot analyses (see ANALY_pilot... s
 3.  Set up  function
 4.  Run models
 
-####STEP 1: SETUP Load libraries and set wd
+##STEP 1: SETUP Load libraries and set wd
 
 ```{r, load libraries, set wd}
 
@@ -61,7 +61,7 @@ targetdata <- rio::import("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/A
 
 
 ```
-## Adjust variable names 
+##Adjust variable names 
 
 Mplus files need to be less than 8 chars in length so we will need to add tags back onto the subcortical measure so that we can adjust for multiple comparisons in batches (e.g., cortical, subcortical etc.) 
 
@@ -86,10 +86,7 @@ targetdata <- targetdata %>%
 
 ```
 
-
-
-
-####STEP 2: Model set up We are using X.Shen's reg_phewasStyle_Random.R function to run the mixed effects models for both unilateral and bilateral brain regions. Note that we will use an average measure across the left and right hemispheres for bilateral brain regions. 
+##STEP 2: Model set up We are the reg_phewasStyle_GLMM.R function to run the mixed effects models. Note that we will use an average measure across the left and right hemispheres for bilateral brain regions. 
 
 We need to change "src_subject_id" to "f.eid" so that function will run.
 
@@ -142,7 +139,7 @@ source('/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depress
 
 ```
 
-Define variables:
+## STEP 3: Define variables:
 
 - scale 
 
@@ -274,10 +271,10 @@ for (fac in ls.factor.cate){
 
 ls.model.region=target.model
 
-# # individual region models add whole brain volume as a covariate
-# ls.model.region.covWholeB=ls.model.region
-# ls.model.region.covWholeB$covs[!grepl('\\.glb',ls.model.region.covWholeB$factor)]=
-#       paste0(ls.model.region.covWholeB$covs[!grepl('\\.glb',ls.model.region.covWholeB$factor)],'+ WBV')
+# individual region models add whole brain volume as a covariate
+ls.model.region.covWholeB=ls.model.region
+ls.model.region.covWholeB$covs[!grepl('FA\\.|MD\\.',ls.model.region.covWholeB$factor)]=
+      paste0(ls.model.region.covWholeB$covs[!grepl('FA\\.|MD\\.' ,ls.model.region.covWholeB$factor)],'+ WBV')
 
 
 ```
@@ -294,6 +291,9 @@ result.males.dep_brain.bulk=reg_phewasStyle(ls.model.bulk,dat_short=targetdata,c
 #Regional (Individual) models
 result.males.dep_brain.region=reg_phewasStyle(ls.model.region,dat_short=targetdata, correctByFactor = T)
 
+#covary for WBV in cortical and subcort models
+result.males.dep_brain.region.covWholeB =reg_phewasStyle(ls.model.region.covWholeB,dat_short=targetdata, correctByFactor = T)
+
 
 #add TRUE column if p.corrected < 0.06 which means that all values of ≤0.05
 
@@ -303,14 +303,23 @@ result.males.dep_brain.bulk$Sig <- as.numeric((as.character(result.males.dep_bra
 #regional results
 result.males.dep_brain.region$Sig <- as.numeric((as.character(result.males.dep_brain.region[,"p.corrected"]))) < 0.06
 
+#cov whole brain results 
+result.males.dep_brain.region.covWholeB$Sig <- as.numeric((as.character(result.males.dep_brain.region.covWholeB[,"p.corrected"]))) < 0.06
+
 
 # #Save as R.Data file
 save(result.males.dep_brain.bulk,result.males.dep_brain.region,file='/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/males_dep_brain_explr.RData')
 
 #Save results as .csv files
 
+#bulk results
+write.csv(result.males.dep_brain.bulk, file = '/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/sig.males.dep.brain.bulk.csv')
+
 #regional results
 write.csv(result.males.dep_brain.region, file = '/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/sig.males.dep.brain.regional.csv')
+
+#cov for WBV
+write.csv(result.males.dep_brain.region.covWholeB, file = '/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depression/results/exploratory_analysis/sig.males.dep.brain.regional.covWholeB.csv')
 
 ```
 

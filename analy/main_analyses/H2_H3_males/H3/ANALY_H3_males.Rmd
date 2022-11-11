@@ -1,0 +1,211 @@
+---
+title: "ANALY_H3_males"
+author: "Niamh MacSweeney"
+date: "2022-10-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(plyr)
+library(tidyverse)
+library(MplusAutomation)
+library(BiocManager) #to read gh5 outputs
+```
+
+#MALES
+# Introduction:
+
+The purpose of this script is to run mediation analysis for H3 of our registered report which will test whether global and regional brain measures, respectively, mediate the association between earlier pubertal timing and increased depressive symptoms. 
+
+I followed the steps in this MPLusAutomation vignette: https://cran.r-project.org/web/packages/MplusAutomation/vignettes/vignette.html to run the MPlus input files in batches. We could have also used a template file to loop over the input files but given the relatively small number of input files, the input files were created in MPlus manually and then ran in R using MPlusAutomation package. 
+
+MPlusAutomation also makes extracting model summary statistics and visualising outputs much easier. 
+
+
+Inputs:
+Mplus input files are located in a directory 
+
+```{r, run H3}
+runModels("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3", 
+          replaceOutfile="modifiedDate")
+
+#extract all model output info from 
+H3Output <- readModels(
+            "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3",
+             recursive=TRUE)
+
+#isolate model fit summary stats
+H3summaryStats <- readModels(
+  "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3",
+  what = "summaries")
+
+H3estimates <- readModels(
+  "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3",
+  what = "parameters") 
+
+#our main outcome of interest is the indirect effects 
+H3indirect <- readModels(
+  "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MplusAuto/males/H3",
+  what = "indirect")
+```
+
+(12/10/22): Ideally, I would write a function for the code below but the MPlusAutomation function setup is proving difficult to integrate within another function. Will revisit later. 
+
+```{r, extract results for specific hypotheses}
+#### H3a ####
+H3aResults <- H3indirect$male_H3a.out$indirect$unstandardized
+H3aResults
+
+#save list elements as dataframe
+overall <- as.data.frame(H3aResults$overall)
+overall$intervening <- NA #match cols before making master df
+
+specific <- as.data.frame(H3aResults$specific)
+specific$summary <- NA
+
+H3aAll <- rbind(overall, specific)
+H3aAll$Hypothesis <- "H3a"
+
+#make new col called model which will show either summary (total, direct, indirect) or mediating variable
+
+H3aAll <- H3aAll %>% mutate(model = coalesce(summary, intervening)) %>%
+         select(-c(summary, intervening))
+
+
+### H3b ###
+H3bResults <- H3indirect$male_H3b.out$indirect$unstandardized
+H3bResults     
+
+#save list elements as dataframe
+overall <- as.data.frame(H3bResults$overall)
+overall$intervening <- NA #match cols before making master df
+
+specific <- as.data.frame(H3bResults$specific)
+specific$summary <- NA
+
+H3bAll <- rbind(overall, specific)
+H3bAll$Hypothesis <- "H3b"
+
+#make new col called model which will show either summary (total, direct, indirect) or mediating variable
+
+H3bAll <- H3bAll %>% mutate(model = coalesce(summary, intervening)) %>%
+         select(-c(summary, intervening))
+
+### H3c ###
+
+H3cResults <- H3indirect$male_H3c.out$indirect$unstandardized
+H3cResults     
+
+#save list elements as dataframe
+overall <- as.data.frame(H3cResults$overall)
+overall$intervening <- NA #match cols before making master df
+
+specific <- as.data.frame(H3cResults$specific)
+specific$summary <- NA
+
+H3cAll <- rbind(overall, specific)
+H3cAll$Hypothesis <- "H3c"
+
+#make new col called model which will show either summary (total, direct, indirect) or mediating variable
+
+H3cAll <- H3cAll %>% mutate(model = coalesce(summary, intervening)) %>%
+         select(-c(summary, intervening))
+
+
+### H3d ###
+
+H3dResults <- H3indirect$male_H3d.out$indirect$unstandardized
+H3dResults     
+
+#save list elements as dataframe
+overall <- as.data.frame(H3dResults$overall)
+overall$intervening <- NA #match cols before making master df
+
+specific <- as.data.frame(H3dResults$specific)
+specific$summary <- NA
+
+H3dAll <- rbind(overall, specific)
+H3dAll$Hypothesis <- "H3d"
+
+#make new col called model which will show either summary (total, direct, indirect) or mediating variable
+
+H3dAll <- H3dAll %>% mutate(model = coalesce(summary, intervening)) %>%
+         select(-c(summary, intervening))
+
+
+### H3e ###
+H3eResults <- H3indirect$male_H3e.out$indirect$unstandardized
+H3eResults     
+
+#save list elements as dataframe
+overall <- as.data.frame(H3eResults$overall)
+overall$intervening <- NA #match cols before making master df
+
+specific <- as.data.frame(H3eResults$specific)
+specific$summary <- NA
+
+H3eAll <- rbind(overall, specific)
+H3eAll$Hypothesis <- "H3e"
+
+#make new col called model which will show either summary (total, direct, indirect) or mediating variable
+
+H3eAll <- H3eAll %>% mutate(model = coalesce(summary, intervening)) %>%
+         select(-c(summary, intervening))
+
+### H3f ###
+
+H3fResults <- H3indirect$male_H3f.out$indirect$unstandardized
+H3fResults     
+
+#save list elements as dataframe
+overall <- as.data.frame(H3fResults$overall)
+overall$intervening <- NA #match cols before making master df
+
+specific <- as.data.frame(H3fResults$specific)
+specific$summary <- NA
+
+H3fAll <- rbind(overall, specific)
+H3fAll$Hypothesis <- "H3f"
+
+#make new col called model which will show either summary (total, direct, indirect) or mediating variable
+
+H3fAll <- H3fAll %>% mutate(model = coalesce(summary, intervening)) %>%
+         select(-c(summary, intervening))
+
+
+
+### H3g ###
+
+H3gResults <- H3indirect$male_H3g.out$indirect$unstandardized
+H3gResults     
+
+#save list elements as dataframe
+overall <- as.data.frame(H3gResults$overall)
+overall$intervening <- NA #match cols before making master df
+
+specific <- as.data.frame(H3gResults$specific)
+specific$summary <- NA
+
+H3gAll <- rbind(overall, specific)
+H3gAll$Hypothesis <- "H3g"
+
+#make new col called model which will show either summary (total, direct, indirect) or mediating variable
+
+H3gAll <- H3gAll %>% mutate(model = coalesce(summary, intervening)) %>%
+         select(-c(summary, intervening))
+
+
+```
+
+
+```{r, combine results in one df and save}
+
+H3resultsAll <- rbind(H3aAll, H3bAll, H3cAll, H3dAll, H3eAll, H3fAll, H3gAll)
+H3resultsAll
+
+#save as csv
+
+write.csv(H3resultsAll, "/Volumes/GenScotDepression/users/niamh/puberty_ABCD/MPlusAuto/males/results_tables/H3maleResults.csv", row.names=TRUE)
+
+```
