@@ -15,10 +15,7 @@ et al.
 If you have any questions about this project or repository, please
 contact Niamh MacSweeney (<niamh.macsweeney@ed.ac.uk>)
 
-This project is current under review as a Stage One Registered Report.
-As soon as an in principle acceptance is issued, the Stage One
-manuscript will be uploaded to a public server (e.g., OSF) and the link
-will be provided here.
+Stage 1 of this project has received an in-principle acceptance (IPA) and Stage 2 is being prepared for re-submission.
 
 #### Set Up
 
