@@ -707,7 +707,6 @@ setwd("/Volumes/GenScotDepression/users/niamh/puberty_ABCD/ABCD_puberty_depressi
 CC_res_tbl_main <- tab_model(CCfitBase, CCfitFull,
                   show.se = TRUE,
                   show.df = FALSE,
-                  show.ci = FALSE,
                   show.est = TRUE,
                   digits = 3,
                   title = "Females: Effect of pubertal timing on youth depression",
@@ -720,6 +719,7 @@ CC_res_tbl_main <- tab_model(CCfitBase, CCfitFull,
 
 CC_res_tbl_main
 
+CC_res_tbl_main
 
 
 
@@ -733,12 +733,16 @@ https://www.dataquest.io/blog/tutorial-poisson-regression-in-r/
 
 ```{r, plot CC}
 #Base
-effectSizePlotFemalesBase <- plot_model(CCfitBase, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
+effectSizePlotFemalesBase <- plot_model(CCfitBase, type = "est", ci.lvl = 0.95, ci.style = "bar", vline.color = "black", dot.size = 3)
 effectSizePlotFemalesBase
 
 #Full
-effectSizePlotFemalesFull <- plot_model(CCfitFull, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
+effectSizePlotFemalesFull <- plot_model(CCfitFull, type = "est", ci.lvl=0.95, ci.style = "bar",  vline.color = "black", dot.size = 3)
 effectSizePlotFemalesFull
+
+#test with CI 
+SE_effectSizePlotFemalesFull <- plot_model(CCfitFull, type = "est", se = TRUE, vline.color = "black", dot.size = 3)
+SE_effectSizePlotFemalesFull
 
 
 

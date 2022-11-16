@@ -748,12 +748,12 @@ https://www.dataquest.io/blog/tutorial-poisson-regression-in-r/
 
 ```{r, plot CC}
 
-effectSizePlotMalesBase <- plot_model(CCfitBase, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
+effectSizePlotMalesBase <- plot_model(CCfitBase, type = "est", ci.lvl=0.95, ci.style = "bar",  vline.color = "black", dot.size = 3)
 effectSizePlotMalesBase
 
 #Full
 
-effectSizePlotMales <- plot_model(CCfitFull, type = "est", ci.style = "bar",  vline.color = "black", dot.size = 3)
+effectSizePlotMales <- plot_model(CCfitFull, type = "est", ci.lvl=0.95, ci.style = "bar",  vline.color = "black", dot.size = 3)
 effectSizePlotMales
 
 ```
