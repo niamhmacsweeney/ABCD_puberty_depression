@@ -15,7 +15,7 @@ et al.
 If you have any questions about this project or repository, please
 contact Niamh MacSweeney (<niamh.macsweeney@ed.ac.uk>)
 
-Stage 1 of this project has received an in-principle acceptance (IPA) and Stage 2 is being prepared for re-submission.
+Stage 1 of this project received an in-principle acceptance (IPA) in August 2022 and Stage 2 was submitted in December 2022. The full version of this paper was published in Developmental Cognitive Neuroscience in February 2023 and is available here: <https://www.sciencedirect.com/science/article/pii/S1878929323000282>
 
 #### Set Up
 
